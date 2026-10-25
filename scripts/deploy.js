@@ -12,7 +12,11 @@ function requireAddress(ethers, name, needed) {
     return null;
   }
   if (!ethers.isAddress(value)) {
-    throw new Error(`${name} ${value} is not a valid address (check for typos / checksum)`);
+    // Never echo the value: if someone pasted a private key here, it must not reach the logs.
+    const hint = /^(0x)?[0-9a-fA-F]{64}$/.test(value.trim())
+      ? "it looks like a private key, not an address. Replace it with the wallet's public address (0x followed by 40 characters), and move that wallet's funds to a new wallet"
+      : "check for typos; it should be 0x followed by 40 characters";
+    throw new Error(`${name} is not a valid address: ${hint}`);
   }
   return ethers.getAddress(value);
 }
