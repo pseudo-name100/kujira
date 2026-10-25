@@ -8,8 +8,13 @@ module.exports = {
 
   rounds: {
     1: {
-      // Out of the 100M pool. Keep early rounds small.
+      // Tokens the round takes from the 100M pool. Keep early rounds small.
       total: parseEther("10000000"),
+      // Most listed wallets never claim, so allocations add up to `oversubscribe` times
+      // `total` while only `total` is reserved. Claims are first come, first served: once
+      // `total` (plus stake bonuses) is paid out, later claims fail. 3 covers a claim
+      // rate up to a third of the listed amount.
+      oversubscribe: 3,
       claimDays: 30,
       stakeBonusBps: 2500, // claim-and-stake gets +25%
 

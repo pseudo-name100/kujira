@@ -19,6 +19,7 @@
   ];
   const DROP_ABI = [
     "function claimed(uint256,address) view returns (bool)",
+    "function rounds(uint256) view returns (bytes32 merkleRoot, uint64 deadline, uint16 stakeBonusBps, bool closed, uint256 reserved, uint256 paid)",
     "function claim(uint256,uint256,bytes32[])",
     "function claimAndStake(uint256,uint256,bytes32[])",
   ];
@@ -195,20 +196,36 @@
       }
       const amount = BigInt(mine.amount);
       const bonus = (amount * BigInt(r.stakeBonusBps)) / 10000n;
+      const state = await drop.rounds(r.roundId);
+      const left = state.reserved - state.paid;
+      const pctClaimed = Number((state.paid * 1000n) / state.reserved) / 10;
+      const progress =
+        `<div class="track"><div class="fill" style="width:${pctClaimed}%"></div></div>` +
+        `<p class="muted">${pctClaimed}% of this round claimed. First come, first served.</p>`;
       if (await drop.claimed(r.roundId, account)) {
         div.innerHTML = `${head}<p class="amount">${fmt(amount)}</p><span class="pill ok">Claimed</span>`;
         box.append(div);
         continue;
       }
+      if (left < amount) {
+        div.innerHTML = `${head}<p class="amount">${fmt(amount)}</p><p class="muted">This round has been fully claimed. Watch @KujiraToken for the next one.</p>`;
+        box.append(div);
+        continue;
+      }
+      const canStake = left >= amount + bonus;
       div.innerHTML =
         `${head}<p class="amount">${fmt(amount)}</p>` +
         `<div class="actions"><button class="btn">Claim</button>` +
-        `<button class="btn solid">Claim &amp; stake +${r.stakeBonusBps / 100}%</button></div>` +
-        `<p class="muted">Claim &amp; stake puts ${fmt(amount + bonus)} in the Pod, earning rewards. Withdraw any time.</p>`;
+        (canStake ? `<button class="btn solid">Claim &amp; stake +${r.stakeBonusBps / 100}%</button>` : "") +
+        `</div>` +
+        (canStake
+          ? `<p class="muted">Claim &amp; stake puts ${fmt(amount + bonus)} in the Pod, earning rewards. Withdraw any time.</p>`
+          : "") +
+        progress;
       const [plain, staked] = div.querySelectorAll("button");
       const d = new ethers.Contract(data.contracts.KujiraDrop, DROP_ABI, signer);
       plain.onclick = () => send("Claim", () => d.claim(r.roundId, amount, mine.proof));
-      staked.onclick = () => send("Claim & stake", () => d.claimAndStake(r.roundId, amount, mine.proof));
+      if (staked) staked.onclick = () => send("Claim & stake", () => d.claimAndStake(r.roundId, amount, mine.proof));
       box.append(div);
     }
   }

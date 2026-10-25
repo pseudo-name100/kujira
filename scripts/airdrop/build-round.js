@@ -1,7 +1,7 @@
 // Usage: node scripts/airdrop/build-round.js <round>
-// Reads airdrop/round-<n>/traders.csv, splits the round total, and writes:
+// Reads airdrop/round-<n>/traders.csv, splits the round total (times `oversubscribe`), and writes:
 //   allocations.csv  human-readable list to review and publish
-//   claims.json      Merkle root, total, and each wallet's amount + proof (for the claim page)
+//   claims.json      Merkle root, reserved total, and each wallet's amount + proof (for the claim page)
 const fs = require("fs");
 const path = require("path");
 const { formatEther } = require("ethers");
@@ -17,8 +17,11 @@ const traders = readCsv(path.join(dir, "traders.csv")).map((t) => ({
   address: t.address,
   activeDays: Number(t.activeDays),
 }));
-const allocations = allocate(traders, cfg.total, cfg.maxWeightDays);
-const { root, total, claims } = buildTree(allocations);
+const oversubscribe = BigInt(cfg.oversubscribe ?? 1);
+const allocations = allocate(traders, cfg.total * oversubscribe, cfg.maxWeightDays);
+const { root, total: listed, claims } = buildTree(allocations);
+// The contract reserves this much; it can't be more than the list adds up to.
+const total = listed < cfg.total ? listed : cfg.total;
 
 writeCsv(
   path.join(dir, "allocations.csv"),
@@ -27,8 +30,14 @@ writeCsv(
 );
 fs.writeFileSync(
   path.join(dir, "claims.json"),
-  JSON.stringify({ round: Number(round), root, total: total.toString(), claims }, null, 2) + "\n"
+  JSON.stringify(
+    { round: Number(round), root, total: total.toString(), listedTotal: listed.toString(), claims },
+    null,
+    2
+  ) + "\n"
 );
 
-console.log(`Round ${round}: ${allocations.length} wallets, ${formatEther(total)} KUJI`);
+console.log(
+  `Round ${round}: ${allocations.length} wallets, ${formatEther(listed)} KUJI listed, ${formatEther(total)} reserved`
+);
 console.log(`Merkle root: ${root}`);
