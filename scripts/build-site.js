@@ -38,6 +38,9 @@ const fonts = {
   "inter-400": "inter/files/inter-latin-400-normal.woff2",
   "inter-500": "inter/files/inter-latin-500-normal.woff2",
   "inter-600": "inter/files/inter-latin-600-normal.woff2",
+  "poppins-300": "poppins/files/poppins-latin-300-normal.woff2",
+  "poppins-600": "poppins/files/poppins-latin-600-normal.woff2",
+  "poppins-800": "poppins/files/poppins-latin-800-normal.woff2",
 };
 for (const [name, file] of Object.entries(fonts)) {
   fs.copyFileSync(path.join(root, "node_modules/@fontsource", file), path.join(out, "fonts", `${name}.woff2`));

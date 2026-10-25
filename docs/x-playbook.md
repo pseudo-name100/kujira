@@ -5,22 +5,14 @@ How the X account looks, sounds and posts. Images are in `brand/out/` (regenerat
 
 ## The idea in one breath
 
-Since 1989, ocean microphones have recorded one whale singing at **52 hertz**, a pitch no
-other whale uses. It has never been seen, and as far as anyone knows nothing has ever answered.
-The press called it the loneliest whale in the world.
+Ryōshi (漁師) means *fisherman*. **A fisherman found a whale in his net. He cut the net.**
+That's the whole story: the fisherman (the account) kept nothing and set the whale (KUJI)
+free for whoever swims with it. It's Ryoshi's ethos (no team tokens, liquidity out of reach, the
+community builds) told through a whale. And the whale itself pays the ones who stay.
 
-**Kujira is that song, sung on Ink. Every holder is an answer.**
-
-Two more true pieces of whale biology carry the mechanics:
-
-- **The whale pump:** whales feed deep and surface to breathe, carrying nutrients up; the sea
-  is richer wherever whales stay. That's **the Pod**, which pays bigger and longer stakes more.
-- **The whale fall:** a whale that dies sinks and feeds deep-sea life for decades. That's
-  **the Drop**, a quarter of the supply given away in rounds.
-
-This is Kujira's own story. Nobody else on Ink tells it: Kaijin Ika and Dejitaru Tsuka run the
-same "lore destines the beast to bring abundance" template. Stay away from that register
-("coveted by the knowing", gods, fear, fortune).
+The account is **inspired by** Ryoshi. Never say or suggest that Ryoshi or Shiba Inu are
+involved, and don't use Shiba imagery. That keeps it honest and keeps the account from being
+reported for impersonation.
 
 ## Profile
 
@@ -28,91 +20,96 @@ same "lore destines the beast to bring abundance" template. Stay away from that 
 | --- | --- |
 | Name | `Kujira 鯨` |
 | Handle | `@KujiraToken` (keep it) |
-| Bio | `A song at 52 hertz. On Ink, someone finally answered. 🐋 $KUJI · no team · no tax · liquidity locked forever · the pod pays whales to stay` (137 characters) |
-| Location | `52 Hz` |
+| Bio | `A fisherman found a whale in his net. He cut the net. 🐋 $KUJI on Ink · no team · no tax · liquidity locked · the pod pays whales to stay` (136 characters) |
+| Location | `The Deep` (already set) |
 | Website | `kujira.ink` |
 | Profile photo | `brand/out/avatar.png` |
 | Header | `brand/out/header.png` (text sits right, clear of the profile photo on mobile) |
 | Pinned post | The Whalepaper post below, with `brand/out/pinned.png` |
 
+Alternative bio (138 characters): `Something has been growing in the deep. 🐋 $KUJI on Ink, launched Ryoshi's way: no team, no tax, liquidity locked. Whales are paid to stay.`
+
 X's "Finish verification" prompt is optional. A checkmark makes impersonator accounts easier
-to tell apart once there's an airdrop.
+to tell apart, which matters once there's an airdrop; it doesn't need your name on the profile.
 
-## Voice: the pod, answering
+## Voice: the fisherman
 
-The account speaks as the pod, plainly and warmly. Not a prophet, not a hype account.
+Ryoshi wrote like a person thinking out loud, not a marketer. The fisherman does the same.
 
-- **Short lines, room to breathe.** One thought per line, blank lines between.
-- **"We" and "the pod", never "buy".** Point at the water; don't sell the whale.
-- **Real things first.** The whale facts are true; keep them true. Link proof for every claim:
-  contracts, the liquidity lock, the lists.
-- **Whale words:** the song, 52 Hz, the pod, the pump, the fall, surfacing, the deep, answering.
-  Japanese sparingly: 鯨 (kujira, whale).
+- **Short lines, lots of air.** One thought per line, blank lines between, like the first two posts.
+- **"We" and "the pod", never "buy".** The fisherman doesn't sell the whale. He points at the water.
+- **Proof over promises.** Every claim gets a link: the contract, the liquidity lock, the list.
+- **Whale words.** The deep, the surface, the pod, the spray, the breach, the song, the tide,
+  krill to kujira. Japanese sparingly: 鯨 (whale), 漁師 (fisherman).
 - **One emoji: 🐋.** Not in every post. No hashtags. `$KUJI` as the cashtag.
-- **Calm, especially when it isn't.** Answer FUD once, with a fact and a link. Never argue.
+- **Calm, especially when it isn't.** Answer FUD with a fact and a link, once. Never argue, never mock.
 
-**Say the fee out loud.** The only thing the builders take is Uniswap's 1% pool fee. When
-someone asks how the project is funded, answer with exactly that and link the lock contract.
-It's a strength, not a secret.
+**Never post:** price predictions, "100x", "moon", "not financial advice" (it reads as the
+opposite), returns or APY promises, fake countdowns, "dev is buying", paid-shill style tags,
+anything implying Ryoshi or Shiba is behind KUJI. The only real deadlines are claim windows
+and announced snapshots.
 
-**Never post:** price predictions, "100x", "moon", "not financial advice", APY promises,
-fake countdowns, Dejitaru/Ika-style prophecy lines, or anything implying Ryoshi or Shiba Inu
-are involved. The only real deadlines are claim windows and announced snapshots.
+**Say the toll out loud.** The fisherman's only take is Uniswap's 1% pool fee. When someone
+asks how the project is funded, answer with exactly that and link the lock contract.
 
-**Safety line, repeat it often:** *We never DM first. The only site is kujira.ink.*
+**Safety line, repeat it often:** *The fisherman never DMs first. The only site is kujira.ink.*
 
 ## Rhythm
 
 | Day | Post |
 | --- | --- |
-| Daily | 1–3 posts: one story or meme, one proof or utility, replies to the pod |
+| Daily | 1–3 posts: one lore or meme, one proof or utility, replies to the pod |
 | Monday | **What the sonar hears**: holders, KUJI staked, Drop claimed (from the site) |
 | Wednesday | **The pod's order**: rank memes, quote-repost people's rank cards |
 | Friday | **Whale watch**: biggest new Pod stakes this week (amounts only, no addresses) |
-| Sunday | **Field notes**: one true whale fact, tied to the pod |
+| Sunday | **The fisherman's log**: a short lore piece |
 
 ## Posts, ready to copy
 
 `[CONTRACT]`, `[LOCK]` and `[DEX LINK]` get filled in at launch.
 
-### Phase 0: Listening (now, until launch)
+### Phase 0: Stillness (now, until kujira.ink is live)
 
-Your first two posts ("For a long time, the surface looked still…" and "First the water moves,
-then you see The Whale") fit this perfectly. Keep going, no ticker yet:
+Keep the mystery going. No ticker yet, no links. You already posted the first two.
 
-> 52.
+> The fisherman has worked these waters for years.
 >
-> Remember that number.
-
-> Some songs travel a thousand miles.
+> Most of what comes up in the net is the same.
 >
-> Some wait thirty years for an answer.
+> Not this time.
 
-> Turn your sound on: kujira.ink
->
-> Tap "Hear the song".
+> Some things are too big to sell.
 
-> Blue whales sing at about 20 hertz.
+> Listen.
 >
-> One whale sings at 52.
+> Can you hear it?
 >
-> Nobody has ever answered it. 🐋
+> 🐋
 
-### Phase 1: The song (site live, before the token)
+> 漁師 (ryōshi): fisherman.
+>
+> 鯨 (kujira): whale.
+
+> The net is getting heavy.
+
+### Phase 1: The song (kujira.ink goes live, before the token)
+
+Pin the Whalepaper post. Then push the Drop checker: ~15,000 people are on the list and each
+one has a reason to share their card.
 
 **Pinned** (image: `pinned.png`)
 
-> For thirty years, one whale has sung at 52 hertz, where no other whale answers.
+> A fisherman found a whale in his net.
 >
-> On Ink, someone finally did.
+> He cut the net.
 >
-> Kujira. $KUJI. No team tokens, no tax, liquidity locked forever, and a pod that pays the ones who stay.
+> Kujira. $KUJI on Ink. No team tokens, no tax, no mint, liquidity locked forever. Inspired by Ryoshi's way: keep none of the whale, let the community build.
 >
 > The Whalepaper: kujira.ink/whalepaper
 
 **The Drop** (image: `drop.png`)
 
-> When a whale falls, the deep eats for fifty years.
+> When the whale breaches, the spray falls on all who stand near.
 >
 > 14,981 wallets that trade on Ink are on the first Drop list. 81,766 $KUJI each.
 >
@@ -120,25 +117,29 @@ then you see The Whale") fit this perfectly. Keep going, no ticker yet:
 >
 > Check yours: kujira.ink
 
-> Swapped on Ink on two different days this year? You might already be on the list.
+> If you've swapped on Ink on two different days this year, you might already be in the spray.
 >
 > Paste your address at kujira.ink. Takes five seconds.
 
-> Found yourself on the list? Make your card and post it. Let's see how far the song carries. 🐋
+> Found your wallet on the list? Make your card and post it. Let's see how far the spray reaches. 🐋
 
-**The tides** (image: `tides.png`)
+**Ryoshi's way** (image: `ryoshi.png`)
 
-> Nothing held back.
+> The fisherman keeps none of the whale.
 >
-> 0% team. 0% tax. 55% liquidity, locked forever. 45% to holders through the Drop and the Pod.
+> 0% team. 0% tax. 55% liquidity, locked forever. 45% straight to holders through the Drop and the Pod.
 >
-> The only thing the builders take is the pool's 1% trading fee, and the contract that collects it is public.
-
-**The pump** (image: `boosts.png`)
-
-> Whales carry life up from the deep. Biologists call it the whale pump: the sea is richer wherever whales stay.
+> His one toll: the pool's 1% trading fee. The contract that collects it is public.
 >
-> The Pod works the same way. Stake $KUJI and earn more the bigger and longer you stay. Up to 2.5x.
+> That's it. That's the tokenomics.
+
+**The Pod** (image: `boosts.png`)
+
+> Most memecoins punish patience.
+>
+> The Pod pays for it.
+>
+> Stake $KUJI and earn more the bigger and longer you stay. Up to 2.5x. Paid from a fixed pool. Nothing printed.
 
 **Ranks** (image: `ranks.png`)
 
@@ -148,7 +149,11 @@ then you see The Whale") fit this perfectly. Keep going, no ticker yet:
 >
 > What are you?
 
-### Phase 2: Surfacing (launch day)
+> Tap the whale on kujira.ink.
+>
+> Turn your sound on.
+
+### Phase 2: The breach (launch day)
 
 Post the thread in order, then pin it in place of the Whalepaper post.
 
@@ -162,9 +167,9 @@ Post the thread in order, then pin it in place of the Whalepaper post.
 
 > 3/ Liquidity is in a 1% Uniswap pool, owned by a lock contract with no way to remove it: [LOCK]
 >
-> The pool's 1% fee is the only thing the builders take.
+> Nobody can pull it. Not the fisherman, not anyone. The pool's 1% fee is his only toll.
 
-> 4/ The Drop is open. 14,981 Ink traders, 81,766 $KUJI each, first come, first served until the 80M round is gone.
+> 4/ The Drop is open. 14,981 Ink traders, 81,766 $KUJI each, first come first served until the 80M round is gone.
 >
 > Claim straight into the Pod for +25%: kujira.ink
 
@@ -172,9 +177,9 @@ Post the thread in order, then pin it in place of the Whalepaper post.
 >
 > Withdraw whenever you like. Leaving just restarts the clock.
 
-> 6/ We never DM first. The only site is kujira.ink. Trade: [DEX LINK]
+> 6/ The fisherman never DMs first. The only site is kujira.ink. Trade: [DEX LINK]
 >
-> The song only matters if someone sings back.
+> The whale belongs to whoever swims with it.
 
 ### Phase 3: The pod (the weeks after)
 
@@ -186,34 +191,39 @@ Post the thread in order, then pin it in place of the Whalepaper post.
 
 > [N]% of round 1 is already claimed.
 >
-> If you're on the list, it won't wait. kujira.ink
+> If your wallet's on the list, the spray won't wait. kujira.ink
 
 > A whale round is coming.
 >
-> On [DATE] we take a snapshot of every $KUJI holder, wallet and Pod together. Orca size and up (1M+) share 25M $KUJI.
+> On [DATE] the fisherman takes a snapshot of every $KUJI holder, wallet and Pod together. Orca size and up (1M+) share 25M $KUJI.
 >
-> The list will be published, like the last one.
+> No tricks: the list will be published, like the last one.
 
-> Whale watch: [N] new stakes over 1M $KUJI this week. 🐋
+> The first Orcas have entered the Pod. 🐋
 >
-> The pump is working.
+> Whale watch: [N] new stakes over 1M $KUJI this week.
 
-> Field notes: a sperm whale can dive more than 2,000 metres and hold its breath for over an hour.
+> Someone just hit 120 days in the Pod.
 >
-> Some of the pod have been staked for 90 days. Same energy.
+> Full time boost. That's what staying looks like.
+
+> The fisherman's log, day [N]:
+>
+> The water is busier now. More fins than last week. Nobody is chasing anything. They're just staying.
 
 > Reply with your rank card. The deepest one gets a repost. 🐋
 
 ## Repeatable memes
 
-- **52:** the number itself. "52" alone, 52 Hz sound clips (tap the whale on the site and screen-record), "the lonely whale got a pod".
-- **Rank ladder:** krill → fish → dolphin → orca → kujira, in any format. Ends at kujira.ink.
-- **The fall:** every Drop round, LP lock or returned tokens is "another whale fall: the deep eats".
-- **The pump:** staking milestones as the whale pump moving life upward.
-- **Field notes:** true whale facts (dive depths, song lengths, migrations), each tied to the pod.
+- **Rank ladder:** krill → fish → dolphin → orca → kujira, in any format (drake, starter
+  pack, "how it started / how it's going"). Always ends at kujira.ink.
+- **"The fisherman cut the net":** Ryoshi moments. Every time something is given away
+  (the liquidity lock, a Drop round, unclaimed tokens returned), post it as the fisherman cutting another net.
+- **Breaching whale clips:** real whale footage (use clips you have rights to, or credit the
+  creator) with one line of lore. Breach = launch, round open, milestone.
+- **Paper hands vs. the pod:** "the surface panics, the deep doesn't."
+- **Sonar screenshots:** the live sonar panel from kujira.ink, weekly.
 - **Share cards:** quote-repost people's Drop and rank cards. They're free reach.
-
-Use real whale footage only if you have the rights or credit the creator.
 
 ## Images
 
@@ -223,6 +233,6 @@ Use real whale footage only if you have the rights or credit the creator.
 | `brand/out/avatar.png` | 800×800 | Profile photo |
 | `brand/out/pinned.png` | 1600×900 | Pinned Whalepaper post |
 | `brand/out/drop.png` | 1600×900 | Drop announcements |
-| `brand/out/tides.png` | 1600×900 | Tokenomics |
+| `brand/out/ryoshi.png` | 1600×900 | Tokenomics / the fisherman's rules |
 | `brand/out/boosts.png` | 1600×900 | The Pod |
 | `brand/out/ranks.png` | 1600×900 | Ranks |

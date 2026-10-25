@@ -158,8 +158,15 @@
   // iPhone's ringer on silent, which live Web Audio doesn't.
   let player = null;
   let playing = false;
+  // Any [data-sing] element starts the song; [data-sing-label] ones also show its state.
+  const singers = () => document.querySelectorAll("[data-sing]");
+  function setSinging(on, label) {
+    for (const el of singers()) {
+      el.classList.toggle("singing", on);
+      if (el.hasAttribute("data-sing-label")) el.textContent = label;
+    }
+  }
   function sing() {
-    const btn = $("sing");
     // Ask iOS to treat this as media playback, not an ambient sound.
     try {
       if (navigator.audioSession) navigator.audioSession.type = "playback";
@@ -168,21 +175,17 @@
     player.currentTime = 0;
     player.onended = () => {
       playing = false;
-      btn.classList.remove("singing");
-      btn.textContent = "Hear the song";
+      setSinging(false, "Hear the song");
     };
     player.play().then(
       () => {
         playing = true;
-        btn.classList.add("singing");
-        btn.textContent = "Listening…";
+        setSinging(true, "Listening…");
       },
-      () => {
-        btn.textContent = "Tap again to listen";
-      }
+      () => setSinging(false, "Tap again to listen")
     );
   }
-  $("sing")?.addEventListener("click", sing); // only on the home page
+  for (const el of singers()) el.addEventListener("click", sing); // home page only
 
   // ------------------------------------------------------------------ the sonar screen
   // A scrolling spectrogram, 0-400 Hz: faint ocean noise, and the 52 Hz whale's pulsed call.

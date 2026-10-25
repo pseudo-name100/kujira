@@ -1,10 +1,9 @@
 # Kujira (KUJI)
 
-> A song at 52 hertz. On Ink, someone finally answered. 🐋
+> For a long time, the surface looked still. Something has been growing in the deep. 🐋
 
-Since 1989, ocean microphones have recorded one whale singing at 52 hertz, a pitch no other
-whale uses; nothing has ever been heard answering it. KUJI is that song on
-[Ink](https://inkonchain.com), Kraken's OP Stack L2: a whale-incentive memecoin with no team
+A fisherman found a whale in his net, and cut the net. KUJI is a whale-incentive memecoin on
+[Ink](https://inkonchain.com), Kraken's OP Stack L2, launched in Ryoshi's spirit: no team
 tokens, no tax, liquidity locked forever, and everything else going to holders. The only thing
 the builders take is the Uniswap pool's 1% trading fee. The rug-pull levers are missing from
 the code:
@@ -134,7 +133,7 @@ The page reads `data/site.json` (token split, every airdrop list) and, after lau
 
 ### X account
 
-`docs/x-playbook.md` has the story (the 52 Hz whale, the whale pump, the whale fall), the voice, a posting rhythm and
+`docs/x-playbook.md` has the profile copy, the voice (the fisherman, 漁師), a posting rhythm and
 ready-to-post content for each phase. Images for X are in `brand/out/` (header, profile photo,
 post graphics); edit `brand/templates.html` and run `node brand/render.js` to regenerate them.
 The Whalepaper is at `site/whalepaper.html` (kujira.ink/whalepaper).
