@@ -163,11 +163,13 @@
     }
   }
 
-  async function roundClaims(r) {
-    if (!claimsCache[r.file]) {
-      claimsCache[r.file] = fetch(r.file, { cache: "no-store" }).then((res) => res.json());
+  // Proofs are split by the address's first byte; fetch only this wallet's slice.
+  async function myClaim(r) {
+    const url = `${r.dir}/${account.slice(2, 4).toLowerCase()}.json`;
+    if (!claimsCache[url]) {
+      claimsCache[url] = fetch(url, { cache: "no-store" }).then((res) => (res.ok ? res.json() : {}));
     }
-    return claimsCache[r.file];
+    return (await claimsCache[url])[account];
   }
 
   async function renderRounds() {
@@ -182,8 +184,7 @@
     const drop = new ethers.Contract(data.contracts.KujiraDrop, DROP_ABI, reader);
     box.innerHTML = "";
     for (const r of open) {
-      const claims = await roundClaims(r);
-      const mine = claims.claims[account];
+      const mine = await myClaim(r);
       const div = document.createElement("div");
       div.className = "round";
       const head = `<span class="pill">Round ${r.round} · closes ${date(r.deadline)}</span>`;
