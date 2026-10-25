@@ -23,42 +23,47 @@
   <div id="gauge" aria-live="off"><span class="arrow">▼</span> <b id="depth">0</b> m · <span id="zone">The Surface</span></div>
 
   <nav>
-    <a href="#top" class="nav-mark"><img src="img/logo-192.png" alt="Kujira" width="34" height="34"></a>
+    <a href="#top" class="nav-mark"><img src="img/logo-192.png" alt="" width="34" height="34"><span>Kujira</span></a>
     <button id="connect" class="btn small">Connect</button>
   </nav>
 
-  <header id="top" class="coin-hero" data-depth="0" data-zone="The Surface">
-    <button class="coin" data-sing aria-label="Hear the Kujira sing">
-      <img src="img/mark-800.webp" alt="" width="800" height="800">
-      <span class="ripple"></span><span class="ripple"></span><span class="ripple"></span>
-    </button>
-    <h1 class="name">Kujira</h1>
-    <p class="kanji" aria-hidden="true">鯨</p>
-    <p class="hint">Tap the whale to hear it sing · scroll to dive</p>
+  <header id="top" class="hero" data-depth="0" data-zone="The Surface">
+    <div class="sonar-screen">
+      <canvas id="spectro" aria-hidden="true"></canvas>
+      <span class="hz-label" aria-hidden="true">52 Hz</span>
+      <span class="axis-label" aria-hidden="true">frequency ↑ · time →</span>
+    </div>
+    <div class="hero-copy">
+      <p class="eyebrow">Kujira · 鯨 · on Ink</p>
+      <h1>Something has been growing in the deep.</h1>
+      <p class="lede">The sonar has heard it for years, a single call at 52 hertz. Now it has surfaced on Ink.</p>
+      <div class="hero-actions">
+        <button class="btn solid" data-sing data-sing-label>Hear the song</button>
+        <a href="#drop" class="btn">Are you in the Drop?</a>
+      </div>
+    </div>
   </header>
 
-  <section class="band">
-    <p>The Kujira has surfaced on Ink</p>
-  </section>
+  <div class="ping" aria-hidden="true"><span></span></div>
 
   <main>
     <p id="notice" class="notice" hidden></p>
 
-    <section class="lore" data-depth="200" data-zone="Twilight Zone">
+    <section class="lore tale-block" data-depth="200" data-zone="Twilight Zone">
       <p class="zone-label">200 m · The Twilight Zone</p>
-      <h2 class="lore-head">The old tales of the sea say the Kujira rises only after the water has been still for a long time. Where it surfaces, the villages along the shore prosper for a generation.</h2>
-      <p class="lore-body tale">The Kujira does not chase. It waits in the deep, growing, unseen by those who watch only the surface. Its song carries a thousand miles, and those who hear it gather. First the water moves. Then you see the whale.</p>
-      <p class="sig">— The Deep</p>
+      <div class="tale">
+        <p class="tategaki" lang="ja" aria-hidden="true">海の言い伝え</p>
+        <div class="tale-text">
+          <h2 class="lore-head">The old tales of the sea say the Kujira rises only after the water has been still for a long time. Where it surfaces, the villages along the shore prosper for a generation.</h2>
+          <p class="lore-body">The Kujira does not chase. It waits in the deep, growing, unseen by those who watch only the surface. Its song carries a thousand miles, and those who hear it gather. First the water moves. Then you see the whale.</p>
+          <p class="sig">— The Deep</p>
+        </div>
+      </div>
     </section>
 
     <section class="lore" data-depth="600" data-zone="Twilight Zone">
       <p class="zone-label">600 m · Sonar</p>
       <h2 class="lore-head">What the sonar hears</h2>
-      <div class="sonar-screen">
-        <canvas id="spectro" aria-hidden="true"></canvas>
-        <span class="axis-label" aria-hidden="true">frequency ↑ · time →</span>
-        <button class="btn small screen-btn" data-sing data-sing-label>Hear the song</button>
-      </div>
       <div class="sonar">
         <div class="readout"><span class="rings"></span><b id="s-holders">—</b><span>Whales holding</span></div>
         <div class="readout"><span class="rings"></span><b id="s-staked">—</b><span>KUJI in the Pod</span></div>
@@ -151,7 +156,7 @@
   </main>
 
   <footer data-depth="10900" data-zone="The Deep">
-    <div class="coin small"><img src="img/mark-800.webp" alt="" width="800" height="800"></div>
+    <img class="foot-mark" src="img/logo-192.png" alt="" width="64" height="64">
     <ul id="social" class="social">
       <li><a href="whalepaper.html">Whalepaper</a></li>
       <li><a href="https://x.com/KujiraToken" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.9 2H22l-6.8 7.8L23 22h-6.2l-4.8-6.3L6.4 22H3.3l7.3-8.3L1 2h6.3l4.4 5.8L18.9 2Zm-1.1 18.1h1.7L6.3 3.8H4.5l13.3 16.3Z"/></svg>X</a></li>

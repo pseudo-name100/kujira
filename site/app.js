@@ -472,9 +472,9 @@
 
   async function drawCard({ kicker, title, sub, address }) {
     await Promise.all([
-      document.fonts.load('800 80px "Poppins"'),
-      document.fonts.load('300 30px "Poppins"'),
-      document.fonts.load('600 26px "Poppins"'),
+      document.fonts.load('400 80px "Fraunces"'),
+      document.fonts.load('400 30px "Inter"'),
+      document.fonts.load('600 26px "Inter"'),
       markImg.decode().catch(() => {}),
     ]);
     const W = 1200, H = 675;
@@ -524,26 +524,26 @@
     // text
     const x = 580;
     g.fillStyle = "#3fc6ea";
-    g.font = '600 26px "Poppins"';
+    g.font = '600 24px "Inter"';
     g.fillText(kicker.toUpperCase(), x, 210);
-    g.fillStyle = "#e6eef1";
-    let size = 96;
-    g.font = `800 ${size}px "Poppins"`;
-    while (g.measureText(title.toUpperCase()).width > W - x - 60 && size > 40) {
+    g.fillStyle = "#eef6f8";
+    let size = 104;
+    g.font = `400 ${size}px "Fraunces"`;
+    while (g.measureText(title).width > W - x - 60 && size > 40) {
       size -= 4;
-      g.font = `800 ${size}px "Poppins"`;
+      g.font = `400 ${size}px "Fraunces"`;
     }
-    g.fillText(title.toUpperCase(), x, 210 + size + 20);
-    g.fillStyle = "#c9d4d8";
-    g.font = '300 30px "Poppins"';
-    wrap(g, sub.toUpperCase(), x, 210 + size + 90, W - x - 60, 42);
+    g.fillText(title, x, 210 + size + 20);
+    g.fillStyle = "#c3d3d9";
+    g.font = '400 30px "Inter"';
+    wrap(g, sub, x, 210 + size + 90, W - x - 60, 44);
 
-    g.fillStyle = "#8199a3";
-    g.font = '600 24px "Poppins"';
+    g.fillStyle = "#7f99a3";
+    g.font = '500 24px "Inter"';
     g.fillText(short(address), x, H - 70);
-    g.fillStyle = "#e6eef1";
+    g.fillStyle = "#eef6f8";
     g.textAlign = "right";
-    g.fillText("KUJIRA.INK · 鯨", W - 60, H - 70);
+    g.fillText("kujira.ink · 鯨", W - 60, H - 70);
     return c;
   }
 
