@@ -1,0 +1,207 @@
+{
+  "window": {
+    "from": "2026-01-01",
+    "to": "2026-10-25",
+    "blocks": [
+      33727189,
+      59450902
+    ]
+  },
+  "discovery": {
+    "slices": 24,
+    "blocksPerSlice": 10000,
+    "minSenders": 10,
+    "minSwapShare": 0.8
+  },
+  "routers": [
+    {
+      "name": "UniversalRouter",
+      "address": "0x551134e92e537cEAa217c2ef63210Af3CE96a065",
+      "sampledWallets": 230,
+      "sampledSwapTxs": 2387,
+      "recentSwapShare": 1
+    },
+    {
+      "name": "AllowanceHolder",
+      "address": "0x0000000000001fF3684f28c67538d4D072C22734",
+      "sampledWallets": 208,
+      "sampledSwapTxs": 623,
+      "recentSwapShare": 0.98
+    },
+    {
+      "name": "DexAggregator",
+      "address": "0x20F6ee51340aDEed01A59B0e65cB3703f3dc860c",
+      "sampledWallets": 204,
+      "sampledSwapTxs": 305,
+      "recentSwapShare": 0.98
+    },
+    {
+      "name": "UniversalRouter",
+      "address": "0xcAF22ce31298CF2BF1D152862F80216478ad7c67",
+      "sampledWallets": 195,
+      "sampledSwapTxs": 429,
+      "recentSwapShare": 1
+    },
+    {
+      "name": "(unverified)",
+      "address": "0x4830E145B6FC48edB3bf1e8865C3B12f46DDc28F",
+      "sampledWallets": 188,
+      "sampledSwapTxs": 462,
+      "recentSwapShare": 0.94
+    },
+    {
+      "name": "MagpieRouterV3_1",
+      "address": "0x52BeBb970697476313AE2B3383F40d4aFD4aD9D3",
+      "sampledWallets": 114,
+      "sampledSwapTxs": 194,
+      "recentSwapShare": 0.96
+    },
+    {
+      "name": "UniversalRouter",
+      "address": "0xdC3dF64448fA5D6F005cd3f0f3Fce7Afe7682b0E",
+      "sampledWallets": 104,
+      "sampledSwapTxs": 274,
+      "recentSwapShare": 1
+    },
+    {
+      "name": "UniswapV2Router02",
+      "address": "0xA8C1C38FF57428e5C3a34E0899Be5Cb385476507",
+      "sampledWallets": 81,
+      "sampledSwapTxs": 291,
+      "recentSwapShare": 0.96
+    },
+    {
+      "name": "(unverified)",
+      "address": "0x95aCbf0A8E1FEee327A020c0fFC147Ee42eC8e6B",
+      "sampledWallets": 47,
+      "sampledSwapTxs": 66,
+      "recentSwapShare": 0.98
+    },
+    {
+      "name": "SuperSwap",
+      "address": "0x8d3cAe434bA71F195400672A9F4b8838C6A96712",
+      "sampledWallets": 40,
+      "sampledSwapTxs": 69,
+      "recentSwapShare": 0.92
+    },
+    {
+      "name": "DyorRouterV2",
+      "address": "0x964379B4B9eA44eaa7457636fBB268f445e6317e",
+      "sampledWallets": 31,
+      "sampledSwapTxs": 86,
+      "recentSwapShare": 1
+    },
+    {
+      "name": "(unverified)",
+      "address": "0x287a9e467808940Fdb31A7FB3a48D4eeB948a048",
+      "sampledWallets": 29,
+      "sampledSwapTxs": 46,
+      "recentSwapShare": 0.84
+    },
+    {
+      "name": "SwapRouter02",
+      "address": "0x177778F19E89dD1012BdBe603F144088A95C4B53",
+      "sampledWallets": 27,
+      "sampledSwapTxs": 472,
+      "recentSwapShare": 0.9
+    },
+    {
+      "name": "(unverified)",
+      "address": "0x1b4D919149912c9781b086C8242729EE317631C8",
+      "sampledWallets": 26,
+      "sampledSwapTxs": 35,
+      "recentSwapShare": 1
+    },
+    {
+      "name": "TransparentUpgradeableProxy",
+      "address": "0x16BB706af367386f2cdf92A4bb673DCdb5FE1886",
+      "sampledWallets": 26,
+      "sampledSwapTxs": 43,
+      "recentSwapShare": 1
+    },
+    {
+      "name": "SentryInkRouterV4",
+      "address": "0x5275de614E06DbA10546171c1e6d2a30A87844b7",
+      "sampledWallets": 24,
+      "sampledSwapTxs": 37,
+      "recentSwapShare": 1
+    },
+    {
+      "name": "InkSettler",
+      "address": "0x51d9175CEE6eAdCD99936C13C5e6d8D172e6158f",
+      "sampledWallets": 21,
+      "sampledSwapTxs": 40,
+      "recentSwapShare": 0.94
+    },
+    {
+      "name": "SwapRouter",
+      "address": "0x63951637d667f23D5251DEdc0f9123D22d8595be",
+      "sampledWallets": 20,
+      "sampledSwapTxs": 4248,
+      "recentSwapShare": 0.86
+    },
+    {
+      "name": "(unverified)",
+      "address": "0xd34C0Ba83490A3A7354A1Ada814e05A5dF212934",
+      "sampledWallets": 19,
+      "sampledSwapTxs": 39,
+      "recentSwapShare": 1
+    },
+    {
+      "name": "UniversalRouter",
+      "address": "0x112908daC86e20e7241B0927479Ea3Bf935d1fa0",
+      "sampledWallets": 15,
+      "sampledSwapTxs": 25,
+      "recentSwapShare": 1
+    },
+    {
+      "name": "IngredientShop",
+      "address": "0x497e9615537C899e9b5ef7641C220E39cD04F546",
+      "sampledWallets": 13,
+      "sampledSwapTxs": 61,
+      "recentSwapShare": 0.98
+    },
+    {
+      "name": "EnsoRouter",
+      "address": "0xF75584eF6673aD213a685a1B58Cc0330B8eA22Cf",
+      "sampledWallets": 12,
+      "sampledSwapTxs": 18,
+      "recentSwapShare": 0.92
+    },
+    {
+      "name": "QwireRouter",
+      "address": "0xaBEa638082213b89Cebb7E0537738091eec423c2",
+      "sampledWallets": 12,
+      "sampledSwapTxs": 14,
+      "recentSwapShare": 1
+    },
+    {
+      "name": "TsunamiSwapRouter02",
+      "address": "0x4415F2360bfD9B1bF55500Cb28fA41dF95CB2d2b",
+      "sampledWallets": 11,
+      "sampledSwapTxs": 89,
+      "recentSwapShare": 0.92
+    },
+    {
+      "name": "(unverified)",
+      "address": "0x7957E5A88f0389997B352315e70aB20d77Ec410a",
+      "sampledWallets": 11,
+      "sampledSwapTxs": 98,
+      "recentSwapShare": 1
+    },
+    {
+      "name": "UniversalRouter",
+      "address": "0x28bD21bB4Ea4fDa370D8d7544992038375D8d456",
+      "sampledWallets": 10,
+      "sampledSwapTxs": 18,
+      "recentSwapShare": 1
+    },
+    {
+      "name": "UniversalRouter",
+      "address": "0x661E93cca42AfacB172121EF892830cA3b70F08d",
+      "sampledWallets": 10,
+      "sampledSwapTxs": 19,
+      "recentSwapShare": 1
+    }
+  ]
+}
