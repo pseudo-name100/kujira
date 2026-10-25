@@ -10,6 +10,7 @@
     "function balanceOf(address) view returns (uint256)",
     "function allowance(address,address) view returns (uint256)",
     "function approve(address,uint256) returns (bool)",
+    "function launchedAt() view returns (uint64)",
   ];
   const POD_ABI = [
     "function totalStaked() view returns (uint256)",
@@ -149,6 +150,31 @@
       link("Drop (airdrop pool)", c.KujiraDrop) +
       (c.KujiraLiquidityLock ? link("Liquidity lock (1% pool fee)", c.KujiraLiquidityLock) : "") +
       (data.launch ? link("Uniswap pool (KUJI/ETH, 1%)", data.launch.pool) : "");
+    watchLaunchTax().catch(() => {});
+  }
+
+  // During the first 30 minutes after the pool opens, show the launch tax on buys as it
+  // falls (KujiraToken.launchTaxBps: 25% at the start, linear to 0).
+  async function watchLaunchTax() {
+    const token = new ethers.Contract(data.contracts.KujiraToken, TOKEN_ABI, reader);
+    const start = Number(await token.launchedAt());
+    if (!start) return;
+    const end = start + 30 * 60;
+    const banner = $("tax-banner");
+    const tick = () => {
+      const left = end - Date.now() / 1000;
+      if (left <= 0) {
+        banner.hidden = true;
+        clearInterval(timer);
+        return;
+      }
+      const pct = (25 * left) / 1800;
+      const m = Math.floor(left / 60), s = Math.floor(left % 60);
+      banner.hidden = false;
+      banner.textContent = `Launch tax on buys right now: ${pct.toFixed(1)}%, falling to 0 in ${m}:${String(s).padStart(2, "0")}. It stops sniper bots and never comes back.`;
+    };
+    const timer = setInterval(tick, 1000);
+    tick();
   }
 
   // ------------------------------------------------------------------ wallet

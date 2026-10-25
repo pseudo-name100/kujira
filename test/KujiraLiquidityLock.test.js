@@ -6,7 +6,7 @@ const e = (n) => ethers.parseEther(String(n));
 
 async function deploy() {
   const [lp, fees, stranger, newFees] = await ethers.getSigners();
-  const kuji = await ethers.deployContract("KujiraToken", [lp.address]);
+  const kuji = await ethers.deployContract("KujiraToken", [lp.address, ethers.ZeroAddress, ethers.ZeroAddress, ethers.ZeroAddress]);
   const weth = await ethers.deployContract("MockToken");
   const npm = await ethers.deployContract("MockPositionManager");
   const lock = await ethers.deployContract("KujiraLiquidityLock", [

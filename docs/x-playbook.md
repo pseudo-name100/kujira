@@ -20,14 +20,14 @@ reported for impersonation.
 | --- | --- |
 | Name | `Kujira 鯨` |
 | Handle | `@KujiraToken` (keep it) |
-| Bio | `A fisherman found a whale in his net. He cut the net. 🐋 $KUJI on Ink · no team · no tax · liquidity locked · the pod pays whales to stay` (136 characters) |
+| Bio | `A fisherman found a whale in his net. He cut the net. 🐋 $KUJI on Ink · no team · no tax after launch · liquidity locked · the pod pays whales to stay` (149 characters) |
 | Location | `The Deep` (already set) |
 | Website | `kujira.ink` |
 | Profile photo | `brand/out/avatar.png` |
 | Header | `brand/out/header.png` (text sits right, clear of the profile photo on mobile) |
 | Pinned post | The Whalepaper post below, with `brand/out/pinned.png` |
 
-Alternative bio (138 characters): `Something has been growing in the deep. 🐋 $KUJI on Ink, launched Ryoshi's way: no team, no tax, liquidity locked. Whales are paid to stay.`
+Alternative bio (151 characters): `Something has been growing in the deep. 🐋 $KUJI on Ink, launched Ryoshi's way: no team, no tax after launch, liquidity locked. Whales are paid to stay.`
 
 X's "Finish verification" prompt is optional. A checkmark makes impersonator accounts easier
 to tell apart, which matters once there's an airdrop; it doesn't need your name on the profile.
@@ -49,8 +49,9 @@ opposite), returns or APY promises, fake countdowns, "dev is buying", paid-shill
 anything implying Ryoshi or Shiba is behind KUJI. The only real deadlines are claim windows
 and announced snapshots.
 
-**Say the toll out loud.** The fisherman's only take is Uniswap's 1% pool fee. When someone
-asks how the project is funded, answer with exactly that and link the lock contract.
+**Say the tolls out loud.** The fisherman takes Uniswap's 1% pool fee, plus the launch tax on
+buys in the first 30 minutes (25% falling to 0). When someone asks how the project is funded,
+answer with exactly that and link the lock contract and the token.
 
 **Safety line, repeat it often:** *The fisherman never DMs first. The only site is kujira.ink.*
 
@@ -106,7 +107,7 @@ one has a reason to share their card.
 >
 > He cut the net.
 >
-> Kujira. $KUJI on Ink. No team tokens, no tax, no mint, liquidity locked forever. Inspired by Ryoshi's way: keep none of the whale, let the community build.
+> Kujira. $KUJI on Ink. No team tokens, no mint, no tax after launch, liquidity locked forever. Inspired by Ryoshi's way: keep none of the whale, let the community build.
 >
 > The Whalepaper: kujira.ink/whalepaper
 
@@ -130,9 +131,9 @@ one has a reason to share their card.
 
 > The fisherman keeps none of the whale.
 >
-> 0% team. 0% tax. 55% liquidity, locked forever. 45% straight to holders through the Drop and the Pod.
+> 0% team. 0% tax once the 30-minute launch window ends. 55% liquidity, locked forever. 45% straight to holders through the Drop and the Pod.
 >
-> His one toll: the pool's 1% trading fee. The contract that collects it is public.
+> His tolls: the pool's 1% trading fee, and a launch tax on buys that falls from 25% to 0 in the first 30 minutes to stop snipers. Both go to a public wallet; the tax is coded into the token and can never come back.
 >
 > That's it. That's the tokenomics.
 
@@ -166,11 +167,13 @@ Post the thread in order, then pin it in place of the Whalepaper post.
 
 > 2/ Contract: [CONTRACT]
 >
-> Verified on the Ink explorer. No owner. No mint. No tax. No blacklist. Not upgradeable.
+> Verified on the Ink explorer. No owner. No mint. No blacklist. Not upgradeable.
+>
+> Launch tax on buys: 25% now, falling every second, 0 in 30 minutes, and never again. It stops sniper bots. Snipe at your own cost; real buyers can wait a few minutes.
 
 > 3/ Liquidity is in a 1% Uniswap pool, owned by a lock contract with no way to remove it: [LOCK]
 >
-> It started at a $10k market cap with KUJI only. No presale, no insider ETH: every ETH in the pool came from a buyer. The pool's 1% fee is the fisherman's only toll.
+> It started at a $10k market cap with KUJI only. No presale, no insider ETH: every ETH in the pool came from a buyer. The pool's 1% fee goes to the fisherman.
 
 > 4/ The Drop never outgrows the market. Round 1 (14,981 Ink traders, 81,766 $KUJI each) opens once buyers have taken 200M $KUJI from the pool, about a $25k market cap.
 >

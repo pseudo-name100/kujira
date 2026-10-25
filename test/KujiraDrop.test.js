@@ -8,7 +8,7 @@ const e = (n) => ethers.parseEther(String(n));
 
 async function deploy() {
   const [owner, alice, bob, carol] = await ethers.getSigners();
-  const token = await ethers.deployContract("KujiraToken", [owner.address]);
+  const token = await ethers.deployContract("KujiraToken", [owner.address, ethers.ZeroAddress, ethers.ZeroAddress, ethers.ZeroAddress]);
   const pod = await ethers.deployContract("KujiraPod", [await token.getAddress(), owner.address]);
   const drop = await ethers.deployContract("KujiraDrop", [await pod.getAddress(), owner.address]);
   await token.transfer(await drop.getAddress(), e(1000));

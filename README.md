@@ -4,14 +4,15 @@
 
 A fisherman found a whale in his net, and cut the net. KUJI is a whale-incentive memecoin on
 [Ink](https://inkonchain.com), Kraken's OP Stack L2, launched in Ryoshi's spirit: no team
-tokens, no tax, liquidity locked forever, and everything else going to holders. The only thing
-the builders take is the Uniswap pool's 1% trading fee. The rug-pull levers are missing from
+tokens, no tax after launch, liquidity locked forever, and everything else going to holders. The
+builders take the Uniswap pool's 1% trading fee, plus a launch tax on buys that falls from 25% to
+0 over the first 30 minutes to stop sniper bots. The rug-pull levers are missing from
 the code:
 
 | Common memecoin risk | KUJI |
 | --- | --- |
 | Owner can mint more | No owner, no mint function. 1,000,000,000 KUJI minted once at deploy. |
-| Hidden buy/sell tax | None. Transfers move the exact amount. |
+| Hidden buy/sell tax | None. A launch tax on buys from the KUJI pool starts at 25% and falls every second to 0 over the first 30 minutes; it is fixed in the token and can never return. Every other transfer moves the exact amount. |
 | Blacklist / pause / "anti-bot" switches | None. |
 | Upgradeable proxy that can be swapped | Not upgradeable. |
 | Team dumps on day one | There is no team allocation. |

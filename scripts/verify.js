@@ -18,7 +18,7 @@ async function main() {
   const d = JSON.parse(
     fs.readFileSync(path.join(__dirname, "..", "deployments", `${hre.network.name}.json`), "utf8")
   );
-  await verify("KujiraToken", d.KujiraToken, [d.deployer]);
+  await verify("KujiraToken", d.KujiraToken, d.tokenArgs);
   await verify("KujiraPod", d.KujiraPod, [d.KujiraToken, d.deployer]);
   await verify("KujiraDrop", d.KujiraDrop, [d.KujiraPod, d.deployer]);
   if (d.KujiraLiquidityLock) {
