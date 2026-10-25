@@ -3,6 +3,7 @@ const { parseEther } = require("ethers");
 // Round settings. Round numbers here are 1-based; on-chain round ids start at 0.
 module.exports = {
   explorerApi: "https://explorer.inkonchain.com/api/v2",
+  explorerRpcApi: "https://explorer.inkonchain.com/api", // Etherscan-style endpoints
   rpcUrl: process.env.INK_RPC_URL || "https://rpc-gel.inkonchain.com",
 
   rounds: {
