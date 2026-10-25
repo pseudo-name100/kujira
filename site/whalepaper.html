@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>The Whalepaper · Kujira</title>
   <meta name="description" content="The Kujira Whalepaper: a fisherman, a whale, and a memecoin launched Ryoshi's way.">
   <meta name="theme-color" content="#0b4d68">
@@ -66,7 +66,7 @@
     <section class="lore" data-depth="800" data-zone="Twilight Zone">
       <p class="zone-label">III. What Kujira is not</p>
       <h2 class="lore-head">Not a promise.</h2>
-      <p class="lore-body">KUJI is a meme. It has no intrinsic value, no roadmap of riches, no team, no presale, no investors and no tax. Nobody is promising you a return, and you should not buy anything you can't afford to lose. If it grows, it grows because people chose to gather.</p>
+      <p class="lore-body">KUJI is a meme. It has no intrinsic value, no roadmap of riches, no team, no presale, no investors, and no tax after the first 30 minutes. Nobody is promising you a return, and you should not buy anything you can't afford to lose. If it grows, it grows because people chose to gather.</p>
     </section>
 
     <section class="lore" data-depth="1200" data-zone="Midnight Zone">
@@ -75,9 +75,10 @@
       <ul class="tenets">
         <li><b>No team tokens.</b> Not one KUJI held back.</li>
         <li><b>Liquidity locked forever.</b> The KUJI/ETH liquidity sits in a 1% Uniswap pool, owned by a contract with no way to remove it. Anyone can read it.</li>
-        <li><b>The one toll.</b> Every trade pays Uniswap's 1% pool fee, and that fee goes to the fisherman's wallet. It pays for the site, the art and the Drops. It's the only thing the fisherman takes, and the contract that collects it is public.</li>
+        <li><b>No insider ETH.</b> The pool opened at a $10k market cap with KUJI only. Every ETH in it came from a buyer.</li>
+        <li><b>The tolls, out in the open.</b> Every trade pays Uniswap's 1% pool fee, and that fee goes to the fisherman's wallet; the contract that collects it is public. For the first 30 minutes there is also a launch tax on buys, starting at 25% and falling every second to 0, so sniper bots pay for rushing in. It goes to the same wallet, it's written into the token, and it can never be switched back on. These pay for the site, the art and the Drops, and they're everything the fisherman takes.</li>
         <li><b>Code you can read.</b> Every contract is verified on the Ink explorer, and the code is open.</li>
-        <li><b>No hidden switches.</b> No tax on transfers, no blacklist, no pause, no upgrades.</li>
+        <li><b>No hidden switches.</b> No tax after the launch window, no blacklist, no pause, no upgrades.</li>
       </ul>
       <p class="muted">The spirit is Ryoshi's, who launched Shiba Inu with no team allocation and the liquidity out of reach. Kujira isn't connected to Ryoshi or Shiba Inu.</p>
     </section>
@@ -108,6 +109,7 @@
       <p class="zone-label">VII. The Drop falls on those already on the water</p>
       <h2 class="lore-head">When the whale breaches, the spray falls on all who stand near.</h2>
       <p class="lore-body">The first round goes to the people who already trade on Ink: 14,981 wallets that swapped on Ink's DEXes on at least two days this year, each listed for 81,766 KUJI. Claims are first come, first served until the round's 80M KUJI is gone. Claim straight into the Pod for 25% more.</p>
+      <p class="lore-body">The Drop never outgrows the market. A round opens only once buyers have taken at least twice its size out of the pool, so the spray never lands harder than the water can hold. Round 1 opens at about a $25k market cap, and the site shows how close it is.</p>
       <p class="lore-body">Later rounds go to the pod itself. Whale rounds snapshot every holder, wallet and Pod together, and reward those of Orca size and up. Snapshots are announced before they happen.</p>
       <p class="lore-body small">Check any wallet at kujira.ink. Every list is published so anyone can verify it.</p>
     </section>
@@ -117,7 +119,7 @@
       <h2 class="lore-head">The fisherman holds a rope, not a net.</h2>
       <ul class="tenets">
         <li><b>Can:</b> add rewards to the Pod, start Drop rounds from the published lists, burn unused Drop tokens, and collect the 1% pool fee.</li>
-        <li><b>Cannot:</b> mint KUJI, tax transfers, freeze a wallet, touch anyone's stake, take the Drop or Pod pools, or remove the locked liquidity.</li>
+        <li><b>Cannot:</b> mint KUJI, add or extend a tax, freeze a wallet, touch anyone's stake, take the Drop or Pod pools, or remove the locked liquidity.</li>
         <li><b>Will:</b> hand the remaining controls to a community multisig, or give them up entirely, once the rounds are done.</li>
       </ul>
     </section>
@@ -135,6 +137,14 @@
     <p class="copy">© 2026 Kujira</p>
     <p class="fine">KUJI is a meme token for entertainment. It has no intrinsic value and no expectation of financial return. Kujira is not affiliated with Ryoshi or Shiba Inu.</p>
   </footer>
+
+  <!-- App-style tabs: the claim and staking panels are one tap from anywhere -->
+  <nav class="tabs" aria-label="Sections">
+    <a href="./#top"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11 12 4l9 7v9h-6v-6H9v6H3z"/></svg><span>Home</span></a>
+    <a href="./#drop"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z"/></svg><span>Claim</span></a>
+    <a href="./#pod"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 8l10 5 10-5-10-5zM2 12l10 5 10-5M2 16l10 5 10-5"/></svg><span>Stake</span></a>
+    <a href="./#rank"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20v-7M12 20V5M19 20v-10"/></svg><span>Rank</span></a>
+  </nav>
 
   <script src="dive.js"></script>
 </body>

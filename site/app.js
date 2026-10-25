@@ -10,6 +10,7 @@
     "function balanceOf(address) view returns (uint256)",
     "function allowance(address,address) view returns (uint256)",
     "function approve(address,uint256) returns (bool)",
+    "function launchedAt() view returns (uint64)",
   ];
   const POD_ABI = [
     "function totalStaked() view returns (uint256)",
@@ -30,6 +31,7 @@
     "function claim(uint256,uint256,bytes32[])",
     "function claimAndStake(uint256,uint256,bytes32[])",
   ];
+  const POOL_ABI = ["function slot0() view returns (uint160 sqrtPriceX96, int24 tick, uint16, uint16, uint16, uint8, bool)"];
 
   // Ranks by KUJI held (wallet + Pod). `boost` is the Pod size bonus for staking that much.
   const TIERS = [
@@ -146,7 +148,33 @@
       link("KUJI token", c.KujiraToken) +
       link("Pod (staking)", c.KujiraPod) +
       link("Drop (airdrop pool)", c.KujiraDrop) +
-      (c.KujiraLiquidityLock ? link("Liquidity lock (1% pool fee)", c.KujiraLiquidityLock) : "");
+      (c.KujiraLiquidityLock ? link("Liquidity lock (1% pool fee)", c.KujiraLiquidityLock) : "") +
+      (data.launch ? link("Uniswap pool (KUJI/ETH, 1%)", data.launch.pool) : "");
+    watchLaunchTax().catch(() => {});
+  }
+
+  // During the first 30 minutes after the pool opens, show the launch tax on buys as it
+  // falls (KujiraToken.launchTaxBps: 25% at the start, linear to 0).
+  async function watchLaunchTax() {
+    const token = new ethers.Contract(data.contracts.KujiraToken, TOKEN_ABI, reader);
+    const start = Number(await token.launchedAt());
+    if (!start) return;
+    const end = start + 30 * 60;
+    const banner = $("tax-banner");
+    const tick = () => {
+      const left = end - Date.now() / 1000;
+      if (left <= 0) {
+        banner.hidden = true;
+        clearInterval(timer);
+        return;
+      }
+      const pct = (25 * left) / 1800;
+      const m = Math.floor(left / 60), s = Math.floor(left % 60);
+      banner.hidden = false;
+      banner.textContent = `Launch tax on buys right now: ${pct.toFixed(1)}%, falling to 0 in ${m}:${String(s).padStart(2, "0")}. It stops sniper bots and never comes back.`;
+    };
+    const timer = setInterval(tick, 1000);
+    tick();
   }
 
   // ------------------------------------------------------------------ wallet
@@ -334,10 +362,12 @@
     const open = data.rounds.filter((r) => !r.closed && r.deadline > now);
     if (!account) {
       box.innerHTML = `<p class="muted">${open.length ? "A round is open. Connect your wallet to claim." : "No round is open right now."}</p>`;
+      if (!open.length) await renderDropCap(box);
       return;
     }
     if (open.length === 0) {
       box.innerHTML = `<p class="muted">The water is still. No round is open right now. Follow @KujiraToken for the next one.</p>`;
+      await renderDropCap(box);
       return;
     }
     const drop = new ethers.Contract(data.contracts.KujiraDrop, DROP_ABI, reader);
@@ -386,6 +416,41 @@
       if (staked) staked.onclick = () => send("Claim & stake", () => d.claimAndStake(r.roundId, amount, mine.proof));
       box.append(div);
     }
+  }
+
+  // The Drop never outgrows the market: a round opens only once buyers have taken enough
+  // KUJI out of the launch pool (scripts/airdrop/gate.js). Shows how close the next one is.
+  async function renderDropCap(box) {
+    const L = data.launch, next = data.nextRound;
+    if (!L || !next) return;
+    const drop = new ethers.Contract(data.contracts.KujiraDrop, DROP_ABI, reader);
+    const pool = new ethers.Contract(L.pool, POOL_ABI, reader);
+    let committed = 0n;
+    for (const r of data.rounds) {
+      const st = await drop.rounds(r.roundId);
+      committed += st.closed ? st.paid : st.reserved;
+    }
+    const [sqrtX96] = await pool.slot0();
+    // Launch curve, in floats (plenty for a progress bar). x = L(1/s0 - 1/s) for KUJI as
+    // token0, x = L(s0 - s) as token1, where s is the sqrt price.
+    const liq = Number(L.liquidity), s = Number(sqrtX96) / 2 ** 96;
+    const s0 = Math.sqrt(1.0001 ** (L.kujiIs0 ? L.tickLower : L.tickUpper));
+    const bought = Math.max(0, L.kujiIs0 ? liq * (1 / s0 - 1 / s) : liq * (s0 - s)) / 1e18;
+    const need = (Number(committed + BigInt(next.reserve)) / 1e18) * (10000 / data.dropCapBps);
+    // Market cap, in launch dollars, once `need` KUJI has been bought.
+    const sNeed = L.kujiIs0 ? 1 / (1 / s0 - (need * 1e18) / liq) : s0 - (need * 1e18) / liq;
+    const ethPerKuji = L.kujiIs0 ? sNeed * sNeed : 1 / (sNeed * sNeed);
+    const capUsd = ethPerKuji * 1e9 * L.ethUsdAtLaunch;
+    const pct = Math.min(100, (bought / need) * 100);
+    const p = document.createElement("div");
+    p.className = "cap";
+    p.innerHTML =
+      `<p class="muted">Round ${next.round} opens once buyers have taken ${fmtNum(need)} KUJI out of the pool` +
+      (sNeed > 0 && isFinite(capUsd) ? `, about a $${fmtNum(capUsd)} market cap` : "") +
+      `. The Drop never hands out more than the market has already absorbed.</p>` +
+      `<div class="track"><div class="fill" style="width:${pct.toFixed(1)}%"></div></div>` +
+      `<p class="muted">${fmtNum(bought)} of ${fmtNum(need)} KUJI so far.</p>`;
+    box.append(p);
   }
 
   // ------------------------------------------------------------------ Pod + rank

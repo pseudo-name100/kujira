@@ -12,7 +12,11 @@ function requireAddress(ethers, name, needed) {
     return null;
   }
   if (!ethers.isAddress(value)) {
-    throw new Error(`${name} ${value} is not a valid address (check for typos / checksum)`);
+    // Never echo the value: if someone pasted a private key here, it must not reach the logs.
+    const hint = /^(0x)?[0-9a-fA-F]{64}$/.test(value.trim())
+      ? "it looks like a private key, not an address. Replace it with the wallet's public address (0x followed by 40 characters), and move that wallet's funds to a new wallet"
+      : "check for typos; it should be 0x followed by 40 characters";
+    throw new Error(`${name} is not a valid address: ${hint}`);
   }
   return ethers.getAddress(value);
 }
@@ -41,10 +45,16 @@ async function main() {
   console.log(`Network:  ${network.name} (chainId ${chainId})`);
   console.log(`Deployer: ${deployer.address}`);
 
-  const token = await ethers.deployContract("KujiraToken", [deployer.address]);
+  // The launch tax needs the Uniswap pool, so only networks with Uniswap get one.
+  const taxUni = uni || (local ? cfg.uniswapV3.ink : null);
+  const tokenArgs = taxUni
+    ? [deployer.address, taxUni.factory, taxUni.weth, feeRecipient || deployer.address]
+    : [deployer.address, ethers.ZeroAddress, ethers.ZeroAddress, ethers.ZeroAddress];
+  const token = await ethers.deployContract("KujiraToken", tokenArgs);
   await token.waitForDeployment();
   const tokenAddress = await token.getAddress();
   console.log(`KujiraToken: ${tokenAddress}`);
+  if (taxUni) console.log(`Launch tax:  25% falling to 0 over 30 minutes on buys from ${await token.pool()}, to ${tokenArgs[3]}`);
 
   const pod = await ethers.deployContract("KujiraPod", [tokenAddress, deployer.address]);
   await pod.waitForDeployment();
@@ -92,6 +102,7 @@ async function main() {
     chainId,
     deployer: deployer.address,
     KujiraToken: tokenAddress,
+    tokenArgs,
     KujiraPod: podAddress,
     KujiraDrop: dropAddress,
     KujiraLiquidityLock: lockAddress,

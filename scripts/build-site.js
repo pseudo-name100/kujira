@@ -70,6 +70,15 @@ for (const dir of roundDirs) {
 lists.sort((a, b) => a.round - b.round);
 
 const { allocations } = require("./tokenomics");
+const { rounds: roundCfg, dropCap } = require("./airdrop/config");
+function nextRound(started) {
+  const done = new Set(started.map((r) => r.round));
+  const next = lists.find((l) => !done.has(l.round) && roundCfg[l.round]);
+  if (!next) return null;
+  const total = BigInt(claimsByDir[`round-${next.round}`].total);
+  const reserve = total + (total * BigInt(roundCfg[next.round].stakeBonusBps)) / 10000n;
+  return { round: next.round, reserve: reserve.toString() };
+}
 const networks = Object.keys(NETWORKS).filter((name) =>
   name === "localhost" ? local && fs.existsSync(path.join(root, "deployments", "localhost.local.json")) : fs.existsSync(path.join(root, "deployments", `${name}.json`))
 );
@@ -97,6 +106,10 @@ for (const [name, meta] of Object.entries(NETWORKS)) {
       KujiraLiquidityLock: d.KujiraLiquidityLock || null,
     },
     rounds,
+    launch: d.launch || null,
+    // The next built-but-unstarted round and the Drop cap it has to fit under (gate.js).
+    nextRound: nextRound(rounds),
+    dropCapBps: dropCap.shareOfBoughtBps,
   };
   fs.writeFileSync(path.join(out, "data", `${name}.json`), JSON.stringify(data, null, 2) + "\n");
   console.log(`${name}: ${rounds.length} round(s)`);

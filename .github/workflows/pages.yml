@@ -9,7 +9,7 @@ on:
   # Deploy and Airdrop commit with the workflow token, which doesn't trigger push
   # events, so rebuild after they finish too.
   workflow_run:
-    workflows: [Deploy, Airdrop]
+    workflows: [Deploy, Launch pool, Airdrop]
     types: [completed]
   workflow_dispatch:
 

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Kujira · 鯨 · The Deep</title>
   <meta name="description" content="Kujira (KUJI) on Ink. Something has been growing in the deep.">
   <meta name="theme-color" content="#0b4d68">
@@ -29,8 +29,9 @@
 
   <header id="top" class="hero" data-depth="0" data-zone="The Surface">
     <img class="hero-logo" src="img/wordmark.webp" alt="Kujira" width="720" height="562">
-    <div class="sonar-screen">
+    <div class="sonar-screen" data-sing role="button" tabindex="0" aria-label="Hear the whale song">
       <canvas id="spectro" aria-hidden="true"></canvas>
+      <span class="sonar-play" data-sing-label>Hear the song</span>
       <span class="hz-label" aria-hidden="true">52 Hz</span>
       <span class="axis-label" aria-hidden="true">frequency ↑ · time →</span>
     </div>
@@ -41,6 +42,7 @@
       <div class="hero-actions">
         <button class="btn solid" data-sing data-sing-label>Hear the song</button>
         <a href="#drop" class="btn">Are you in the Drop?</a>
+        <a href="#pod" class="btn">Stake in the Pod</a>
       </div>
     </div>
   </header>
@@ -48,6 +50,7 @@
   <div class="ping" aria-hidden="true"><span></span></div>
 
   <main>
+    <p id="tax-banner" class="notice tax" hidden></p>
     <p id="notice" class="notice" hidden></p>
 
     <section class="lore tale-block" data-depth="200" data-zone="Twilight Zone">
@@ -78,11 +81,11 @@
       <h2 class="lore-head">Nothing hidden beneath the surface.</h2>
       <ul class="tenets">
         <li><b>One billion KUJI.</b> Minted once. No owner, no mint, ever.</li>
-        <li><b>No tax.</b> Every transfer moves the exact amount.</li>
+        <li><b>No tax after launch.</b> For the first 30 minutes after launch, buys pay a launch tax that starts at 25% and falls every second to 0, so sniper bots pay for rushing. It goes to the fisherman's wallet, it's written into the token, and it can never come back. After that, every transfer moves the exact amount.</li>
         <li><b>No blacklist, no pause.</b> Nobody can freeze a wallet.</li>
         <li><b>Not upgradeable.</b> The code you read is the code that runs.</li>
         <li><b>No team tokens.</b> The fisherman kept none of the whale. Not one KUJI held back.</li>
-        <li><b>Liquidity locked forever.</b> It sits in a 1% Uniswap pool owned by a contract that can never remove it. The pool's 1% trading fee is the fisherman's only toll, and the contract that collects it is public.</li>
+        <li><b>Liquidity locked forever.</b> It sits in a 1% Uniswap pool owned by a contract that can never remove it. The pool's 1% trading fee goes to the fisherman, and the contract that collects it is public.</li>
         <li><b>Rewards pre-funded.</b> Staking pays from a fixed pool, never by printing.</li>
       </ul>
     </section>
@@ -174,6 +177,14 @@
     </div>
     <button id="card-close" class="btn ghost">Close</button>
   </dialog>
+
+  <!-- App-style tabs: the claim and staking panels are one tap from anywhere -->
+  <nav class="tabs" aria-label="Sections">
+    <a href="#top"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11 12 4l9 7v9h-6v-6H9v6H3z"/></svg><span>Home</span></a>
+    <a href="#drop"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z"/></svg><span>Claim</span></a>
+    <a href="#pod"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 8l10 5 10-5-10-5zM2 12l10 5 10-5M2 16l10 5 10-5"/></svg><span>Stake</span></a>
+    <a href="#rank"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20v-7M12 20V5M19 20v-10"/></svg><span>Rank</span></a>
+  </nav>
 
   <script src="ethers.umd.min.js"></script>
   <script src="song.js"></script>

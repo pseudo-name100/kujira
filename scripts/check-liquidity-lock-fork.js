@@ -32,7 +32,7 @@ async function main() {
   const [lp, feeWallet, trader] = await ethers.getSigners();
   const fmt = ethers.formatEther;
 
-  const kuji = await ethers.deployContract("KujiraToken", [lp.address]);
+  const kuji = await ethers.deployContract("KujiraToken", [lp.address, ethers.ZeroAddress, ethers.ZeroAddress, ethers.ZeroAddress]);
   const lock = await ethers.deployContract("KujiraLiquidityLock", [ink.positionManager, await kuji.getAddress(), feeWallet.address]);
   const npm = new ethers.Contract(ink.positionManager, NPM_ABI, lp);
   const weth = new ethers.Contract(ink.weth, WETH_ABI, lp);
