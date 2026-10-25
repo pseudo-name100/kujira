@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Kujira · 鯨 · The Deep</title>
   <meta name="description" content="Kujira (KUJI) on Ink. Something has been growing in the deep.">
-  <meta name="theme-color" content="#000000">
+  <meta name="theme-color" content="#0b4d68">
   <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32.png">
   <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
   <meta property="og:title" content="Kujira (KUJI) on Ink">
@@ -16,15 +16,25 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <!-- The ocean: colour, light and drifting particles change with depth (dive.js) -->
+  <div id="ocean" aria-hidden="true"></div>
+  <div id="rays" aria-hidden="true"></div>
+  <canvas id="snow" aria-hidden="true"></canvas>
+  <div id="gauge" aria-live="off"><span class="arrow">▼</span> <b id="depth">0</b> m · <span id="zone">The Surface</span></div>
+
   <nav>
     <a href="#top" class="nav-mark"><img src="img/logo-192.png" alt="Kujira" width="36" height="36"></a>
     <button id="connect" class="btn">Connect</button>
   </nav>
 
-  <header id="top" class="hero">
-    <div class="coin"><img src="img/mark-800.webp" alt="Kujira whale" width="800" height="800"></div>
+  <header id="top" class="hero" data-depth="0" data-zone="The Surface">
+    <button id="sing" class="coin" aria-label="Hear the Kujira sing">
+      <img src="img/mark-800.webp" alt="" width="800" height="800">
+      <span class="ripple"></span><span class="ripple"></span><span class="ripple"></span>
+    </button>
     <h1 class="name">Kujira</h1>
     <p class="kanji" aria-hidden="true">鯨</p>
+    <p class="hint">Tap the whale to hear it sing · scroll to dive</p>
   </header>
 
   <section class="band">
@@ -34,23 +44,37 @@
   <main>
     <p id="notice" class="notice" hidden></p>
 
-    <section class="lore">
+    <section class="lore" data-depth="200" data-zone="Twilight Zone">
+      <p class="zone-label">200 m — The Twilight Zone</p>
       <h2 class="lore-head">The old tales of the sea say the Kujira rises only after the water has been still for a long time. Where it surfaces, the villages along the shore prosper for a generation.</h2>
       <p class="lore-body">The Kujira does not chase. It waits in the deep, growing, unseen by those who watch only the surface. Its song carries a thousand miles, and those who hear it gather. First the water moves. Then you see the whale.</p>
       <p class="sig">— The Deep</p>
+    </section>
+
+    <section class="lore" data-depth="600" data-zone="Twilight Zone">
+      <p class="zone-label">600 m — Sonar</p>
+      <h2 class="lore-head">What the sonar hears</h2>
+      <div class="sonar">
+        <div class="ping"><span class="rings"></span><b id="s-holders">—</b><span>Whales holding</span></div>
+        <div class="ping"><span class="rings"></span><b id="s-staked">—</b><span>KUJI in the Pod</span></div>
+        <div class="ping"><span class="rings"></span><b id="s-drop">—</b><span>Of the Drop claimed</span></div>
+      </div>
+      <p id="s-note" class="muted center">Listening… the Kujira surfaces soon.</p>
     </section>
   </main>
 
   <section class="band links-band">
     <ul id="social" class="social">
-      <li><a href="#drop"><span class="glyph">滴</span><span>Claim</span></a></li>
+      <li><a href="#drop"><span class="glyph">滴</span><span>Drop</span></a></li>
+      <li><a href="#rank"><span class="glyph">位</span><span>Rank</span></a></li>
       <li><a href="#pod"><span class="glyph">群</span><span>Stake</span></a></li>
       <li><a href="https://x.com/KujiraToken" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.9 2H22l-6.8 7.8L23 22h-6.2l-4.8-6.3L6.4 22H3.3l7.3-8.3L1 2h6.3l4.4 5.8L18.9 2Zm-1.1 18.1h1.7L6.3 3.8H4.5l13.3 16.3Z"/></svg><span>X</span></a></li>
     </ul>
   </section>
 
   <main>
-    <section class="lore">
+    <section class="lore" data-depth="1000" data-zone="Midnight Zone">
+      <p class="zone-label">1,000 m — The Midnight Zone</p>
       <h2 class="lore-head">Nothing hidden beneath the surface.</h2>
       <ul class="tenets">
         <li><b>One billion KUJI.</b> Minted once. No owner, no mint, ever.</li>
@@ -62,19 +86,38 @@
       </ul>
     </section>
 
-    <section class="lore">
+    <section class="lore" data-depth="2000" data-zone="Midnight Zone">
+      <p class="zone-label">2,000 m — The Tides</p>
       <h2 class="lore-head">The tides</h2>
       <p class="supply">1,000,000,000 KUJI</p>
       <ul id="alloc" class="alloc"></ul>
     </section>
 
-    <section id="drop" class="lore">
+    <section id="drop" class="lore" data-depth="4000" data-zone="The Abyss">
+      <p class="zone-label">4,000 m — The Abyss</p>
       <h2 class="lore-head">The Drop</h2>
       <p class="lore-body">When the whale breaches, the spray falls on all who stand near. A fifth of all KUJI rests in the Drop, released in rounds to those already on the water.</p>
-      <div class="panel" id="rounds"><p class="muted">Connect your wallet to see if the spray reaches you.</p></div>
+      <div class="panel">
+        <h3 class="panel-head">Are you in the Drop?</h3>
+        <div class="row">
+          <input id="check-addr" placeholder="Paste a wallet address" autocomplete="off" autocapitalize="off" spellcheck="false">
+          <button id="check" class="btn solid">Check</button>
+        </div>
+        <div id="check-result" class="result" aria-live="polite"></div>
+      </div>
+      <div class="panel" id="rounds"><p class="muted">Connect your wallet to claim when a round is open.</p></div>
     </section>
 
-    <section id="pod" class="lore">
+    <section id="rank" class="lore" data-depth="5000" data-zone="The Abyss">
+      <p class="zone-label">5,000 m — The Pod's order</p>
+      <h2 class="lore-head">Your place in the pod</h2>
+      <p class="lore-body">Every creature of the deep has its place. Hold KUJI, in your wallet or in the Pod, and rise through the ranks.</p>
+      <ol class="tiers" id="tiers"></ol>
+      <div class="panel" id="rank-panel"><p class="muted">Connect your wallet after launch to find your rank.</p></div>
+    </section>
+
+    <section id="pod" class="lore" data-depth="5500" data-zone="The Abyss">
+      <p class="zone-label">5,500 m — The Pod</p>
       <h2 class="lore-head">The Pod</h2>
       <p class="lore-body">Whales travel together. Stake KUJI in the Pod and share in its rewards. Leave whenever you choose.</p>
       <div class="panel">
@@ -97,20 +140,32 @@
       </div>
     </section>
 
-    <section class="lore">
+    <section class="lore" data-depth="8000" data-zone="Hadal Zone">
+      <p class="zone-label">8,000 m — The Hadal Zone</p>
       <h2 class="lore-head">The contracts</h2>
-      <ul id="contracts" class="links"><li class="muted">Loading…</li></ul>
+      <ul id="contracts" class="links"><li class="muted">The contracts appear here at launch.</li></ul>
       <p class="lore-body small">Every contract is verified on the Ink explorer. Read it yourself.</p>
     </section>
   </main>
 
-  <footer>
+  <footer data-depth="10900" data-zone="The Deep">
     <div class="coin small"><img src="img/mark-800.webp" alt="" width="800" height="800"></div>
     <p class="copy">© 2026 Kujira</p>
     <p class="fine">KUJI is a meme token for entertainment. It has no intrinsic value and no expectation of financial return.</p>
   </footer>
 
+  <!-- Share card preview -->
+  <dialog id="card-dialog">
+    <img id="card-img" alt="Your Kujira card">
+    <div class="actions two">
+      <button id="card-save" class="btn solid">Save image</button>
+      <a id="card-post" class="btn" target="_blank" rel="noopener">Post on X</a>
+    </div>
+    <button id="card-close" class="btn ghost">Close</button>
+  </dialog>
+
   <script src="ethers.umd.min.js"></script>
+  <script src="dive.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

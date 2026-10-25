@@ -1,6 +1,6 @@
 // Usage: node scripts/build-site.js [--local]
-// Builds the claim page into _site/: the static files in site/, ethers, and per-network
-// data (contract addresses + started airdrop rounds) from deployments/ and airdrop/.
+// Builds the site into _site/: the static files in site/, ethers, fonts, every airdrop list,
+// and per-network data (contract addresses + started rounds) from deployments/ and airdrop/.
 const fs = require("fs");
 const path = require("path");
 
@@ -29,12 +29,39 @@ for (const w of [300, 400, 600, 800]) {
     path.join(out, "fonts", `poppins-${w}.woff2`)
   );
 }
-const { allocations } = require("./tokenomics");
-fs.writeFileSync(path.join(out, "data", "site.json"), JSON.stringify({ allocations }, null, 2) + "\n");
-
 const roundDirs = fs.existsSync(path.join(root, "airdrop"))
   ? fs.readdirSync(path.join(root, "airdrop")).filter((d) => /^round-\d+$/.test(d))
   : [];
+
+// Every round's list is published, started or not, so the page's checker works before
+// launch. Proofs are split into 256 files by the address's first byte, so a visitor only
+// downloads the slice their wallet is in.
+const lists = [];
+const claimsByDir = {};
+for (const dir of roundDirs) {
+  const claimsFile = path.join(root, "airdrop", dir, "claims.json");
+  if (!fs.existsSync(claimsFile)) continue;
+  const claims = JSON.parse(fs.readFileSync(claimsFile, "utf8"));
+  claimsByDir[dir] = claims;
+  const rel = `airdrop/${dir}/claims`;
+  const shards = {};
+  for (const [addr, c] of Object.entries(claims.claims)) {
+    (shards[addr.slice(2, 4).toLowerCase()] ||= {})[addr] = c;
+  }
+  fs.mkdirSync(path.join(out, rel), { recursive: true });
+  for (let i = 0; i < 256; i++) {
+    const key = i.toString(16).padStart(2, "0");
+    fs.writeFileSync(path.join(out, rel, `${key}.json`), JSON.stringify(shards[key] || {}));
+  }
+  lists.push({ round: claims.round, root: claims.root, dir: rel, wallets: Object.keys(claims.claims).length });
+}
+lists.sort((a, b) => a.round - b.round);
+
+const { allocations } = require("./tokenomics");
+const networks = Object.keys(NETWORKS).filter((name) =>
+  name === "localhost" ? local && fs.existsSync(path.join(root, "deployments", "localhost.local.json")) : fs.existsSync(path.join(root, "deployments", `${name}.json`))
+);
+fs.writeFileSync(path.join(out, "data", "site.json"), JSON.stringify({ allocations, lists, networks }, null, 2) + "\n");
 
 for (const [name, meta] of Object.entries(NETWORKS)) {
   const file = path.join(root, "deployments", name === "localhost" ? "localhost.local.json" : `${name}.json`);
@@ -42,25 +69,9 @@ for (const [name, meta] of Object.entries(NETWORKS)) {
   const d = JSON.parse(fs.readFileSync(file, "utf8"));
 
   const rounds = [];
-  for (const dir of roundDirs) {
-    const claimsFile = path.join(root, "airdrop", dir, "claims.json");
-    if (!fs.existsSync(claimsFile)) continue;
-    const claims = JSON.parse(fs.readFileSync(claimsFile, "utf8"));
+  for (const [dir, claims] of Object.entries(claimsByDir)) {
     const started = claims.started?.[name];
-    if (!started) continue;
-    // Split the proofs into 256 files by the address's first byte, so a visitor only
-    // downloads the slice their wallet is in.
-    const rel = `airdrop/${dir}/claims`;
-    const shards = {};
-    for (const [addr, c] of Object.entries(claims.claims)) {
-      (shards[addr.slice(2, 4).toLowerCase()] ||= {})[addr] = c;
-    }
-    fs.mkdirSync(path.join(out, rel), { recursive: true });
-    for (let i = 0; i < 256; i++) {
-      const key = i.toString(16).padStart(2, "0");
-      fs.writeFileSync(path.join(out, rel, `${key}.json`), JSON.stringify(shards[key] || {}));
-    }
-    rounds.push({ round: claims.round, root: claims.root, dir: rel, ...started });
+    if (started) rounds.push({ round: claims.round, root: claims.root, dir: `airdrop/${dir}/claims`, ...started });
   }
 
   const data = {

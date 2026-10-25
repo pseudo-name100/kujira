@@ -78,12 +78,26 @@ phone browser. The workflows must be on the repository's default branch to show 
 Test on `inkSepolia` first: Deploy, then Airdrop `start-round` for round 1, and claim from
 the page with `?network=inkSepolia` added to its URL.
 
-### Claim page
+### The site (kujira.ink)
 
-`site/` is a static page that works in wallet apps' built-in browsers. Holders connect, see
-whether they're on an open round's list, and tap **Claim** or **Claim & stake**. They can also
-stake, withdraw and collect Pod rewards there. The page reads `deployments/<network>.json`
-and the `claims.json` of every round started on that network.
+`site/` is a static page that works in wallet apps' built-in browsers.
+
+- **The Dive.** Scrolling is a descent: the water darkens from surface blue to black, a depth
+  gauge reads the zone (Twilight, Midnight, Abyss, Hadal), marine snow drifts down and turns
+  bioluminescent in the abyss (`site/dive.js`).
+- **Whale song.** Tapping the whale plays a song synthesized in the browser (no audio file).
+- **Sonar.** Live stats once launched: holders (from the explorer), KUJI staked, and how much
+  of the Drop is claimed. Refreshes every 30 seconds.
+- **Drop checker.** Anyone can paste an address to see if it's on a round's list, before or
+  after launch, and make a share card for X.
+- **Rank.** A connected wallet is ranked by KUJI held in the wallet plus the Pod: Krill (any),
+  Fish (10,000+), Dolphin (100,000+), Orca (1,000,000+), Kujira (10,000,000+), with a share card.
+- **Claim and stake.** Claim or claim-and-stake open rounds, and stake, withdraw or collect Pod
+  rewards.
+
+The page reads `data/site.json` (token split, every airdrop list) and, after launch,
+`data/<network>.json` (contracts and started rounds), both built from `deployments/` and
+`airdrop/` by `scripts/build-site.js`.
 
 ## Running locally
 
