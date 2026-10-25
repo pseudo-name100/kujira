@@ -1,9 +1,10 @@
-@font-face { font-family: "Fraunces"; font-weight: 400; font-display: swap; src: url(fonts/fraunces-400.woff2) format("woff2"); }
-@font-face { font-family: "Fraunces"; font-weight: 400; font-style: italic; font-display: swap; src: url(fonts/fraunces-400-italic.woff2) format("woff2"); }
-@font-face { font-family: "Fraunces"; font-weight: 600; font-display: swap; src: url(fonts/fraunces-600.woff2) format("woff2"); }
-@font-face { font-family: "Inter"; font-weight: 400; font-display: swap; src: url(fonts/inter-400.woff2) format("woff2"); }
-@font-face { font-family: "Inter"; font-weight: 500; font-display: swap; src: url(fonts/inter-500.woff2) format("woff2"); }
-@font-face { font-family: "Inter"; font-weight: 600; font-display: swap; src: url(fonts/inter-600.woff2) format("woff2"); }
+@font-face { font-family: "Dela"; font-weight: 400; font-display: swap; src: url(fonts/dela-400.woff2) format("woff2"); }
+@font-face { font-family: "Dela"; font-weight: 400; font-display: swap; src: url(fonts/dela-ja.woff2) format("woff2"); unicode-range: U+3000-9FFF, U+FF00-FFEF; }
+@font-face { font-family: "Zen"; font-weight: 400; font-display: swap; src: url(fonts/zen-400.woff2) format("woff2"); }
+@font-face { font-family: "Zen"; font-weight: 500; font-display: swap; src: url(fonts/zen-500.woff2) format("woff2"); }
+@font-face { font-family: "Zen"; font-weight: 700; font-display: swap; src: url(fonts/zen-700.woff2) format("woff2"); }
+@font-face { font-family: "Zen"; font-weight: 400 500; font-display: swap; src: url(fonts/zen-ja-400.woff2) format("woff2"); unicode-range: U+3000-9FFF, U+FF00-FFEF; }
+@font-face { font-family: "Zen"; font-weight: 700; font-display: swap; src: url(fonts/zen-ja-700.woff2) format("woff2"); unicode-range: U+3000-9FFF, U+FF00-FFEF; }
 
 /* Colours come from the whale logo's ice-cyan glow over deep water. */
 :root {
@@ -17,8 +18,8 @@
   --accent-hi: #8fe6ff;
   --ok: #8fd6a8;
   --err: #ff8a8a;
-  --serif: "Fraunces", Georgia, "Times New Roman", serif;
-  --sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --serif: "Dela", "Zen", system-ui, sans-serif;
+  --sans: "Zen", system-ui, -apple-system, "Segoe UI", sans-serif;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
@@ -30,6 +31,7 @@ body {
   font: 400 17px/1.7 var(--sans);
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
+  font-synthesis: none;
 }
 .addr { letter-spacing: 0.01em; font-variant-numeric: tabular-nums; }
 h1, h2, h3 { font-family: var(--serif); font-weight: 400; color: var(--head); margin: 0; letter-spacing: -0.01em; }
@@ -53,7 +55,7 @@ a { color: var(--accent-hi); }
   color: var(--text); background: rgba(0, 0, 0, 0.6); border: 1px solid var(--line);
   backdrop-filter: blur(6px); pointer-events: none;
 }
-#gauge b { color: var(--accent-hi); font-weight: 600; font-variant-numeric: tabular-nums; }
+#gauge b { color: var(--accent-hi); font-weight: 700; font-variant-numeric: tabular-nums; }
 #gauge .arrow { color: var(--accent); }
 
 nav {
@@ -79,9 +81,9 @@ nav {
 .axis-label { right: 12px; top: 10px; color: var(--muted); }
 .hero-copy { padding: 34px 4px 0; }
 .eyebrow { margin: 0 0 12px; font: 500 13px var(--sans); letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
-.hero h1 { font-size: clamp(42px, 11vw, 76px); line-height: 1.02; letter-spacing: -0.02em; }
+.hero h1 { font-size: clamp(36px, 10vw, 68px); line-height: 1.12; letter-spacing: -0.01em; }
 .lede { margin: 20px 0 0; font-size: clamp(18px, 4.6vw, 21px); line-height: 1.6; max-width: 36em; }
-.lede.strong { color: var(--head); font-family: var(--serif); font-style: italic; font-size: clamp(20px, 5vw, 24px); }
+.lede.strong { color: var(--head); font-family: var(--serif); font-size: clamp(19px, 4.8vw, 23px); line-height: 1.45; }
 .hero-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
 #sing.singing { box-shadow: 0 0 0 6px rgba(63, 198, 234, 0.18), 0 0 30px rgba(63, 198, 234, 0.55); }
 
@@ -97,7 +99,7 @@ nav {
 
 /* ---------------------------------------------------------------- story sections */
 main { max-width: 760px; margin: 0 auto; padding: 64px 16px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 80px; }
-.zone-label { margin: 0 0 14px; font: 600 12px var(--sans); letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); }
+.zone-label { margin: 0 0 14px; font: 700 12px var(--sans); letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); }
 .story h2 { font-size: clamp(30px, 7.4vw, 46px); line-height: 1.12; margin-bottom: 22px; }
 .story > p { margin: 0 0 18px; font-size: clamp(17px, 4.4vw, 19px); }
 .muted { color: var(--muted); margin: 0; font-size: 15px; }
@@ -108,17 +110,17 @@ main { max-width: 760px; margin: 0 auto; padding: 64px 16px; display: grid; grid
 
 .tenets { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
 .tenets li { padding: 14px 16px; border-radius: 14px; background: var(--panel); border: 1px solid var(--line); line-height: 1.6; }
-.tenets b { display: block; color: var(--head); font-weight: 600; }
+.tenets b { display: block; color: var(--head); font-weight: 700; }
 
 .boosts { list-style: none; margin: 6px 0 14px; padding: 0; display: grid; gap: 8px; }
 .boosts li { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: baseline; padding: 12px 16px; border-radius: 14px; background: var(--panel); border: 1px solid var(--line); font-size: 15px; }
-.boosts b { color: var(--head); font-weight: 600; min-width: 46px; }
-.boosts em { font-style: normal; color: var(--accent-hi); font-weight: 600; }
+.boosts b { color: var(--head); font-weight: 700; min-width: 46px; }
+.boosts em { font-style: normal; color: var(--accent-hi); font-weight: 700; }
 
 .supply { margin: -6px 0 22px; font: 400 clamp(30px, 8vw, 46px)/1.1 var(--serif); color: var(--accent-hi); }
 .alloc { list-style: none; margin: 0; padding: 0; display: grid; gap: 18px; }
 .alloc .label { display: flex; justify-content: space-between; gap: 12px; font-size: 16px; }
-.alloc .label b { font-weight: 600; color: var(--head); }
+.alloc .label b { font-weight: 700; color: var(--head); }
 .alloc .track { height: 6px; border-radius: 3px; background: var(--line); margin-top: 6px; overflow: hidden; }
 .alloc .fill { height: 100%; background: linear-gradient(90deg, #0a4a62, var(--accent)); }
 .alloc .note { font-size: 14px; color: var(--muted); margin-top: 4px; }
@@ -147,7 +149,7 @@ main { max-width: 760px; margin: 0 auto; padding: 64px 16px; display: grid; grid
   text-decoration: none; white-space: nowrap; transition: background 0.15s, border-color 0.15s;
 }
 .btn.small { padding: 8px 16px; font-size: 14px; }
-.btn.solid { background: var(--accent); border-color: var(--accent); color: #00141c; font-weight: 600; }
+.btn.solid { background: var(--accent); border-color: var(--accent); color: #00141c; font-weight: 700; }
 .btn:hover:not(:disabled) { border-color: var(--accent-hi); }
 .btn.solid:hover:not(:disabled) { background: var(--accent-hi); }
 .btn:disabled { opacity: 0.4; cursor: not-allowed; }
@@ -172,7 +174,7 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 16px; margin: 0; }
 .stats div { min-width: 0; }
 dt { color: var(--muted); font-size: 13px; }
-dd { margin: 0; font-weight: 600; color: var(--head); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; line-height: 1.5; }
+dd { margin: 0; font-weight: 700; color: var(--head); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; line-height: 1.5; }
 .boost-note { margin-top: 12px; font-size: 14px; }
 #poke { margin-top: 10px; width: 100%; }
 .boost-note[hidden] { display: none; }
@@ -196,11 +198,11 @@ dd { margin: 0; font-weight: 600; color: var(--head); font-variant-numeric: tabu
 .tiers li { padding: 12px 4px; text-align: center; border-radius: 14px; border: 1px solid var(--line); background: var(--panel); }
 .tiers b { display: block; font: 400 17px/1.3 var(--serif); color: var(--head); }
 .tiers span { display: block; font-size: 10px; color: var(--muted); line-height: 1.5; }
-.tiers .tier-boost { color: var(--accent-hi); font-weight: 600; font-size: 11px; }
+.tiers .tier-boost { color: var(--accent-hi); font-weight: 700; font-size: 11px; }
 .tiers li.me { border-color: var(--accent); box-shadow: 0 0 20px rgba(63, 198, 234, 0.35); }
 .tiers li.me b { color: var(--accent-hi); }
-.rank-name { margin: 0; font: 400 46px/1.15 var(--serif); color: var(--accent-hi); }
-.held { margin: 10px 0 0; color: var(--head); font-weight: 600; }
+.rank-name { margin: 0; font: 400 40px/1.2 var(--serif); color: var(--accent-hi); }
+.held { margin: 10px 0 0; color: var(--head); font-weight: 700; }
 #rank-panel .track { height: 4px; border-radius: 2px; background: var(--line); margin-top: 12px; overflow: hidden; }
 #rank-panel .fill { height: 100%; background: var(--accent); }
 #rank-panel .btn { margin-top: 16px; }
@@ -220,7 +222,7 @@ dialog::backdrop { background: rgba(0, 0, 0, 0.75); }
 #card-img { display: block; width: 100%; height: auto; margin-bottom: 14px; border-radius: 12px; }
 
 /* Whalepaper */
-.paper .hero h1 { font-size: clamp(40px, 10vw, 64px); }
+.paper .hero h1 { font-size: clamp(34px, 9vw, 58px); }
 .paper-mark { width: 88px; height: 88px; border-radius: 50%; box-shadow: 0 0 50px rgba(63, 198, 234, 0.35); }
 
 @media (prefers-reduced-motion: reduce) {
@@ -228,22 +230,22 @@ dialog::backdrop { background: rgba(0, 0, 0, 0.75); }
   .rings, .rings::before, .rings::after, .ping span::before, .ping span::after { animation: none; }
 }
 
-/* Lore: set like a sea tale in a book. Serif in sentence case, a vertical Japanese column
-   (tategaki) and a thin rule, rather than the all-caps slabs other lore sites use. */
+/* Lore: Dela Gothic One heads in sentence case beside a vertical Japanese column (tategaki)
+   and a thin rule, rather than the all-caps slabs other lore sites use. */
 .lore-head {
   margin: 0 0 22px; color: var(--head); font-family: var(--serif); font-weight: 400;
-  font-size: clamp(28px, 7vw, 42px); line-height: 1.18; letter-spacing: -0.01em;
+  font-size: clamp(25px, 6.4vw, 38px); line-height: 1.28; letter-spacing: 0;
 }
 .lore-body { margin: 0 0 18px; font-size: clamp(17px, 4.4vw, 19px); }
 .tale { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 18px; align-items: start; }
 .tategaki {
   margin: 4px 0 0; writing-mode: vertical-rl; text-orientation: upright;
-  font-size: 15px; letter-spacing: 0.5em; color: var(--accent);
+  font: 400 16px var(--serif); letter-spacing: 0.4em; color: var(--accent);
   padding-right: 14px; border-right: 1px solid rgba(63, 198, 234, 0.45);
 }
-.tale .lore-head { font-size: clamp(30px, 7.6vw, 46px); }
+.tale .lore-head { font-size: clamp(21px, 5.4vw, 30px); line-height: 1.42; }
 .tale .lore-head::first-letter { color: var(--accent-hi); }
-.tale .lore-body { font-family: var(--serif); font-style: italic; font-size: clamp(19px, 5vw, 23px); line-height: 1.6; color: var(--text); }
-.sig { margin: 22px 0 0; font: 600 13px var(--sans); letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
+.tale .lore-body { font-size: clamp(17px, 4.5vw, 20px); line-height: 1.75; color: var(--text); }
+.sig { margin: 22px 0 0; font: 700 13px var(--sans); letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
 .btn.singing { box-shadow: 0 0 0 6px rgba(63, 198, 234, 0.18), 0 0 30px rgba(63, 198, 234, 0.55); }
 .copy { margin: 14px 0 0; color: var(--head); font-size: 14px; }

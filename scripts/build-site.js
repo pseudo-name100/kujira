@@ -30,14 +30,13 @@ if (fs.existsSync(path.join(root, "wallet", "node_modules"))) {
   console.warn("wallet/node_modules missing: run `npm ci --prefix wallet` to include Privy login");
 }
 fs.mkdirSync(path.join(out, "data"));
-fs.mkdirSync(path.join(out, "fonts"));
+// site/fonts/ holds the Japanese subsets (only the kanji the site uses); Latin comes from fontsource.
+fs.mkdirSync(path.join(out, "fonts"), { recursive: true });
 const fonts = {
-  "fraunces-400": "fraunces/files/fraunces-latin-400-normal.woff2",
-  "fraunces-400-italic": "fraunces/files/fraunces-latin-400-italic.woff2",
-  "fraunces-600": "fraunces/files/fraunces-latin-600-normal.woff2",
-  "inter-400": "inter/files/inter-latin-400-normal.woff2",
-  "inter-500": "inter/files/inter-latin-500-normal.woff2",
-  "inter-600": "inter/files/inter-latin-600-normal.woff2",
+  "dela-400": "dela-gothic-one/files/dela-gothic-one-latin-400-normal.woff2",
+  "zen-400": "zen-kaku-gothic-new/files/zen-kaku-gothic-new-latin-400-normal.woff2",
+  "zen-500": "zen-kaku-gothic-new/files/zen-kaku-gothic-new-latin-500-normal.woff2",
+  "zen-700": "zen-kaku-gothic-new/files/zen-kaku-gothic-new-latin-700-normal.woff2",
 };
 for (const [name, file] of Object.entries(fonts)) {
   fs.copyFileSync(path.join(root, "node_modules/@fontsource", file), path.join(out, "fonts", `${name}.woff2`));

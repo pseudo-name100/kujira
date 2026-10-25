@@ -4,13 +4,16 @@
 <meta charset="utf-8">
 <!-- Artboards for the X account, rendered to PNG by render.js. Each .board is one image. -->
 <style>
-  @font-face { font-family: S; font-weight: 400; src: url(../node_modules/@fontsource/fraunces/files/fraunces-latin-400-normal.woff2); }
-  @font-face { font-family: S; font-weight: 400; font-style: italic; src: url(../node_modules/@fontsource/fraunces/files/fraunces-latin-400-italic.woff2); }
-  @font-face { font-family: I; font-weight: 400; src: url(../node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2); }
-  @font-face { font-family: I; font-weight: 600; src: url(../node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2); }
+  @font-face { font-family: S; font-weight: 400; src: url(../node_modules/@fontsource/dela-gothic-one/files/dela-gothic-one-latin-400-normal.woff2); }
+  @font-face { font-family: S; font-weight: 400; src: url(../site/fonts/dela-ja.woff2); unicode-range: U+3000-9FFF, U+FF00-FFEF; }
+  @font-face { font-family: I; font-weight: 400; src: url(../node_modules/@fontsource/zen-kaku-gothic-new/files/zen-kaku-gothic-new-latin-400-normal.woff2); }
+  @font-face { font-family: I; font-weight: 700; src: url(../node_modules/@fontsource/zen-kaku-gothic-new/files/zen-kaku-gothic-new-latin-700-normal.woff2); }
+  @font-face { font-family: I; font-weight: 400; src: url(../site/fonts/zen-ja-400.woff2); unicode-range: U+3000-9FFF, U+FF00-FFEF; }
+  @font-face { font-family: I; font-weight: 700; src: url(../site/fonts/zen-ja-700.woff2); unicode-range: U+3000-9FFF, U+FF00-FFEF; }
   :root { --head: #e6eef1; --text: #c9d4d8; --muted: #8199a3; --accent: #3fc6ea; --hi: #8fe6ff; --line: #1c2a31; }
   body { margin: 0; background: #111; display: grid; gap: 40px; padding: 40px; }
   .board {
+    font-synthesis: none;
     position: relative; overflow: hidden; color: var(--text);
     font-family: I, sans-serif; font-weight: 400;
     background: radial-gradient(120% 90% at 30% -10%, #0e6080 0%, #03202d 45%, #000 100%);
@@ -29,16 +32,16 @@
     box-shadow: 0 0 0 14px rgba(0,0,0,0.5), 0 0 0 17px rgba(63,198,234,0.18), 0 0 120px rgba(63,198,234,0.35); }
   .coin img { width: 112%; height: 112%; margin: -6%; display: block; }
   h1, h2, p { margin: 0; }
-  .k { color: var(--accent); font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; }
-  .big { color: var(--head); font-family: S, serif; font-weight: 400; line-height: 1.08; letter-spacing: -0.015em; }
-  .foot { position: absolute; left: 80px; right: 80px; bottom: 54px; display: flex; justify-content: space-between; font-weight: 600; font-size: 26px; color: var(--muted); }
+  .k { color: var(--accent); font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; }
+  .big { color: var(--head); font-family: S, serif; font-weight: 400; line-height: 1.18; letter-spacing: -0.005em; }
+  .foot { position: absolute; left: 80px; right: 80px; bottom: 54px; display: flex; justify-content: space-between; font-weight: 700; font-size: 26px; color: var(--muted); }
   .wave { position: absolute; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, transparent, rgba(170,240,255,0.95) 20%, rgba(170,240,255,0.95) 80%, transparent); box-shadow: 0 0 18px rgba(63,198,234,0.9); }
-  .foot b { color: var(--head); font-weight: 600; }
+  .foot b { color: var(--head); font-weight: 700; }
   .post { width: 1600px; height: 900px; }
   .post .body { position: absolute; left: 80px; top: 90px; right: 80px; }
   .rule { height: 6px; background: linear-gradient(90deg, var(--accent), transparent); width: 220px; margin: 28px 0; }
   .chips { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 40px; }
-  .chips span { border: 2px solid rgba(143,230,255,0.45); border-radius: 999px; padding: 12px 26px; font-weight: 600; font-size: 26px; color: var(--head); background: rgba(0,0,0,0.35); }
+  .chips span { border: 2px solid rgba(143,230,255,0.45); border-radius: 999px; padding: 12px 26px; font-weight: 700; font-size: 26px; color: var(--head); background: rgba(0,0,0,0.35); }
 </style>
 </head>
 <body>
@@ -50,7 +53,7 @@
   <p class="k" style="position:absolute;left:40px;top:340px;font-size:18px;color:var(--hi)">52 Hz</p>
   <div style="position:absolute;right:90px;top:80px;text-align:right">
     <p class="k" style="font-size:22px">Kujira · 鯨 · on Ink</p>
-    <h1 class="big" style="font-size:92px;margin-top:14px">Something has been<br>growing in the deep.</h1>
+    <h1 class="big" style="font-size:80px;margin-top:14px">Something has been<br>growing in the deep.</h1>
     <p style="font-size:22px;color:var(--muted);margin-top:24px;font-weight:600">No team · No tax · Liquidity locked forever · kujira.ink</p>
   </div>
 </div>
@@ -65,7 +68,7 @@
   <img class="ghost" src="../site/img/mark-800.webp" style="width:1000px;right:-260px;top:-120px">
   <div class="body">
     <p class="k" style="font-size:28px">The Whalepaper · 漁師</p>
-    <h2 class="big" style="font-size:100px;margin-top:26px;max-width:1150px">A fisherman found a whale in his net.<br><i>He cut the net.</i></h2>
+    <h2 class="big" style="font-size:84px;margin-top:26px;max-width:1250px">A fisherman found a whale in his net.<br><span style="color:var(--hi)">He cut the net.</span></h2>
     <div class="rule"></div>
     <p style="font-size:34px;max-width:1100px;line-height:1.6">One billion KUJI on Ink. Nothing kept back. The whale belongs to whoever swims with it.</p>
     <div class="chips"><span>No team tokens</span><span>No tax</span><span>No mint</span><span>Liquidity locked</span><span>Code verified</span></div>
@@ -95,9 +98,9 @@
   <img class="ghost" src="../site/img/mark-800.webp" style="width:900px;right:-200px;top:40px">
   <div class="body">
     <p class="k" style="font-size:28px">The Pod</p>
-    <h2 class="big" style="font-size:92px;margin-top:20px;max-width:1150px">Most memecoins punish patience.<br><i>The Pod pays for it.</i></h2>
+    <h2 class="big" style="font-size:80px;margin-top:20px;max-width:1250px">Most memecoins punish patience.<br><span style="color:var(--hi)">The Pod pays for it.</span></h2>
     <div style="display:flex;gap:80px;margin-top:70px;align-items:flex-end">
-      <div><p style="font-size:210px;line-height:0.9;font-family:S,serif;color:var(--hi)">2.5×</p><p class="k" style="font-size:26px;margin-top:18px">Max reward boost</p></div>
+      <div><p style="font-size:180px;line-height:0.95;font-family:S,serif;color:var(--hi)">2.5×</p><p class="k" style="font-size:26px;margin-top:18px">Max reward boost</p></div>
       <div style="font-size:32px;line-height:1.9">
         <p><b style="color:var(--head);font-weight:600">Size</b> · up to +0.50× at 10M KUJI</p>
         <p><b style="color:var(--head);font-weight:600">Time</b> · +0.25× every 30 days, up to +1.00×</p>
@@ -113,7 +116,7 @@
   <img class="ghost" src="../site/img/mark-800.webp" style="width:1000px;right:-240px;top:-80px">
   <div class="body">
     <p class="k" style="font-size:28px">The Drop · Round 1</p>
-    <h2 class="big" style="font-size:80px;margin-top:20px;max-width:1150px">When the whale breaches, the spray falls on all who stand near.</h2>
+    <h2 class="big" style="font-size:70px;margin-top:20px;max-width:1250px">When the whale breaches, the spray falls on all who stand near.</h2>
     <div style="display:flex;gap:90px;margin-top:50px">
       <div><p style="font-size:120px;font-family:S,serif;color:var(--hi);line-height:1">14,981</p><p class="k" style="font-size:24px;margin-top:14px">Ink DEX traders</p></div>
       <div><p style="font-size:120px;font-family:S,serif;color:var(--hi);line-height:1">81,766</p><p class="k" style="font-size:24px;margin-top:14px">KUJI each</p></div>
@@ -127,7 +130,7 @@
 <div class="board snow post" id="ryoshi">
   <div class="body">
     <p class="k" style="font-size:28px">漁師 · The fisherman's rules</p>
-    <h2 class="big" style="font-size:92px;margin-top:20px">The fisherman keeps none of the whale.</h2>
+    <h2 class="big" style="font-size:80px;margin-top:20px">The fisherman keeps none of the whale.</h2>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px 60px;margin-top:60px;font-size:34px;line-height:1.5">
       <p><b style="color:var(--hi);font-family:S,serif;font-weight:400;font-size:72px">0%</b><br>Team tokens</p>
       <p><b style="color:var(--hi);font-family:S,serif;font-weight:400;font-size:72px">0%</b><br>Buy and sell tax</p>
@@ -143,7 +146,7 @@
   for (const t of document.querySelectorAll(".tier")) {
     t.style.cssText = "border:2px solid rgba(143,230,255,0.14);border-radius:24px;background:rgba(0,0,0,0.45);padding:40px 10px;text-align:center";
     if (t.dataset.n === "Kujira") t.style.borderColor = "var(--accent)";
-    t.innerHTML = `<p style="font-size:46px;font-family:S,serif;color:var(--head)">${t.dataset.n}</p>` +
+    t.innerHTML = `<p style="font-size:40px;font-family:S,serif;color:var(--head)">${t.dataset.n}</p>` +
       `<p style="font-size:26px;margin-top:10px">${t.dataset.m}</p>` +
       `<p style="font-size:32px;margin-top:22px;color:var(--hi);font-weight:600">${t.dataset.b}</p>`;
   }

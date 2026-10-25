@@ -472,9 +472,10 @@
 
   async function drawCard({ kicker, title, sub, address }) {
     await Promise.all([
-      document.fonts.load('400 80px "Fraunces"'),
-      document.fonts.load('400 30px "Inter"'),
-      document.fonts.load('600 26px "Inter"'),
+      document.fonts.load('400 80px "Dela"'),
+      document.fonts.load('400 30px "Zen"'),
+      document.fonts.load('700 26px "Zen"'),
+      document.fonts.load('400 24px "Dela"', "鯨"),
       markImg.decode().catch(() => {}),
     ]);
     const W = 1200, H = 675;
@@ -524,22 +525,22 @@
     // text
     const x = 580;
     g.fillStyle = "#3fc6ea";
-    g.font = '600 24px "Inter"';
+    g.font = '700 24px "Zen"';
     g.fillText(kicker.toUpperCase(), x, 210);
     g.fillStyle = "#eef6f8";
-    let size = 104;
-    g.font = `400 ${size}px "Fraunces"`;
+    let size = 92;
+    g.font = `400 ${size}px "Dela"`;
     while (g.measureText(title).width > W - x - 60 && size > 40) {
       size -= 4;
-      g.font = `400 ${size}px "Fraunces"`;
+      g.font = `400 ${size}px "Dela"`;
     }
     g.fillText(title, x, 210 + size + 20);
     g.fillStyle = "#c3d3d9";
-    g.font = '400 30px "Inter"';
+    g.font = '400 30px "Zen"';
     wrap(g, sub, x, 210 + size + 90, W - x - 60, 44);
 
     g.fillStyle = "#7f99a3";
-    g.font = '500 24px "Inter"';
+    g.font = '500 24px "Zen"';
     g.fillText(short(address), x, H - 70);
     g.fillStyle = "#eef6f8";
     g.textAlign = "right";
