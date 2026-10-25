@@ -27,6 +27,10 @@ async function main() {
   if (pct !== 100) throw new Error(`allocations add up to ${pct}%, expected 100%`);
   // Where the liquidity share goes. Defaults to the deployer.
   const liquidityAddress = requireAddress(ethers, "LIQUIDITY_ADDRESS", false) || deployer.address;
+  // Uniswap v3 on this network, if configured: deploy the liquidity lock, whose fees go to
+  // FEE_RECIPIENT.
+  const uni = cfg.uniswapV3?.[network.name];
+  const feeRecipient = requireAddress(ethers, "FEE_RECIPIENT", Boolean(uni) && !local);
 
   const dir = path.join(__dirname, "..", "deployments");
   const outFile = path.join(dir, `${network.name}${local ? ".local" : ""}.json`);
@@ -64,6 +68,19 @@ async function main() {
   if (airdrop > 0n) await (await token.transfer(dropAddress, airdrop)).wait();
   console.log(`KujiraDrop:  ${dropAddress} (${ethers.formatEther(airdrop)} KUJI pool)`);
 
+  let lockAddress = null;
+  if (uni || local) {
+    const positionManager = uni?.positionManager ?? cfg.uniswapV3.ink.positionManager;
+    const lock = await ethers.deployContract("KujiraLiquidityLock", [
+      positionManager,
+      tokenAddress,
+      feeRecipient || deployer.address,
+    ]);
+    await lock.waitForDeployment();
+    lockAddress = await lock.getAddress();
+    console.log(`KujiraLiquidityLock: ${lockAddress} (fees to ${feeRecipient || deployer.address})`);
+  }
+
   if (liquidityAddress !== deployer.address) {
     const rest = await token.balanceOf(deployer.address);
     await (await token.transfer(liquidityAddress, rest)).wait();
@@ -77,6 +94,8 @@ async function main() {
     KujiraToken: tokenAddress,
     KujiraPod: podAddress,
     KujiraDrop: dropAddress,
+    KujiraLiquidityLock: lockAddress,
+    feeRecipient: lockAddress ? feeRecipient || deployer.address : null,
     liquidity: liquidityAddress,
   };
   fs.mkdirSync(dir, { recursive: true });

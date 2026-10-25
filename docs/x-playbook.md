@@ -7,7 +7,7 @@ How the X account looks, sounds and posts. Images are in `brand/out/` (regenerat
 
 Ryōshi (漁師) means *fisherman*. **A fisherman found a whale in his net. He cut the net.**
 That's the whole story: the fisherman (the account) kept nothing and set the whale (KUJI)
-free for whoever swims with it. It's Ryoshi's ethos (no team tokens, liquidity burned, the
+free for whoever swims with it. It's Ryoshi's ethos (no team tokens, liquidity out of reach, the
 community builds) told through a whale. And the whale itself pays the ones who stay.
 
 The account is **inspired by** Ryoshi. Never say or suggest that Ryoshi or Shiba Inu are
@@ -20,14 +20,14 @@ reported for impersonation.
 | --- | --- |
 | Name | `Kujira 鯨` |
 | Handle | `@KujiraToken` (keep it) |
-| Bio | `A fisherman found a whale in his net. He cut the net. 🐋 $KUJI on Ink · no team · no tax · LP burned · the pod pays whales to stay` (129 characters) |
+| Bio | `A fisherman found a whale in his net. He cut the net. 🐋 $KUJI on Ink · no team · no tax · liquidity locked · the pod pays whales to stay` (136 characters) |
 | Location | `The Deep` (already set) |
 | Website | `kujira.ink` |
 | Profile photo | `brand/out/avatar.png` |
 | Header | `brand/out/header.png` (text sits right, clear of the profile photo on mobile) |
 | Pinned post | The Whalepaper post below, with `brand/out/pinned.png` |
 
-Alternative bio (131 characters): `Something has been growing in the deep. 🐋 $KUJI on Ink, launched Ryoshi's way: no team, no tax, LP burned. Whales are paid to stay.`
+Alternative bio (138 characters): `Something has been growing in the deep. 🐋 $KUJI on Ink, launched Ryoshi's way: no team, no tax, liquidity locked. Whales are paid to stay.`
 
 X's "Finish verification" prompt is optional. A checkmark makes impersonator accounts easier
 to tell apart, which matters once there's an airdrop; it doesn't need your name on the profile.
@@ -38,7 +38,7 @@ Ryoshi wrote like a person thinking out loud, not a marketer. The fisherman does
 
 - **Short lines, lots of air.** One thought per line, blank lines between, like the first two posts.
 - **"We" and "the pod", never "buy".** The fisherman doesn't sell the whale. He points at the water.
-- **Proof over promises.** Every claim gets a link: the contract, the LP burn transaction, the list.
+- **Proof over promises.** Every claim gets a link: the contract, the liquidity lock, the list.
 - **Whale words.** The deep, the surface, the pod, the spray, the breach, the song, the tide,
   krill to kujira. Japanese sparingly: 鯨 (whale), 漁師 (fisherman).
 - **One emoji: 🐋.** Not in every post. No hashtags. `$KUJI` as the cashtag.
@@ -48,6 +48,9 @@ Ryoshi wrote like a person thinking out loud, not a marketer. The fisherman does
 opposite), returns or APY promises, fake countdowns, "dev is buying", paid-shill style tags,
 anything implying Ryoshi or Shiba is behind KUJI. The only real deadlines are claim windows
 and announced snapshots.
+
+**Say the toll out loud.** The fisherman's only take is Uniswap's 1% pool fee. When someone
+asks how the project is funded, answer with exactly that and link the lock contract.
 
 **Safety line, repeat it often:** *The fisherman never DMs first. The only site is kujira.ink.*
 
@@ -63,7 +66,7 @@ and announced snapshots.
 
 ## Posts, ready to copy
 
-`[CONTRACT]`, `[LP BURN TX]` and `[DEX LINK]` get filled in at launch.
+`[CONTRACT]`, `[LOCK]` and `[DEX LINK]` get filled in at launch.
 
 ### Phase 0: Stillness (now, until kujira.ink is live)
 
@@ -100,7 +103,7 @@ one has a reason to share their card.
 >
 > He cut the net.
 >
-> Kujira. $KUJI on Ink. No team tokens, no tax, no mint, liquidity burned. Inspired by Ryoshi's way: keep nothing, let the community build.
+> Kujira. $KUJI on Ink. No team tokens, no tax, no mint, liquidity locked forever. Inspired by Ryoshi's way: keep none of the whale, let the community build.
 >
 > The Whalepaper: kujira.ink/whalepaper
 
@@ -122,9 +125,11 @@ one has a reason to share their card.
 
 **Ryoshi's way** (image: `ryoshi.png`)
 
-> The fisherman keeps nothing.
+> The fisherman keeps none of the whale.
 >
-> 0% team. 0% tax. 55% liquidity, LP burned. 45% straight to holders through the Drop and the Pod.
+> 0% team. 0% tax. 55% liquidity, locked forever. 45% straight to holders through the Drop and the Pod.
+>
+> His one toll: the pool's 1% trading fee. The contract that collects it is public.
 >
 > That's it. That's the tokenomics.
 
@@ -160,9 +165,9 @@ Post the thread in order, then pin it in place of the Whalepaper post.
 >
 > Verified on the Ink explorer. No owner. No mint. No tax. No blacklist. Not upgradeable.
 
-> 3/ Liquidity is paired and the LP tokens are burned: [LP BURN TX]
+> 3/ Liquidity is in a 1% Uniswap pool, owned by a lock contract with no way to remove it: [LOCK]
 >
-> Nobody can pull it. Not the fisherman, not anyone.
+> Nobody can pull it. Not the fisherman, not anyone. The pool's 1% fee is his only toll.
 
 > 4/ The Drop is open. 14,981 Ink traders, 81,766 $KUJI each, first come first served until the 80M round is gone.
 >
@@ -213,7 +218,7 @@ Post the thread in order, then pin it in place of the Whalepaper post.
 - **Rank ladder:** krill → fish → dolphin → orca → kujira, in any format (drake, starter
   pack, "how it started / how it's going"). Always ends at kujira.ink.
 - **"The fisherman cut the net":** Ryoshi moments. Every time something is given away
-  (LP burn, a Drop round, unclaimed tokens returned), post it as the fisherman cutting another net.
+  (the liquidity lock, a Drop round, unclaimed tokens returned), post it as the fisherman cutting another net.
 - **Breaching whale clips:** real whale footage (use clips you have rights to, or credit the
   creator) with one line of lore. Breach = launch, round open, milestone.
 - **Paper hands vs. the pod:** "the surface panics, the deep doesn't."
@@ -228,6 +233,6 @@ Post the thread in order, then pin it in place of the Whalepaper post.
 | `brand/out/avatar.png` | 800×800 | Profile photo |
 | `brand/out/pinned.png` | 1600×900 | Pinned Whalepaper post |
 | `brand/out/drop.png` | 1600×900 | Drop announcements |
-| `brand/out/ryoshi.png` | 1600×900 | Tokenomics / Ryoshi's way |
+| `brand/out/ryoshi.png` | 1600×900 | Tokenomics / the fisherman's rules |
 | `brand/out/boosts.png` | 1600×900 | The Pod |
 | `brand/out/ranks.png` | 1600×900 | Ranks |

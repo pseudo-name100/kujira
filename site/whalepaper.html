@@ -22,24 +22,34 @@
   <div id="gauge" aria-live="off"><span class="arrow">▼</span> <b id="depth">0</b> m · <span id="zone">The Surface</span></div>
 
   <nav>
-    <a href="./" class="nav-mark"><img src="img/logo-192.png" alt="Kujira home" width="36" height="36"></a>
-    <a href="./" class="btn">kujira.ink</a>
+    <a href="./" class="nav-mark"><img src="img/logo-192.png" alt="" width="34" height="34"><span>Kujira</span></a>
+    <a href="./" class="btn small">kujira.ink</a>
   </nav>
 
   <header class="hero" data-depth="0" data-zone="The Surface">
-    <div class="coin"><img src="img/mark-800.webp" alt="" width="800" height="800"></div>
-    <h1 class="name">Whalepaper</h1>
-    <p class="kanji" aria-hidden="true">鯨 · 漁師</p>
+    <img class="paper-mark" src="img/logo-192.png" alt="" width="88" height="88">
+    <div class="hero-copy">
+      <p class="eyebrow">Kujira · 鯨 · 漁師 · the Whalepaper</p>
+      <h1>A fisherman found a whale in his net. He cut the net.</h1>
+      <p class="lede">What Kujira is, where every token goes, and what the fisherman can and can't do.</p>
+    </div>
   </header>
 
+  <div class="ping" aria-hidden="true"><span></span></div>
+
   <main>
-    <section class="lore" data-depth="100" data-zone="The Surface">
+    <section class="lore tale-block" data-depth="100" data-zone="The Surface">
       <p class="zone-label">I. The fisherman's note</p>
+      <div class="tale">
+        <p class="tategaki" lang="ja" aria-hidden="true">漁師の手記</p>
+        <div class="tale-text">
       <h2 class="lore-head">I am a fisherman. For a long time I worked the surface of Ink and watched the same nets come up.</h2>
       <p class="lore-body">Tokens with hidden taxes. Owners who could print more whenever they liked. Teams who sold the moment anyone arrived. The water looked busy, but nothing lived in it for long.</p>
       <p class="lore-body">One morning something else was in the net. It was heavy, and it was alive. A whale.</p>
-      <p class="lore-body">I could have sold it. Instead I cut the net. I kept none of it. Whatever it becomes now belongs to those who swim with it.</p>
+      <p class="lore-body">I could have sold it. Instead I cut the net. I kept none of it. Whatever it becomes now belongs to those who swim with it. I ask one small toll on the water, and I'll tell you exactly what it is.</p>
       <p class="sig">— 漁師, the fisherman</p>
+        </div>
+      </div>
     </section>
 
     <section class="lore" data-depth="400" data-zone="Twilight Zone">
@@ -60,15 +70,16 @@
     </section>
 
     <section class="lore" data-depth="1200" data-zone="Midnight Zone">
-      <p class="zone-label">IV. Ryoshi's way</p>
+      <p class="zone-label">IV. How the net was cut</p>
       <h2 class="lore-head">Give it away. Keep nothing. Let the community build.</h2>
-      <p class="lore-body">Ryoshi, the anonymous creator of Shiba Inu, launched a token with no team allocation, put the liquidity out of reach, and stepped back. Kujira follows that spirit. It is inspired by Ryoshi; it is not connected to Ryoshi or to Shiba Inu.</p>
       <ul class="tenets">
         <li><b>No team tokens.</b> Not one KUJI held back.</li>
-        <li><b>Liquidity burned.</b> The LP tokens go to the dead address, permanently. The transaction is posted for anyone to check.</li>
+        <li><b>Liquidity locked forever.</b> The KUJI/ETH liquidity sits in a 1% Uniswap pool, owned by a contract with no way to remove it. Anyone can read it.</li>
+        <li><b>The one toll.</b> Every trade pays Uniswap's 1% pool fee, and that fee goes to the fisherman's wallet. It pays for the site, the art and the Drops. It's the only thing the fisherman takes, and the contract that collects it is public.</li>
         <li><b>Code you can read.</b> Every contract is verified on the Ink explorer, and the code is open.</li>
-        <li><b>No hidden switches.</b> No tax, no blacklist, no pause, no upgrades.</li>
+        <li><b>No hidden switches.</b> No tax on transfers, no blacklist, no pause, no upgrades.</li>
       </ul>
+      <p class="muted">The spirit is Ryoshi's, who launched Shiba Inu with no team allocation and the liquidity out of reach. Kujira isn't connected to Ryoshi or Shiba Inu.</p>
     </section>
 
     <section class="lore" data-depth="2000" data-zone="Midnight Zone">
@@ -76,7 +87,7 @@
       <h2 class="lore-head">Where every KUJI goes</h2>
       <p class="supply">1,000,000,000 KUJI</p>
       <ul class="alloc">
-        <li><div class="label"><b>Liquidity</b><span>55%</span></div><div class="track"><div class="fill" style="width:55%"></div></div><div class="note">Paired on an Ink DEX. LP tokens burned.</div></li>
+        <li><div class="label"><b>Liquidity</b><span>55%</span></div><div class="track"><div class="fill" style="width:55%"></div></div><div class="note">In a 1% Uniswap pool, locked forever.</div></li>
         <li><div class="label"><b>The Drop</b><span>25%</span></div><div class="track"><div class="fill" style="width:25%"></div></div><div class="note">Locked in the Drop contract, released in claim rounds.</div></li>
         <li><div class="label"><b>Pod rewards</b><span>20%</span></div><div class="track"><div class="fill" style="width:20%"></div></div><div class="note">Locked in the Pod, streamed to stakers over time.</div></li>
         <li><div class="label"><b>Team</b><span>0%</span></div><div class="track"><div class="fill" style="width:0%"></div></div><div class="note">None.</div></li>
@@ -105,8 +116,8 @@
       <p class="zone-label">VIII. What the fisherman can and cannot do</p>
       <h2 class="lore-head">The fisherman holds a rope, not a net.</h2>
       <ul class="tenets">
-        <li><b>Can:</b> add rewards to the Pod, start Drop rounds from the published lists, and burn unused Drop tokens.</li>
-        <li><b>Cannot:</b> mint KUJI, tax it, freeze a wallet, touch anyone's stake, or take the Drop or Pod pools.</li>
+        <li><b>Can:</b> add rewards to the Pod, start Drop rounds from the published lists, burn unused Drop tokens, and collect the 1% pool fee.</li>
+        <li><b>Cannot:</b> mint KUJI, tax transfers, freeze a wallet, touch anyone's stake, take the Drop or Pod pools, or remove the locked liquidity.</li>
         <li><b>Will:</b> hand the remaining controls to a community multisig, or give them up entirely, once the rounds are done.</li>
       </ul>
     </section>
@@ -120,9 +131,9 @@
   </main>
 
   <footer data-depth="10900" data-zone="The Deep">
-    <div class="coin small"><img src="img/mark-800.webp" alt="" width="800" height="800"></div>
+    <img class="foot-mark" src="img/logo-192.png" alt="" width="64" height="64">
     <p class="copy">© 2026 Kujira</p>
-    <p class="fine">KUJI is a meme token for entertainment. It has no intrinsic value and no expectation of financial return. Kujira is inspired by Ryoshi and is not affiliated with Ryoshi or Shiba Inu.</p>
+    <p class="fine">KUJI is a meme token for entertainment. It has no intrinsic value and no expectation of financial return. Kujira is not affiliated with Ryoshi or Shiba Inu.</p>
   </footer>
 
   <script src="dive.js"></script>

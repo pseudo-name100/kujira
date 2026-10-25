@@ -30,12 +30,16 @@ if (fs.existsSync(path.join(root, "wallet", "node_modules"))) {
   console.warn("wallet/node_modules missing: run `npm ci --prefix wallet` to include Privy login");
 }
 fs.mkdirSync(path.join(out, "data"));
-fs.mkdirSync(path.join(out, "fonts"));
-for (const w of [300, 400, 600, 800]) {
-  fs.copyFileSync(
-    path.join(root, "node_modules/@fontsource/poppins/files", `poppins-latin-${w}-normal.woff2`),
-    path.join(out, "fonts", `poppins-${w}.woff2`)
-  );
+// site/fonts/ holds the Japanese subsets (only the kanji the site uses); Latin comes from fontsource.
+fs.mkdirSync(path.join(out, "fonts"), { recursive: true });
+const fonts = {
+  "dela-400": "dela-gothic-one/files/dela-gothic-one-latin-400-normal.woff2",
+  "zen-400": "zen-kaku-gothic-new/files/zen-kaku-gothic-new-latin-400-normal.woff2",
+  "zen-500": "zen-kaku-gothic-new/files/zen-kaku-gothic-new-latin-500-normal.woff2",
+  "zen-700": "zen-kaku-gothic-new/files/zen-kaku-gothic-new-latin-700-normal.woff2",
+};
+for (const [name, file] of Object.entries(fonts)) {
+  fs.copyFileSync(path.join(root, "node_modules/@fontsource", file), path.join(out, "fonts", `${name}.woff2`));
 }
 const roundDirs = fs.existsSync(path.join(root, "airdrop"))
   ? fs.readdirSync(path.join(root, "airdrop")).filter((d) => /^round-\d+$/.test(d))
@@ -90,6 +94,7 @@ for (const [name, meta] of Object.entries(NETWORKS)) {
       KujiraToken: d.KujiraToken,
       KujiraPod: d.KujiraPod,
       KujiraDrop: d.KujiraDrop,
+      KujiraLiquidityLock: d.KujiraLiquidityLock || null,
     },
     rounds,
   };

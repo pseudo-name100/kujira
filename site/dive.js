@@ -1,6 +1,7 @@
 // The Dive: the page is a descent from the surface to the deep. As you scroll, the water
 // darkens, sunlight fades, marine snow and then bioluminescence appear, and the gauge reads
-// the depth of the section you're looking at. Tapping the whale plays a synthesized song.
+// the depth of the section you're looking at. The hero's sonar screen is a live spectrogram
+// with the 52 Hz whale on it; "Hear the song" plays the recorded call (song.js) and draws it.
 (() => {
   const $ = (id) => document.getElementById(id);
   const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -153,89 +154,112 @@
   });
 
   // ------------------------------------------------------------------ whale song
-  // Three long calls: slow glides between low tones with vibrato, through a lowpass
-  // filter and a long synthetic reverb, so it sounds distant and underwater.
-  let audio;
-  function reverb(ac, seconds) {
-    const len = ac.sampleRate * seconds;
-    const buf = ac.createBuffer(2, len, ac.sampleRate);
-    for (let ch = 0; ch < 2; ch++) {
-      const d = buf.getChannelData(ch);
-      for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3);
-    }
-    const c = ac.createConvolver();
-    c.buffer = buf;
-    return c;
-  }
-
-  function call(ac, out, start, path, dur) {
-    const osc = ac.createOscillator();
-    const over = ac.createOscillator(); // a quiet harmonic for body
-    const gain = ac.createGain();
-    const overGain = ac.createGain();
-    const lfo = ac.createOscillator();
-    const lfoGain = ac.createGain();
-    osc.type = "sine";
-    over.type = "triangle";
-    lfo.frequency.value = 4.5;
-    lfoGain.gain.value = 5;
-    lfo.connect(lfoGain);
-    lfoGain.connect(osc.frequency);
-    lfoGain.connect(over.frequency);
-
-    osc.frequency.setValueAtTime(path[0], start);
-    over.frequency.setValueAtTime(path[0] * 2, start);
-    path.slice(1).forEach((f, i) => {
-      const at = start + (dur * (i + 1)) / (path.length - 1);
-      osc.frequency.exponentialRampToValueAtTime(f, at);
-      over.frequency.exponentialRampToValueAtTime(f * 2, at);
-    });
-
-    gain.gain.setValueAtTime(0.0001, start);
-    gain.gain.exponentialRampToValueAtTime(0.5, start + 0.35);
-    gain.gain.setValueAtTime(0.5, start + dur - 0.5);
-    gain.gain.exponentialRampToValueAtTime(0.0001, start + dur);
-    overGain.gain.value = 0.12;
-
-    osc.connect(gain);
-    over.connect(overGain);
-    overGain.connect(gain);
-    gain.connect(out);
-    for (const o of [osc, over, lfo]) {
-      o.start(start);
-      o.stop(start + dur + 0.1);
+  // A pre-rendered file (song.js + scripts/render-song.js): an <audio> element plays with an
+  // iPhone's ringer on silent, which live Web Audio doesn't.
+  let player = null;
+  let playing = false;
+  // Any [data-sing] element starts the song; [data-sing-label] ones also show its state.
+  const singers = () => document.querySelectorAll("[data-sing]");
+  function setSinging(on, label) {
+    for (const el of singers()) {
+      el.classList.toggle("singing", on);
+      if (el.hasAttribute("data-sing-label")) el.textContent = label;
     }
   }
-
   function sing() {
-    audio ||= new (window.AudioContext || window.webkitAudioContext)();
-    const ac = audio;
-    ac.resume();
-    const t = ac.currentTime + 0.05;
-    const master = ac.createGain();
-    master.gain.value = 0.32;
-    const filter = ac.createBiquadFilter();
-    filter.type = "lowpass";
-    filter.frequency.value = 1100;
-    const wet = reverb(ac, 4);
-    const wetGain = ac.createGain();
-    wetGain.gain.value = 0.7;
-    filter.connect(master);
-    filter.connect(wet);
-    wet.connect(wetGain);
-    wetGain.connect(master);
-    master.connect(ac.destination);
-
-    call(ac, filter, t, [130, 310, 180], 2.2);
-    call(ac, filter, t + 2.6, [95, 70, 140], 2.0);
-    call(ac, filter, t + 5.0, [210, 420, 260, 150], 2.8);
-
-    const coin = $("sing");
-    coin.classList.add("singing");
-    clearTimeout(sing.timer);
-    sing.timer = setTimeout(() => coin.classList.remove("singing"), 8500);
+    // Ask iOS to treat this as media playback, not an ambient sound.
+    try {
+      if (navigator.audioSession) navigator.audioSession.type = "playback";
+    } catch {}
+    player ||= new Audio("audio/song.wav");
+    player.currentTime = 0;
+    player.onended = () => {
+      playing = false;
+      setSinging(false, "Hear the song");
+    };
+    player.play().then(
+      () => {
+        playing = true;
+        setSinging(true, "Listening…");
+      },
+      () => setSinging(false, "Tap again to listen")
+    );
   }
-  $("sing")?.addEventListener("click", sing); // only on the home page
+  for (const el of singers()) el.addEventListener("click", sing); // home page only
+
+  // ------------------------------------------------------------------ the sonar screen
+  // A scrolling spectrogram, 0-400 Hz: faint ocean noise, and the 52 Hz whale's pulsed call.
+  // While the song plays, its real frequencies are drawn from the audio itself.
+  const spectro = $("spectro");
+  if (spectro) {
+    const sc = spectro.getContext("2d");
+    const MAX_HZ = 400;
+    let sw = 0, sh = 0, sdpr = 1, freq = null;
+    const size = () => {
+      sdpr = Math.min(devicePixelRatio || 1, 2);
+      sw = spectro.clientWidth;
+      sh = spectro.clientHeight;
+      spectro.width = sw * sdpr;
+      spectro.height = sh * sdpr;
+      sc.setTransform(sdpr, 0, 0, sdpr, 0, 0);
+      sc.fillStyle = "#000a0f";
+      sc.fillRect(0, 0, sw, sh);
+    };
+    size();
+    addEventListener("resize", size);
+    const yOf = (hz) => sh - (hz / MAX_HZ) * sh;
+    let t0 = performance.now();
+    const step = (now) => {
+      const t = (now - t0) / 1000;
+      const dx = 2;
+      // scroll left
+      sc.drawImage(spectro, dx * sdpr, 0, (sw - dx) * sdpr, sh * sdpr, 0, 0, sw - dx, sh);
+      const x = sw - dx;
+      sc.fillStyle = "rgba(0, 10, 15, 0.92)";
+      sc.fillRect(x, 0, dx, sh);
+      // ocean noise
+      for (let i = 0; i < 26; i++) {
+        const y = Math.random() * sh;
+        sc.fillStyle = `rgba(63, 198, 234, ${Math.random() * 0.09})`;
+        sc.fillRect(x, y, dx, 1 + Math.random() * 2);
+      }
+      // the 52 Hz whale: long tonal pulses, a few seconds on, a few off
+      const on = (t % 6) < 3.4;
+      if (on) {
+        const wobble = Math.sin(t * 1.7) * 1.5;
+        const y = yOf(52 + wobble);
+        const g = sc.createLinearGradient(0, y - 6, 0, y + 6);
+        g.addColorStop(0, "rgba(143, 230, 255, 0)");
+        g.addColorStop(0.5, "rgba(170, 240, 255, 0.95)");
+        g.addColorStop(1, "rgba(143, 230, 255, 0)");
+        sc.fillStyle = g;
+        sc.fillRect(x, y - 6, dx, 12);
+      }
+      // the song, drawn from its notes in time with playback
+      if (playing && window.KujiraSong) {
+        const now = player.currentTime;
+        for (const c of window.KujiraSong.CALLS) {
+          const into = now - c.start;
+          if (into < 0 || into > c.dur) continue;
+          const env = Math.min(1, into / 0.35, (c.dur - into) / 0.5);
+          const f = window.KujiraSong.freqAt(c, into) + Math.sin(now * 2 * Math.PI * 4.5) * 5;
+          for (const [mult, alpha, thick] of [[1, 1, 7], [2, 0.35, 4]]) {
+            const y = yOf(f * mult);
+            if (y < 0) continue;
+            const g = sc.createLinearGradient(0, y - thick, 0, y + thick);
+            g.addColorStop(0, "rgba(170, 240, 255, 0)");
+            g.addColorStop(0.5, `rgba(225, 250, 255, ${alpha * env})`);
+            g.addColorStop(1, "rgba(170, 240, 255, 0)");
+            sc.fillStyle = g;
+            sc.fillRect(x, y - thick, dx, thick * 2);
+          }
+        }
+      }
+      if (!reduceMotion && !document.hidden) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+    document.addEventListener("visibilitychange", () => !document.hidden && !reduceMotion && requestAnimationFrame(step));
+  }
 
   measure();
   update();

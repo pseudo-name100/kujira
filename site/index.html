@@ -23,83 +23,83 @@
   <div id="gauge" aria-live="off"><span class="arrow">▼</span> <b id="depth">0</b> m · <span id="zone">The Surface</span></div>
 
   <nav>
-    <a href="#top" class="nav-mark"><img src="img/logo-192.png" alt="Kujira" width="36" height="36"></a>
-    <button id="connect" class="btn">Connect</button>
+    <a href="#top" class="nav-mark"><img src="img/logo-192.png" alt="" width="34" height="34"><span>Kujira</span></a>
+    <button id="connect" class="btn small">Connect</button>
   </nav>
 
   <header id="top" class="hero" data-depth="0" data-zone="The Surface">
-    <button id="sing" class="coin" aria-label="Hear the Kujira sing">
-      <img src="img/mark-800.webp" alt="" width="800" height="800">
-      <span class="ripple"></span><span class="ripple"></span><span class="ripple"></span>
-    </button>
-    <h1 class="name">Kujira</h1>
-    <p class="kanji" aria-hidden="true">鯨</p>
-    <p class="hint">Tap the whale to hear it sing · scroll to dive</p>
+    <img class="hero-logo" src="img/wordmark.webp" alt="Kujira" width="720" height="562">
+    <div class="sonar-screen">
+      <canvas id="spectro" aria-hidden="true"></canvas>
+      <span class="hz-label" aria-hidden="true">52 Hz</span>
+      <span class="axis-label" aria-hidden="true">frequency ↑ · time →</span>
+    </div>
+    <div class="hero-copy">
+      <p class="eyebrow">Kujira · 鯨 · on Ink</p>
+      <h1>Something has been growing in the deep.</h1>
+      <p class="lede">The sonar has heard it for years, a single call at 52 hertz. Now it has surfaced on Ink.</p>
+      <div class="hero-actions">
+        <button class="btn solid" data-sing data-sing-label>Hear the song</button>
+        <a href="#drop" class="btn">Are you in the Drop?</a>
+      </div>
+    </div>
   </header>
 
-  <section class="band">
-    <p>The Kujira has surfaced on Ink</p>
-  </section>
+  <div class="ping" aria-hidden="true"><span></span></div>
 
   <main>
     <p id="notice" class="notice" hidden></p>
 
-    <section class="lore" data-depth="200" data-zone="Twilight Zone">
-      <p class="zone-label">200 m — The Twilight Zone</p>
-      <h2 class="lore-head">The old tales of the sea say the Kujira rises only after the water has been still for a long time. Where it surfaces, the villages along the shore prosper for a generation.</h2>
-      <p class="lore-body">The Kujira does not chase. It waits in the deep, growing, unseen by those who watch only the surface. Its song carries a thousand miles, and those who hear it gather. First the water moves. Then you see the whale.</p>
-      <p class="sig">— The Deep</p>
+    <section class="lore tale-block" data-depth="200" data-zone="Twilight Zone">
+      <p class="zone-label">200 m · The Twilight Zone</p>
+      <div class="tale">
+        <p class="tategaki" lang="ja" aria-hidden="true">海の言い伝え</p>
+        <div class="tale-text">
+          <h2 class="lore-head">The old tales of the sea say the Kujira rises only after the water has been still for a long time. Where it surfaces, the villages along the shore prosper for a generation.</h2>
+          <p class="lore-body">The Kujira does not chase. It waits in the deep, growing, unseen by those who watch only the surface. Its song carries a thousand miles, and those who hear it gather. First the water moves. Then you see the whale.</p>
+          <p class="sig">— The Deep</p>
+        </div>
+      </div>
     </section>
 
     <section class="lore" data-depth="600" data-zone="Twilight Zone">
-      <p class="zone-label">600 m — Sonar</p>
+      <p class="zone-label">600 m · Sonar</p>
       <h2 class="lore-head">What the sonar hears</h2>
       <div class="sonar">
-        <div class="ping"><span class="rings"></span><b id="s-holders">—</b><span>Whales holding</span></div>
-        <div class="ping"><span class="rings"></span><b id="s-staked">—</b><span>KUJI in the Pod</span></div>
-        <div class="ping"><span class="rings"></span><b id="s-drop">—</b><span>Of the Drop claimed</span></div>
+        <div class="readout"><span class="rings"></span><b id="s-holders">—</b><span>Whales holding</span></div>
+        <div class="readout"><span class="rings"></span><b id="s-staked">—</b><span>KUJI in the Pod</span></div>
+        <div class="readout"><span class="rings"></span><b id="s-drop">—</b><span>Of the Drop claimed</span></div>
       </div>
-      <p id="s-note" class="muted center">Listening… the Kujira surfaces soon.</p>
+      <p id="s-note" class="muted center">Listening. The readings start when the Kujira surfaces.</p>
     </section>
-  </main>
 
-  <section class="band links-band">
-    <ul id="social" class="social">
-      <li><a href="#drop"><span class="glyph">滴</span><span>Drop</span></a></li>
-      <li><a href="#rank"><span class="glyph">位</span><span>Rank</span></a></li>
-      <li><a href="#pod"><span class="glyph">群</span><span>Stake</span></a></li>
-      <li><a href="whalepaper.html"><span class="glyph">書</span><span>Whalepaper</span></a></li>
-      <li><a href="https://x.com/KujiraToken" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.9 2H22l-6.8 7.8L23 22h-6.2l-4.8-6.3L6.4 22H3.3l7.3-8.3L1 2h6.3l4.4 5.8L18.9 2Zm-1.1 18.1h1.7L6.3 3.8H4.5l13.3 16.3Z"/></svg><span>X</span></a></li>
-    </ul>
-  </section>
-
-  <main>
     <section class="lore" data-depth="1000" data-zone="Midnight Zone">
-      <p class="zone-label">1,000 m — The Midnight Zone</p>
+      <p class="zone-label">1,000 m · The Midnight Zone</p>
       <h2 class="lore-head">Nothing hidden beneath the surface.</h2>
       <ul class="tenets">
         <li><b>One billion KUJI.</b> Minted once. No owner, no mint, ever.</li>
         <li><b>No tax.</b> Every transfer moves the exact amount.</li>
         <li><b>No blacklist, no pause.</b> Nobody can freeze a wallet.</li>
         <li><b>Not upgradeable.</b> The code you read is the code that runs.</li>
-        <li><b>No team tokens.</b> Ryoshi's way: not one KUJI held back. Everything goes to the pool.</li>
+        <li><b>No team tokens.</b> The fisherman kept none of the whale. Not one KUJI held back.</li>
+        <li><b>Liquidity locked forever.</b> It sits in a 1% Uniswap pool owned by a contract that can never remove it. The pool's 1% trading fee is the fisherman's only toll, and the contract that collects it is public.</li>
         <li><b>Rewards pre-funded.</b> Staking pays from a fixed pool, never by printing.</li>
       </ul>
     </section>
 
     <section class="lore" data-depth="2000" data-zone="Midnight Zone">
-      <p class="zone-label">2,000 m — The Tides</p>
+      <p class="zone-label">2,000 m · The Tides</p>
       <h2 class="lore-head">The tides</h2>
       <p class="supply">1,000,000,000 KUJI</p>
       <ul id="alloc" class="alloc"></ul>
     </section>
 
     <section id="drop" class="lore" data-depth="4000" data-zone="The Abyss">
-      <p class="zone-label">4,000 m — The Abyss</p>
+      <p class="zone-label">4,000 m · The Abyss</p>
       <h2 class="lore-head">The Drop</h2>
-      <p class="lore-body">When the whale breaches, the spray falls on all who stand near. A fifth of all KUJI rests in the Drop, released in rounds to those already on the water.</p>
+      <p class="lore-body">When the whale breaches, the spray falls on all who stand near. A quarter of all KUJI rests in the Drop, released in rounds to those already on the water.</p>
       <div class="panel">
-        <h3 class="panel-head">Are you in the Drop?</h3>
+        <h3>Are you in the Drop?</h3>
         <div class="row">
           <input id="check-addr" placeholder="Paste a wallet address" autocomplete="off" autocapitalize="off" spellcheck="false">
           <button id="check" class="btn solid">Check</button>
@@ -110,7 +110,7 @@
     </section>
 
     <section id="rank" class="lore" data-depth="5000" data-zone="The Abyss">
-      <p class="zone-label">5,000 m — The Pod's order</p>
+      <p class="zone-label">5,000 m · The Pod's order</p>
       <h2 class="lore-head">Your place in the pod</h2>
       <p class="lore-body">Every creature of the deep has its place. Hold KUJI, in your wallet or in the Pod, and rise through the ranks. Orcas and up earn bigger Pod boosts and are first in line for whale-only Drops.</p>
       <ol class="tiers" id="tiers"></ol>
@@ -118,7 +118,7 @@
     </section>
 
     <section id="pod" class="lore" data-depth="5500" data-zone="The Abyss">
-      <p class="zone-label">5,500 m — The Pod</p>
+      <p class="zone-label">5,500 m · The Pod</p>
       <h2 class="lore-head">The Pod</h2>
       <p class="lore-body">Whales travel together, and the pod rewards those who stay. Bigger stakes and longer stays earn more, up to 2.5 times. Leave whenever you choose, but leaving restarts the clock.</p>
       <ul class="boosts">
@@ -149,17 +149,20 @@
     </section>
 
     <section class="lore" data-depth="8000" data-zone="Hadal Zone">
-      <p class="zone-label">8,000 m — The Hadal Zone</p>
+      <p class="zone-label">8,000 m · The Hadal Zone</p>
       <h2 class="lore-head">The contracts</h2>
       <ul id="contracts" class="links"><li class="muted">The contracts appear here at launch.</li></ul>
-      <p class="lore-body small">Every contract is verified on the Ink explorer. Read it yourself.</p>
+      <p class="muted">Every contract is verified on the Ink explorer. Read it yourself.</p>
     </section>
   </main>
 
   <footer data-depth="10900" data-zone="The Deep">
-    <div class="coin small"><img src="img/mark-800.webp" alt="" width="800" height="800"></div>
-    <p class="copy">© 2026 Kujira</p>
-    <p class="fine">KUJI is a meme token for entertainment. It has no intrinsic value and no expectation of financial return.</p>
+    <img class="foot-mark" src="img/logo-192.png" alt="" width="64" height="64">
+    <ul id="social" class="social">
+      <li><a href="whalepaper.html">Whalepaper</a></li>
+      <li><a href="https://x.com/KujiraToken" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.9 2H22l-6.8 7.8L23 22h-6.2l-4.8-6.3L6.4 22H3.3l7.3-8.3L1 2h6.3l4.4 5.8L18.9 2Zm-1.1 18.1h1.7L6.3 3.8H4.5l13.3 16.3Z"/></svg>X</a></li>
+    </ul>
+    <p class="fine">KUJI is a meme token for entertainment. It has no intrinsic value and no expectation of financial return. © 2026 Kujira.</p>
   </footer>
 
   <!-- Share card preview -->
@@ -173,6 +176,7 @@
   </dialog>
 
   <script src="ethers.umd.min.js"></script>
+  <script src="song.js"></script>
   <script src="dive.js"></script>
   <script src="app.js"></script>
 </body>
