@@ -69,6 +69,9 @@
   };
   const ALLOC_NAMES = { liquidity: "Liquidity", stakingRewards: "Pod rewards", team: "Team", airdrop: "The Drop" };
 
+  const TELEGRAM_SVG =
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.9 4.3 18.7 19.4c-.2 1.1-.9 1.3-1.8.8l-4.9-3.6-2.4 2.3c-.3.3-.5.5-1 .5l.3-5 9.2-8.3c.4-.4-.1-.6-.6-.2L6.2 13.1 1.3 11.6c-1.1-.3-1.1-1.1.2-1.6L20.6 2.7c.9-.3 1.7.2 1.3 1.6Z"/></svg>';
+
   async function loadSite() {
     const [site, links] = await Promise.all(
       ["data/site.json", "links.json"].map((f) => fetch(f, { cache: "no-store" }).then((r) => (r.ok ? r.json() : {})))
@@ -81,9 +84,21 @@
           `<div class="note">${ALLOC_NOTES[k] || ""}</div></li>`
       )
       .join("");
-    if (links.buy) {
-      $("buy").href = links.buy;
-      $("buy").hidden = false;
+    // Optional links from links.json, added to the links band.
+    const extra = [
+      ["buy", '<span class="glyph">買</span>', "Buy"],
+      ["telegram", TELEGRAM_SVG, "Telegram"],
+      ["chart", '<span class="glyph">潮</span>', "Chart"],
+    ];
+    for (const [key, icon, label] of extra) {
+      if (!links[key]) continue;
+      const li = document.createElement("li");
+      const a = document.createElement("a");
+      a.href = links[key];
+      a.rel = "noopener";
+      a.innerHTML = `${icon}<span>${label}</span>`;
+      li.append(a);
+      key === "buy" ? $("social").prepend(li) : $("social").append(li);
     }
   }
 
@@ -187,7 +202,7 @@
       div.innerHTML =
         `${head}<p class="amount">${fmt(amount)}</p>` +
         `<div class="actions"><button class="btn">Claim</button>` +
-        `<button class="btn primary">Claim &amp; stake +${r.stakeBonusBps / 100}%</button></div>` +
+        `<button class="btn solid">Claim &amp; stake +${r.stakeBonusBps / 100}%</button></div>` +
         `<p class="muted">Claim &amp; stake puts ${fmt(amount + bonus)} in the Pod, earning rewards. Withdraw any time.</p>`;
       const [plain, staked] = div.querySelectorAll("button");
       const d = new ethers.Contract(data.contracts.KujiraDrop, DROP_ABI, signer);

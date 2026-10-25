@@ -16,23 +16,20 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="bar"></div>
-
   <nav>
     <a href="#top" class="nav-mark"><img src="img/logo-192.png" alt="Kujira" width="36" height="36"></a>
     <button id="connect" class="btn">Connect</button>
   </nav>
 
   <header id="top" class="hero">
-    <img class="wordmark" src="img/wordmark.webp" alt="Kujira" width="720" height="562">
+    <div class="coin"><img src="img/mark-800.webp" alt="Kujira whale" width="800" height="800"></div>
+    <h1 class="name">Kujira</h1>
     <p class="kanji" aria-hidden="true">鯨</p>
-    <p class="tagline">Something has been growing in the deep.</p>
-    <div class="hero-actions">
-      <a href="#drop" class="btn gold">Claim</a>
-      <a href="#pod" class="btn">Stake</a>
-      <a id="buy" href="#" class="btn" hidden rel="noopener">Buy</a>
-    </div>
   </header>
+
+  <section class="band">
+    <p>The Kujira has surfaced on Ink</p>
+  </section>
 
   <main>
     <p id="notice" class="notice" hidden></p>
@@ -42,7 +39,17 @@
       <p class="lore-body">The Kujira does not chase. It waits in the deep, growing, unseen by those who watch only the surface. Its song carries a thousand miles, and those who hear it gather. First the water moves. Then you see the whale.</p>
       <p class="sig">— The Deep</p>
     </section>
+  </main>
 
+  <section class="band links-band">
+    <ul id="social" class="social">
+      <li><a href="#drop"><span class="glyph">滴</span><span>Claim</span></a></li>
+      <li><a href="#pod"><span class="glyph">群</span><span>Stake</span></a></li>
+      <li><a href="https://x.com/KujiraToken" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.9 2H22l-6.8 7.8L23 22h-6.2l-4.8-6.3L6.4 22H3.3l7.3-8.3L1 2h6.3l4.4 5.8L18.9 2Zm-1.1 18.1h1.7L6.3 3.8H4.5l13.3 16.3Z"/></svg><span>X</span></a></li>
+    </ul>
+  </section>
+
+  <main>
     <section class="lore">
       <h2 class="lore-head">Nothing hidden beneath the surface.</h2>
       <ul class="tenets">
@@ -83,7 +90,7 @@
           <button id="max" class="btn">Max</button>
         </div>
         <div class="actions">
-          <button id="stake" class="btn gold" disabled>Stake</button>
+          <button id="stake" class="btn solid" disabled>Stake</button>
           <button id="withdraw" class="btn" disabled>Withdraw</button>
           <button id="claim-rewards" class="btn" disabled>Claim rewards</button>
         </div>
@@ -98,10 +105,10 @@
   </main>
 
   <footer>
-    <a href="https://x.com/KujiraToken" rel="noopener">@KujiraToken</a>
+    <div class="coin small"><img src="img/mark-800.webp" alt="" width="800" height="800"></div>
+    <p class="copy">© 2026 Kujira</p>
     <p class="fine">KUJI is a meme token for entertainment. It has no intrinsic value and no expectation of financial return.</p>
   </footer>
-  <div class="bar"></div>
 
   <script src="ethers.umd.min.js"></script>
   <script src="app.js"></script>
