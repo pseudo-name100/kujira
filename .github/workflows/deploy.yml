@@ -1,0 +1,59 @@
+# Deploys KUJI from the Actions tab (works from a phone browser).
+# Needs the repository secret PRIVATE_KEY (operator wallet with a little ETH on the
+# chosen network) and the repository variable LIQUIDITY_ADDRESS.
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      network:
+        description: Network
+        type: choice
+        options: [inkSepolia, ink]
+        default: inkSepolia
+      confirm:
+        description: Type DEPLOY to confirm
+        required: true
+
+permissions:
+  contents: write
+
+concurrency: deploy-${{ inputs.network }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      NETWORK: ${{ inputs.network }}
+      CONFIRM: ${{ inputs.confirm }}
+    steps:
+      - name: Check confirmation
+        run: |
+          if [ "$CONFIRM" != "DEPLOY" ]; then echo "Type DEPLOY to confirm"; exit 1; fi
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx hardhat test
+      - name: Deploy
+        env:
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+          LIQUIDITY_ADDRESS: ${{ vars.LIQUIDITY_ADDRESS }}
+        run: npx hardhat run scripts/deploy.js --network "$NETWORK"
+      - name: Save addresses
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add deployments
+          git commit -m "Deploy KUJI to $NETWORK"
+          git push
+      - name: Verify source on the explorer
+        # The explorer needs a moment to index new contracts; retry if it isn't ready.
+        run: |
+          for i in 1 2 3 4 5; do
+            sleep 30
+            npx hardhat run scripts/verify.js --network "$NETWORK" && exit 0
+          done
+          exit 1

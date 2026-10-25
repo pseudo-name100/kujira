@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Whalepaper · Kujira</title>
+  <meta name="description" content="The Kujira Whalepaper: a fisherman, a whale, and a memecoin launched Ryoshi's way.">
+  <meta name="theme-color" content="#0b4d68">
+  <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32.png">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+  <meta property="og:title" content="The Kujira Whalepaper">
+  <meta property="og:description" content="A fisherman found a whale in his net. He cut the net.">
+  <meta property="og:image" content="https://kujira.ink/img/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@KujiraToken">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="paper">
+  <div id="ocean" aria-hidden="true"></div>
+  <div id="rays" aria-hidden="true"></div>
+  <canvas id="snow" aria-hidden="true"></canvas>
+  <div id="gauge" aria-live="off"><span class="arrow">▼</span> <b id="depth">0</b> m · <span id="zone">The Surface</span></div>
+
+  <nav>
+    <a href="./" class="nav-mark"><img src="img/logo-192.png" alt="Kujira home" width="36" height="36"></a>
+    <a href="./" class="btn">kujira.ink</a>
+  </nav>
+
+  <header class="hero" data-depth="0" data-zone="The Surface">
+    <div class="coin"><img src="img/mark-800.webp" alt="" width="800" height="800"></div>
+    <h1 class="name">Whalepaper</h1>
+    <p class="kanji" aria-hidden="true">鯨 · 漁師</p>
+  </header>
+
+  <main>
+    <section class="lore" data-depth="100" data-zone="The Surface">
+      <p class="zone-label">I. The fisherman's note</p>
+      <h2 class="lore-head">I am a fisherman. For a long time I worked the surface of Ink and watched the same nets come up.</h2>
+      <p class="lore-body">Tokens with hidden taxes. Owners who could print more whenever they liked. Teams who sold the moment anyone arrived. The water looked busy, but nothing lived in it for long.</p>
+      <p class="lore-body">One morning something else was in the net. It was heavy, and it was alive. A whale.</p>
+      <p class="lore-body">I could have sold it. Instead I cut the net. I kept none of it. Whatever it becomes now belongs to those who swim with it.</p>
+      <p class="sig">— 漁師, the fisherman</p>
+    </section>
+
+    <section class="lore" data-depth="400" data-zone="Twilight Zone">
+      <p class="zone-label">II. What Kujira is</p>
+      <h2 class="lore-head">A memecoin on Ink, and an experiment in rewarding the ones who stay.</h2>
+      <ul class="tenets">
+        <li><b>One billion KUJI.</b> Minted once, at the start. Nobody can make more.</li>
+        <li><b>The Pod.</b> Stake KUJI and share in a fixed pool of rewards. Bigger stakes and longer stays earn more, up to 2.5 times.</li>
+        <li><b>The Drop.</b> A quarter of all KUJI, released in rounds to people already on the water: Ink traders first, then the pod's whales.</li>
+        <li><b>The ranks.</b> Krill, Fish, Dolphin, Orca, Kujira. Every creature has its place.</li>
+      </ul>
+    </section>
+
+    <section class="lore" data-depth="800" data-zone="Twilight Zone">
+      <p class="zone-label">III. What Kujira is not</p>
+      <h2 class="lore-head">Not a promise.</h2>
+      <p class="lore-body">KUJI is a meme. It has no intrinsic value, no roadmap of riches, no team, no presale, no investors and no tax. Nobody is promising you a return, and you should not buy anything you can't afford to lose. If it grows, it grows because people chose to gather.</p>
+    </section>
+
+    <section class="lore" data-depth="1200" data-zone="Midnight Zone">
+      <p class="zone-label">IV. Ryoshi's way</p>
+      <h2 class="lore-head">Give it away. Keep nothing. Let the community build.</h2>
+      <p class="lore-body">Ryoshi, the anonymous creator of Shiba Inu, launched a token with no team allocation, put the liquidity out of reach, and stepped back. Kujira follows that spirit. It is inspired by Ryoshi; it is not connected to Ryoshi or to Shiba Inu.</p>
+      <ul class="tenets">
+        <li><b>No team tokens.</b> Not one KUJI held back.</li>
+        <li><b>Liquidity burned.</b> The LP tokens go to the dead address, permanently. The transaction is posted for anyone to check.</li>
+        <li><b>Code you can read.</b> Every contract is verified on the Ink explorer, and the code is open.</li>
+        <li><b>No hidden switches.</b> No tax, no blacklist, no pause, no upgrades.</li>
+      </ul>
+    </section>
+
+    <section class="lore" data-depth="2000" data-zone="Midnight Zone">
+      <p class="zone-label">V. The tides</p>
+      <h2 class="lore-head">Where every KUJI goes</h2>
+      <p class="supply">1,000,000,000 KUJI</p>
+      <ul class="alloc">
+        <li><div class="label"><b>Liquidity</b><span>55%</span></div><div class="track"><div class="fill" style="width:55%"></div></div><div class="note">Paired on an Ink DEX. LP tokens burned.</div></li>
+        <li><div class="label"><b>The Drop</b><span>25%</span></div><div class="track"><div class="fill" style="width:25%"></div></div><div class="note">Locked in the Drop contract, released in claim rounds.</div></li>
+        <li><div class="label"><b>Pod rewards</b><span>20%</span></div><div class="track"><div class="fill" style="width:20%"></div></div><div class="note">Locked in the Pod, streamed to stakers over time.</div></li>
+        <li><div class="label"><b>Team</b><span>0%</span></div><div class="track"><div class="fill" style="width:0%"></div></div><div class="note">None.</div></li>
+      </ul>
+    </section>
+
+    <section class="lore" data-depth="3000" data-zone="Midnight Zone">
+      <p class="zone-label">VI. The Pod pays whales to stay</p>
+      <h2 class="lore-head">Most memecoins punish patience. The Pod pays for it.</h2>
+      <ul class="boosts">
+        <li><b>Size</b><span>Dolphin 100K+ <em>+0.10×</em></span><span>Orca 1M+ <em>+0.25×</em></span><span>Kujira 10M+ <em>+0.50×</em></span></li>
+        <li><b>Time</b><span>Every 30 days staked <em>+0.25×</em></span><span>Up to 120 days <em>+1.00×</em></span></li>
+      </ul>
+      <p class="lore-body">Rewards are shared by boosted stake, so a Kujira-size stake held for four months earns 2.5 times what the same KUJI would earn on day one. Leaving is always allowed, but withdrawing anything restarts the clock. Rewards come only from the pool that was put in at the start. Nothing is printed.</p>
+    </section>
+
+    <section class="lore" data-depth="4000" data-zone="The Abyss">
+      <p class="zone-label">VII. The Drop falls on those already on the water</p>
+      <h2 class="lore-head">When the whale breaches, the spray falls on all who stand near.</h2>
+      <p class="lore-body">The first round goes to the people who already trade on Ink: 14,981 wallets that swapped on Ink's DEXes on at least two days this year, each listed for 81,766 KUJI. Claims are first come, first served until the round's 80M KUJI is gone. Claim straight into the Pod for 25% more.</p>
+      <p class="lore-body">Later rounds go to the pod itself. Whale rounds snapshot every holder, wallet and Pod together, and reward those of Orca size and up. Snapshots are announced before they happen.</p>
+      <p class="lore-body small">Check any wallet at kujira.ink. Every list is published so anyone can verify it.</p>
+    </section>
+
+    <section class="lore" data-depth="6000" data-zone="The Abyss">
+      <p class="zone-label">VIII. What the fisherman can and cannot do</p>
+      <h2 class="lore-head">The fisherman holds a rope, not a net.</h2>
+      <ul class="tenets">
+        <li><b>Can:</b> add rewards to the Pod, start Drop rounds from the published lists, and burn unused Drop tokens.</li>
+        <li><b>Cannot:</b> mint KUJI, tax it, freeze a wallet, touch anyone's stake, or take the Drop or Pod pools.</li>
+        <li><b>Will:</b> hand the remaining controls to a community multisig, or give them up entirely, once the rounds are done.</li>
+      </ul>
+    </section>
+
+    <section class="lore" data-depth="9000" data-zone="Hadal Zone">
+      <p class="zone-label">IX. The pod decides</p>
+      <h2 class="lore-head">The whale belongs to whoever swims with it.</h2>
+      <p class="lore-body">Make the memes. Build the tools. Run the spaces. Hold, stake, share your rank. The fisherman will keep the water clear and the lists honest. Everything else is yours.</p>
+      <p class="sig">— 漁師</p>
+    </section>
+  </main>
+
+  <footer data-depth="10900" data-zone="The Deep">
+    <div class="coin small"><img src="img/mark-800.webp" alt="" width="800" height="800"></div>
+    <p class="copy">© 2026 Kujira</p>
+    <p class="fine">KUJI is a meme token for entertainment. It has no intrinsic value and no expectation of financial return. Kujira is inspired by Ryoshi and is not affiliated with Ryoshi or Shiba Inu.</p>
+  </footer>
+
+  <script src="dive.js"></script>
+</body>
+</html>
