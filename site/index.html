@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Kujira · 鯨 · The Deep</title>
   <meta name="description" content="Kujira (KUJI) on Ink. Something has been growing in the deep.">
   <meta name="theme-color" content="#0b4d68">
@@ -24,7 +24,6 @@
 
   <nav>
     <a href="#top" class="nav-mark"><img src="img/logo-192.png" alt="" width="34" height="34"><span>Kujira</span></a>
-    <div class="nav-links"><a href="#drop">Drop</a><a href="#pod">Pod</a></div>
     <button id="connect" class="btn small">Connect</button>
   </nav>
 
@@ -178,6 +177,14 @@
     </div>
     <button id="card-close" class="btn ghost">Close</button>
   </dialog>
+
+  <!-- App-style tabs: the claim and staking panels are one tap from anywhere -->
+  <nav class="tabs" aria-label="Sections">
+    <a href="#top"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11 12 4l9 7v9h-6v-6H9v6H3z"/></svg><span>Home</span></a>
+    <a href="#drop"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z"/></svg><span>Claim</span></a>
+    <a href="#pod"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 8l10 5 10-5-10-5zM2 12l10 5 10-5M2 16l10 5 10-5"/></svg><span>Stake</span></a>
+    <a href="#rank"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20v-7M12 20V5M19 20v-10"/></svg><span>Rank</span></a>
+  </nav>
 
   <script src="ethers.umd.min.js"></script>
   <script src="song.js"></script>

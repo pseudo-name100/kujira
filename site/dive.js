@@ -183,6 +183,25 @@
       () => setSinging(false, "Tap again to listen")
     );
   }
+  // Light up the tab for the section on screen.
+  const tabLinks = [...document.querySelectorAll(".tabs a")].filter((a) => a.hash && document.querySelector(a.hash));
+  if (tabLinks.length && "IntersectionObserver" in window) {
+    const seen = new Map();
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) seen.set(e.target.id, e.isIntersecting ? e.intersectionRect.height : 0);
+        let best = null, most = 0;
+        for (const a of tabLinks) {
+          const h = seen.get(a.hash.slice(1)) || 0;
+          if (h > most) [best, most] = [a, h];
+        }
+        for (const a of tabLinks) a.classList.toggle("active", a === best);
+      },
+      { threshold: [0, 0.25, 0.5, 0.75, 1] }
+    );
+    for (const a of tabLinks) io.observe(document.querySelector(a.hash));
+  }
+
   for (const el of singers()) {
     el.addEventListener("click", sing); // home page only
     el.addEventListener("keydown", (e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), sing()));
