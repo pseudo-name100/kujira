@@ -82,6 +82,17 @@ body { padding-bottom: calc(84px + env(safe-area-inset-bottom)); }
 }
 .tabs svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .tabs a.active { color: var(--accent-hi); background: rgba(63, 198, 234, 0.12); }
+/* Desktop: the tabs sit in the top bar instead. */
+@media (min-width: 900px) {
+  body { padding-bottom: 0; }
+  .tabs {
+    top: 9px; bottom: auto; width: auto; grid-template-columns: repeat(4, auto); padding: 4px;
+    background: rgba(2, 12, 18, 0.6);
+  }
+  .tabs a { flex-direction: row; gap: 7px; padding: 7px 16px; font-size: 14px; }
+  .tabs svg { width: 18px; height: 18px; }
+  #gauge { bottom: 12px; }
+}
 
 /* ---------------------------------------------------------------- hero: the sonar screen */
 .hero { max-width: 760px; margin: 0 auto; padding: 24px 16px 56px; }
