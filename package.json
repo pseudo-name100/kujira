@@ -19,6 +19,8 @@
   },
   "homepage": "https://github.com/pseudo-name100/kujira#readme",
   "devDependencies": {
+    "@fontsource/fraunces": "^5.3.0",
+    "@fontsource/inter": "^5.3.0",
     "@fontsource/poppins": "^5.3.0",
     "@nomicfoundation/hardhat-toolbox": "^6.1.2",
     "@openzeppelin/merkle-tree": "^1.0.8",

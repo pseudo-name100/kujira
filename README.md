@@ -1,10 +1,13 @@
 # Kujira (KUJI)
 
-> For a long time, the surface looked still. Something has been growing in the deep. 🐋
+> A song at 52 hertz. On Ink, someone finally answered. 🐋
 
-KUJI is a whale-incentive memecoin on [Ink](https://inkonchain.com), Kraken's OP Stack L2,
-launched Ryoshi's way: no team tokens, liquidity burned or locked, everything else to holders.
-The rug-pull levers are missing from the code:
+Since 1989, ocean microphones have recorded one whale singing at 52 hertz, a pitch no other
+whale uses; nothing has ever been heard answering it. KUJI is that song on
+[Ink](https://inkonchain.com), Kraken's OP Stack L2: a whale-incentive memecoin with no team
+tokens, no tax, liquidity locked forever, and everything else going to holders. The only thing
+the builders take is the Uniswap pool's 1% trading fee. The rug-pull levers are missing from
+the code:
 
 | Common memecoin risk | KUJI |
 | --- | --- |
@@ -13,6 +16,7 @@ The rug-pull levers are missing from the code:
 | Blacklist / pause / "anti-bot" switches | None. |
 | Upgradeable proxy that can be swapped | Not upgradeable. |
 | Team dumps on day one | There is no team allocation. |
+| Liquidity pulled | The Uniswap position is owned by `KujiraLiquidityLock`, which can't remove it. |
 | "Staking APY" paid by printing tokens | Rewards come only from a pool deposited up front. |
 
 **Whale incentives.** The Pod pays bigger stakes and longer stays more, up to 2.5x, and the
@@ -48,15 +52,21 @@ released in claim-based airdrop rounds as the project grows. Round 1 goes to Ink
   into the Pod for a bonus (+25% by default, capped at +100%). After the deadline anyone can
   `closeRound` to return unclaimed tokens to the pool. The owner can burn unreserved pool
   tokens but can never withdraw them.
+- `contracts/KujiraLiquidityLock.sol`: owns KUJI's Uniswap v3 position NFTs forever. It has no
+  function that removes liquidity, moves the NFT or approves anyone. `collect(tokenId)` /
+  `collectAll()` send the pool's 1% trading fees (WETH and KUJI) to `feeRecipient`; anyone can
+  trigger them, and only the recipient can hand the role on. `track(tokenId)` lists a position
+  that arrived through a plain `transferFrom`. `scripts/check-liquidity-lock-fork.js` runs the
+  whole flow against the real Uniswap v3 on an Ink mainnet fork.
 
 Split (edit `scripts/tokenomics.js` before deploying):
 
 | Bucket | % | Where it goes |
 | --- | --- | --- |
-| Liquidity | 55 | Sent to `LIQUIDITY_ADDRESS` to pair on a DEX. Burn the LP tokens afterwards. |
+| Liquidity | 55 | Sent to `LIQUIDITY_ADDRESS`, paired in a 1% Uniswap v3 pool, position locked in `KujiraLiquidityLock` |
 | Pod rewards | 20 | Deposited into the Pod, streamed over 180 days |
 | The Drop | 25 | Locked in the Drop, released in rounds |
-| Team | 0 | None, Ryoshi's way |
+| Team | 0 | None |
 
 ## Running everything from a phone
 
@@ -70,7 +80,8 @@ phone browser. The workflows must be on the repository's default branch to show 
    airdrop rounds. It never holds the liquidity tokens.
 2. **Secrets and variables > Actions > Secrets:** add `PRIVATE_KEY` (the operator wallet's key).
 3. **Secrets and variables > Actions > Variables:** add `LIQUIDITY_ADDRESS` (your own wallet,
-   receives the 55% to pair on a DEX).
+   receives the 55% to pair on a DEX) and `FEE_RECIPIENT` (the wallet that receives the 1% pool
+   fees).
 4. **Pages:** set Source to **GitHub Actions**, then set Custom domain to `kujira.ink` and tick
    **Enforce HTTPS** once it's offered. At the domain registrar, add these DNS records:
    - `A` records for `kujira.ink` (host `@`): `185.199.108.153`, `185.199.109.153`,
@@ -123,7 +134,7 @@ The page reads `data/site.json` (token split, every airdrop list) and, after lau
 
 ### X account
 
-`docs/x-playbook.md` has the profile copy, the voice (the fisherman, 漁師), a posting rhythm and
+`docs/x-playbook.md` has the story (the 52 Hz whale, the whale pump, the whale fall), the voice, a posting rhythm and
 ready-to-post content for each phase. Images for X are in `brand/out/` (header, profile photo,
 post graphics); edit `brand/templates.html` and run `node brand/render.js` to regenerate them.
 The Whalepaper is at `site/whalepaper.html` (kujira.ink/whalepaper).
@@ -132,7 +143,7 @@ The Whalepaper is at `site/whalepaper.html` (kujira.ink/whalepaper).
 
 ```sh
 npm install
-cp .env.example .env   # add PRIVATE_KEY, LIQUIDITY_ADDRESS
+cp .env.example .env   # add PRIVATE_KEY, LIQUIDITY_ADDRESS, FEE_RECIPIENT
 npm ci --prefix wallet # Privy login bundle for the site
 npm test
 npm run deploy:ink-sepolia
@@ -191,14 +202,16 @@ volume, followers) before it happens.
 
 ## Launch checklist
 
-1. Deploy on Ink Sepolia, start a test airdrop round, and claim and stake from the page.
-2. Deploy on Ink mainnet.
-3. From your liquidity wallet, create the KUJI/ETH pool on an Ink DEX.
-4. Burn the LP tokens (send them to `0x000000000000000000000000000000000000dEaD`), Ryoshi's
-   way, and post the transaction. (A public locker works too, but burning is permanent.)
+1. Deploy on Ink mainnet (Actions → Deploy → `ink`). This also deploys `KujiraLiquidityLock`.
+2. From your liquidity wallet, on app.uniswap.org (network: Ink), create a KUJI/ETH position:
+   fee tier **1%**, **full range**, with the 550M KUJI and the ETH you choose. The ETH sets the
+   starting price and how far large trades move it.
+3. Send the position NFT from your wallet to the `KujiraLiquidityLock` address. If the wallet used
+   a plain transfer, call `track(tokenId)` on the lock (anyone can) so it's listed. Post the
+   transaction: the liquidity can never be removed.
 5. Optionally hand Pod and Drop ownership to a multisig (`transferOwnership`, then `acceptOwnership`
    from the multisig) or renounce it once no more reward rounds are planned.
-6. Post the contract addresses, verification links, LP burn/lock tx and airdrop contracts on
+6. Post the contract addresses, verification links, liquidity lock tx and airdrop contracts on
    X (@KujiraToken) and the website so people can check everything themselves.
 
 ## Notes

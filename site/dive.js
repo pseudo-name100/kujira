@@ -1,6 +1,7 @@
 // The Dive: the page is a descent from the surface to the deep. As you scroll, the water
 // darkens, sunlight fades, marine snow and then bioluminescence appear, and the gauge reads
-// the depth of the section you're looking at. Tapping the whale plays a synthesized song.
+// the depth of the section you're looking at. The hero's sonar screen is a live spectrogram
+// with the 52 Hz whale on it; "Hear the song" plays a synthesized call and draws it there.
 (() => {
   const $ = (id) => document.getElementById(id);
   const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -225,17 +226,96 @@
     wet.connect(wetGain);
     wetGain.connect(master);
     master.connect(ac.destination);
+    // Feed the song into the sonar screen too.
+    analyser = ac.createAnalyser();
+    analyser.fftSize = 16384;
+    analyser.smoothingTimeConstant = 0.2;
+    master.connect(analyser);
 
     call(ac, filter, t, [130, 310, 180], 2.2);
     call(ac, filter, t + 2.6, [95, 70, 140], 2.0);
     call(ac, filter, t + 5.0, [210, 420, 260, 150], 2.8);
 
-    const coin = $("sing");
-    coin.classList.add("singing");
+    const btn = $("sing");
+    btn.classList.add("singing");
+    btn.textContent = "Listening…";
     clearTimeout(sing.timer);
-    sing.timer = setTimeout(() => coin.classList.remove("singing"), 8500);
+    sing.timer = setTimeout(() => {
+      btn.classList.remove("singing");
+      btn.textContent = "Hear the song";
+      analyser = null;
+    }, 8500);
   }
   $("sing")?.addEventListener("click", sing); // only on the home page
+
+  // ------------------------------------------------------------------ the sonar screen
+  // A scrolling spectrogram, 0-400 Hz: faint ocean noise, and the 52 Hz whale's pulsed call.
+  // While the song plays, its real frequencies are drawn from the audio itself.
+  let analyser = null;
+  const spectro = $("spectro");
+  if (spectro) {
+    const sc = spectro.getContext("2d");
+    const MAX_HZ = 400;
+    let sw = 0, sh = 0, sdpr = 1, freq = null;
+    const size = () => {
+      sdpr = Math.min(devicePixelRatio || 1, 2);
+      sw = spectro.clientWidth;
+      sh = spectro.clientHeight;
+      spectro.width = sw * sdpr;
+      spectro.height = sh * sdpr;
+      sc.setTransform(sdpr, 0, 0, sdpr, 0, 0);
+      sc.fillStyle = "#000a0f";
+      sc.fillRect(0, 0, sw, sh);
+    };
+    size();
+    addEventListener("resize", size);
+    const yOf = (hz) => sh - (hz / MAX_HZ) * sh;
+    let t0 = performance.now();
+    const step = (now) => {
+      const t = (now - t0) / 1000;
+      const dx = 2;
+      // scroll left
+      sc.drawImage(spectro, dx * sdpr, 0, (sw - dx) * sdpr, sh * sdpr, 0, 0, sw - dx, sh);
+      const x = sw - dx;
+      sc.fillStyle = "rgba(0, 10, 15, 0.92)";
+      sc.fillRect(x, 0, dx, sh);
+      // ocean noise
+      for (let i = 0; i < 26; i++) {
+        const y = Math.random() * sh;
+        sc.fillStyle = `rgba(63, 198, 234, ${Math.random() * 0.09})`;
+        sc.fillRect(x, y, dx, 1 + Math.random() * 2);
+      }
+      // the 52 Hz whale: long tonal pulses, a few seconds on, a few off
+      const on = (t % 6) < 3.4;
+      if (on) {
+        const wobble = Math.sin(t * 1.7) * 1.5;
+        const y = yOf(52 + wobble);
+        const g = sc.createLinearGradient(0, y - 6, 0, y + 6);
+        g.addColorStop(0, "rgba(143, 230, 255, 0)");
+        g.addColorStop(0.5, "rgba(170, 240, 255, 0.95)");
+        g.addColorStop(1, "rgba(143, 230, 255, 0)");
+        sc.fillStyle = g;
+        sc.fillRect(x, y - 6, dx, 12);
+      }
+      // the song, live
+      if (analyser) {
+        freq ||= new Uint8Array(analyser.frequencyBinCount);
+        analyser.getByteFrequencyData(freq);
+        const binHz = analyser.context.sampleRate / analyser.fftSize;
+        for (let b = 1; b * binHz < MAX_HZ; b++) {
+          // Only the loudest bins: the call itself, not its echo.
+          const v = (freq[b] / 255 - 0.55) / 0.45;
+          if (v <= 0) continue;
+          sc.fillStyle = `rgba(${Math.round(150 + 105 * v)}, ${Math.round(232 + 23 * v)}, 255, ${Math.min(1, 0.25 + v)})`;
+          const y = yOf(b * binHz);
+          sc.fillRect(x, y - 2, dx, Math.max(2, (binHz / MAX_HZ) * sh + 1));
+        }
+      }
+      if (!reduceMotion && !document.hidden) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+    document.addEventListener("visibilitychange", () => !document.hidden && !reduceMotion && requestAnimationFrame(step));
+  }
 
   measure();
   update();

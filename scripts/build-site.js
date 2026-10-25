@@ -31,11 +31,16 @@ if (fs.existsSync(path.join(root, "wallet", "node_modules"))) {
 }
 fs.mkdirSync(path.join(out, "data"));
 fs.mkdirSync(path.join(out, "fonts"));
-for (const w of [300, 400, 600, 800]) {
-  fs.copyFileSync(
-    path.join(root, "node_modules/@fontsource/poppins/files", `poppins-latin-${w}-normal.woff2`),
-    path.join(out, "fonts", `poppins-${w}.woff2`)
-  );
+const fonts = {
+  "fraunces-400": "fraunces/files/fraunces-latin-400-normal.woff2",
+  "fraunces-400-italic": "fraunces/files/fraunces-latin-400-italic.woff2",
+  "fraunces-600": "fraunces/files/fraunces-latin-600-normal.woff2",
+  "inter-400": "inter/files/inter-latin-400-normal.woff2",
+  "inter-500": "inter/files/inter-latin-500-normal.woff2",
+  "inter-600": "inter/files/inter-latin-600-normal.woff2",
+};
+for (const [name, file] of Object.entries(fonts)) {
+  fs.copyFileSync(path.join(root, "node_modules/@fontsource", file), path.join(out, "fonts", `${name}.woff2`));
 }
 const roundDirs = fs.existsSync(path.join(root, "airdrop"))
   ? fs.readdirSync(path.join(root, "airdrop")).filter((d) => /^round-\d+$/.test(d))
