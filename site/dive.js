@@ -1,7 +1,7 @@
 // The Dive: the page is a descent from the surface to the deep. As you scroll, the water
 // darkens, sunlight fades, marine snow and then bioluminescence appear, and the gauge reads
 // the depth of the section you're looking at. The hero's sonar screen is a live spectrogram
-// with the 52 Hz whale on it; "Hear the song" plays a synthesized call and draws it there.
+// with the 52 Hz whale on it; "Hear the song" plays the recorded call (song.js) and draws it.
 (() => {
   const $ = (id) => document.getElementById(id);
   const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -154,104 +154,39 @@
   });
 
   // ------------------------------------------------------------------ whale song
-  // Three long calls: slow glides between low tones with vibrato, through a lowpass
-  // filter and a long synthetic reverb, so it sounds distant and underwater.
-  let audio;
-  function reverb(ac, seconds) {
-    const len = ac.sampleRate * seconds;
-    const buf = ac.createBuffer(2, len, ac.sampleRate);
-    for (let ch = 0; ch < 2; ch++) {
-      const d = buf.getChannelData(ch);
-      for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3);
-    }
-    const c = ac.createConvolver();
-    c.buffer = buf;
-    return c;
-  }
-
-  function call(ac, out, start, path, dur) {
-    const osc = ac.createOscillator();
-    const over = ac.createOscillator(); // a quiet harmonic for body
-    const gain = ac.createGain();
-    const overGain = ac.createGain();
-    const lfo = ac.createOscillator();
-    const lfoGain = ac.createGain();
-    osc.type = "sine";
-    over.type = "triangle";
-    lfo.frequency.value = 4.5;
-    lfoGain.gain.value = 5;
-    lfo.connect(lfoGain);
-    lfoGain.connect(osc.frequency);
-    lfoGain.connect(over.frequency);
-
-    osc.frequency.setValueAtTime(path[0], start);
-    over.frequency.setValueAtTime(path[0] * 2, start);
-    path.slice(1).forEach((f, i) => {
-      const at = start + (dur * (i + 1)) / (path.length - 1);
-      osc.frequency.exponentialRampToValueAtTime(f, at);
-      over.frequency.exponentialRampToValueAtTime(f * 2, at);
-    });
-
-    gain.gain.setValueAtTime(0.0001, start);
-    gain.gain.exponentialRampToValueAtTime(0.5, start + 0.35);
-    gain.gain.setValueAtTime(0.5, start + dur - 0.5);
-    gain.gain.exponentialRampToValueAtTime(0.0001, start + dur);
-    overGain.gain.value = 0.12;
-
-    osc.connect(gain);
-    over.connect(overGain);
-    overGain.connect(gain);
-    gain.connect(out);
-    for (const o of [osc, over, lfo]) {
-      o.start(start);
-      o.stop(start + dur + 0.1);
-    }
-  }
-
+  // A pre-rendered file (song.js + scripts/render-song.js): an <audio> element plays with an
+  // iPhone's ringer on silent, which live Web Audio doesn't.
+  let player = null;
+  let playing = false;
   function sing() {
-    audio ||= new (window.AudioContext || window.webkitAudioContext)();
-    const ac = audio;
-    ac.resume();
-    const t = ac.currentTime + 0.05;
-    const master = ac.createGain();
-    master.gain.value = 0.32;
-    const filter = ac.createBiquadFilter();
-    filter.type = "lowpass";
-    filter.frequency.value = 1100;
-    const wet = reverb(ac, 4);
-    const wetGain = ac.createGain();
-    wetGain.gain.value = 0.7;
-    filter.connect(master);
-    filter.connect(wet);
-    wet.connect(wetGain);
-    wetGain.connect(master);
-    master.connect(ac.destination);
-    // Feed the song into the sonar screen too.
-    analyser = ac.createAnalyser();
-    analyser.fftSize = 16384;
-    analyser.smoothingTimeConstant = 0.2;
-    master.connect(analyser);
-
-    call(ac, filter, t, [130, 310, 180], 2.2);
-    call(ac, filter, t + 2.6, [95, 70, 140], 2.0);
-    call(ac, filter, t + 5.0, [210, 420, 260, 150], 2.8);
-
     const btn = $("sing");
-    btn.classList.add("singing");
-    btn.textContent = "Listening…";
-    clearTimeout(sing.timer);
-    sing.timer = setTimeout(() => {
+    // Ask iOS to treat this as media playback, not an ambient sound.
+    try {
+      if (navigator.audioSession) navigator.audioSession.type = "playback";
+    } catch {}
+    player ||= new Audio("audio/song.wav");
+    player.currentTime = 0;
+    player.onended = () => {
+      playing = false;
       btn.classList.remove("singing");
       btn.textContent = "Hear the song";
-      analyser = null;
-    }, 8500);
+    };
+    player.play().then(
+      () => {
+        playing = true;
+        btn.classList.add("singing");
+        btn.textContent = "Listening…";
+      },
+      () => {
+        btn.textContent = "Tap again to listen";
+      }
+    );
   }
   $("sing")?.addEventListener("click", sing); // only on the home page
 
   // ------------------------------------------------------------------ the sonar screen
   // A scrolling spectrogram, 0-400 Hz: faint ocean noise, and the 52 Hz whale's pulsed call.
   // While the song plays, its real frequencies are drawn from the audio itself.
-  let analyser = null;
   const spectro = $("spectro");
   if (spectro) {
     const sc = spectro.getContext("2d");
@@ -297,18 +232,24 @@
         sc.fillStyle = g;
         sc.fillRect(x, y - 6, dx, 12);
       }
-      // the song, live
-      if (analyser) {
-        freq ||= new Uint8Array(analyser.frequencyBinCount);
-        analyser.getByteFrequencyData(freq);
-        const binHz = analyser.context.sampleRate / analyser.fftSize;
-        for (let b = 1; b * binHz < MAX_HZ; b++) {
-          // Only the loudest bins: the call itself, not its echo.
-          const v = (freq[b] / 255 - 0.55) / 0.45;
-          if (v <= 0) continue;
-          sc.fillStyle = `rgba(${Math.round(150 + 105 * v)}, ${Math.round(232 + 23 * v)}, 255, ${Math.min(1, 0.25 + v)})`;
-          const y = yOf(b * binHz);
-          sc.fillRect(x, y - 2, dx, Math.max(2, (binHz / MAX_HZ) * sh + 1));
+      // the song, drawn from its notes in time with playback
+      if (playing && window.KujiraSong) {
+        const now = player.currentTime;
+        for (const c of window.KujiraSong.CALLS) {
+          const into = now - c.start;
+          if (into < 0 || into > c.dur) continue;
+          const env = Math.min(1, into / 0.35, (c.dur - into) / 0.5);
+          const f = window.KujiraSong.freqAt(c, into) + Math.sin(now * 2 * Math.PI * 4.5) * 5;
+          for (const [mult, alpha, thick] of [[1, 1, 7], [2, 0.35, 4]]) {
+            const y = yOf(f * mult);
+            if (y < 0) continue;
+            const g = sc.createLinearGradient(0, y - thick, 0, y + thick);
+            g.addColorStop(0, "rgba(170, 240, 255, 0)");
+            g.addColorStop(0.5, `rgba(225, 250, 255, ${alpha * env})`);
+            g.addColorStop(1, "rgba(170, 240, 255, 0)");
+            sc.fillStyle = g;
+            sc.fillRect(x, y - thick, dx, thick * 2);
+          }
         }
       }
       if (!reduceMotion && !document.hidden) requestAnimationFrame(step);
