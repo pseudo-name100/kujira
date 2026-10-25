@@ -65,3 +65,41 @@ describe("airdrop eligibility", function () {
     expect(odd.reduce((s, r) => s + r.amount, 0n)).to.be.lte(100n);
   });
 });
+
+describe("whale rounds", function () {
+  const { mergeHolders, allocateWeighted } = require("../scripts/airdrop/lib");
+  const D = "0x00000000000000000000000000000000000000d4";
+  const P = "0x00000000000000000000000000000000000000e5";
+
+  it("adds wallet and Pod balances, drops contracts, exclusions and empty rows", function () {
+    const rows = mergeHolders(
+      [
+        { address: A, balance: 5n, isContract: false },
+        { address: B, balance: 7n, isContract: true }, // e.g. the DEX pool
+        { address: P, balance: 100n, isContract: false }, // excluded below
+        { address: D, balance: 0n, isContract: false },
+      ],
+      [
+        { address: A, staked: 10n },
+        { address: C, staked: 3n }, // staked everything, nothing in the wallet
+        { address: C, staked: 1n },
+      ],
+      [P]
+    );
+    expect(rows).to.deep.equal([
+      { address: require("ethers").getAddress(A), wallet: 5n, staked: 10n, held: 15n },
+      { address: require("ethers").getAddress(C), wallet: 0n, staked: 4n, held: 4n },
+    ]);
+  });
+
+  it("splits by weight without exceeding the total", function () {
+    const res = allocateWeighted(
+      [
+        { address: A, weight: 3n },
+        { address: B, weight: 1n },
+      ],
+      1000n
+    );
+    expect(res.map((r) => r.amount)).to.deep.equal([750n, 250n]);
+  });
+});

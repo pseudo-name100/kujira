@@ -55,5 +55,21 @@ module.exports = {
       // than raw swap counts, and the cap keeps whales from taking the whole round.
       maxWeightDays: 10,
     },
+
+    // Example whale-only round, for after launch. Snapshot KUJI holders (wallet + Pod)
+    // with Airdrop -> build-list, then start it. Announce the snapshot date in advance.
+    2: {
+      source: "kuji-holders",
+      network: "ink",
+      total: parseEther("25000000"),
+      claimDays: 30,
+      stakeBonusBps: 2500,
+      eligibility: {
+        minHeld: parseEther("1000000"), // Orca and up
+        exclude: [], // known exchange or bridge wallets, the project's own wallets
+      },
+      // Shares by KUJI held, counted up to Kujira size (10M) so one giant can't take it all.
+      weightCap: parseEther("10000000"),
+    },
   },
 };

@@ -21,15 +21,6 @@ async function main() {
   await verify("KujiraToken", d.KujiraToken, [d.deployer]);
   await verify("KujiraPod", d.KujiraPod, [d.KujiraToken, d.deployer]);
   await verify("KujiraDrop", d.KujiraDrop, [d.KujiraPod, d.deployer]);
-  if (d.VestingWallet) {
-    const v = d.VestingWallet;
-    await verify(
-      "VestingWallet",
-      v.address,
-      [v.beneficiary, v.start, v.duration],
-      "@openzeppelin/contracts/finance/VestingWallet.sol:VestingWallet"
-    );
-  }
 }
 
 main().catch((e) => {

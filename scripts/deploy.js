@@ -25,7 +25,6 @@ async function main() {
 
   const pct = Object.values(cfg.allocations).reduce((a, b) => a + b, 0);
   if (pct !== 100) throw new Error(`allocations add up to ${pct}%, expected 100%`);
-  const teamAddress = requireAddress(ethers, "TEAM_ADDRESS", cfg.allocations.team > 0);
   // Where the liquidity share goes. Defaults to the deployer.
   const liquidityAddress = requireAddress(ethers, "LIQUIDITY_ADDRESS", false) || deployer.address;
 
@@ -65,20 +64,6 @@ async function main() {
   if (airdrop > 0n) await (await token.transfer(dropAddress, airdrop)).wait();
   console.log(`KujiraDrop:  ${dropAddress} (${ethers.formatEther(airdrop)} KUJI pool)`);
 
-  let vesting = null;
-  const team = share(cfg.allocations.team);
-  if (team > 0n) {
-    const now = (await ethers.provider.getBlock("latest")).timestamp;
-    const start = now + cfg.teamCliffDays * DAY;
-    const duration = cfg.teamVestingDays * DAY;
-    // OpenZeppelin VestingWallet: releases linearly from `start` over `duration`.
-    const wallet = await ethers.deployContract("VestingWallet", [teamAddress, start, duration]);
-    await wallet.waitForDeployment();
-    vesting = { address: await wallet.getAddress(), beneficiary: teamAddress, start, duration };
-    await (await token.transfer(vesting.address, team)).wait();
-    console.log(`VestingWallet: ${vesting.address} (${ethers.formatEther(team)} KUJI for ${teamAddress})`);
-  }
-
   if (liquidityAddress !== deployer.address) {
     const rest = await token.balanceOf(deployer.address);
     await (await token.transfer(liquidityAddress, rest)).wait();
@@ -92,7 +77,6 @@ async function main() {
     KujiraToken: tokenAddress,
     KujiraPod: podAddress,
     KujiraDrop: dropAddress,
-    VestingWallet: vesting,
     liquidity: liquidityAddress,
   };
   fs.mkdirSync(dir, { recursive: true });

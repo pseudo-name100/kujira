@@ -1,5 +1,6 @@
 # Runs one step of an airdrop round from the Actions tab.
-#   build-list   find Ink DEX routers and traders, build the round's list (no key needed)
+#   build-list   build the round's list: Ink DEX traders, or a KUJI holder snapshot for
+#                whale rounds (no key needed)
 #   start-round  publish the list's Merkle root to KujiraDrop (uses PRIVATE_KEY)
 #   close-round  return a finished round's unclaimed tokens to the pool (uses PRIVATE_KEY)
 name: Airdrop
@@ -47,10 +48,7 @@ jobs:
 
       - name: Build list
         if: inputs.step == 'build-list'
-        run: |
-          node scripts/airdrop/discover-routers.js "$ROUND"
-          node scripts/airdrop/collect-dex-traders.js "$ROUND"
-          node scripts/airdrop/build-round.js "$ROUND"
+        run: node scripts/airdrop/build-list.js "$ROUND"
       - name: Start round
         if: inputs.step == 'start-round'
         env:

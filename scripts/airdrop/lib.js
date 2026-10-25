@@ -58,6 +58,36 @@ function allocate(traders, total, maxWeightDays) {
     .filter((a) => a.amount > 0n);
 }
 
+/**
+ * Combine wallet balances and Pod stakes into one row per holder.
+ * @param wallets [{ address, balance: bigint, isContract }]
+ * @param stakes  [{ address, staked: bigint }]
+ * @param exclude addresses to drop (contracts of the project, burn address, liquidity wallet...)
+ */
+function mergeHolders(wallets, stakes, exclude = []) {
+  const skip = new Set(exclude.filter(Boolean).map((a) => getAddress(a)));
+  const rows = new Map();
+  const row = (a) => {
+    const address = getAddress(a);
+    if (!rows.has(address)) rows.set(address, { address, wallet: 0n, staked: 0n, isContract: false });
+    return rows.get(address);
+  };
+  for (const w of wallets) Object.assign(row(w.address), { wallet: w.balance, isContract: Boolean(w.isContract) });
+  for (const s of stakes) row(s.address).staked += s.staked;
+  return [...rows.values()]
+    .filter((r) => !skip.has(r.address) && !r.isContract)
+    .map((r) => ({ address: r.address, wallet: r.wallet, staked: r.staked, held: r.wallet + r.staked }))
+    .filter((r) => r.held > 0n)
+    .sort((a, b) => (b.held > a.held ? 1 : b.held < a.held ? -1 : a.address.localeCompare(b.address)));
+}
+
+/** Split `total` (bigint) in proportion to each item's `weight` (bigint), rounding down. */
+function allocateWeighted(items, total) {
+  const sum = items.reduce((s, i) => s + i.weight, 0n);
+  if (sum === 0n) throw new Error("nobody to allocate to");
+  return items.map((i) => ({ address: i.address, amount: (total * i.weight) / sum })).filter((a) => a.amount > 0n);
+}
+
 function buildTree(allocations) {
   const tree = StandardMerkleTree.of(
     allocations.map((a) => [a.address, a.amount.toString()]),
@@ -82,4 +112,4 @@ function readCsv(file) {
   return lines.map((l) => Object.fromEntries(l.split(",").map((v, i) => [cols[i], v])));
 }
 
-module.exports = { roundDir, createAggregator, aggregateTraders, filterTraders, allocate, buildTree, writeCsv, readCsv };
+module.exports = { roundDir, mergeHolders, allocateWeighted, createAggregator, aggregateTraders, filterTraders, allocate, buildTree, writeCsv, readCsv };

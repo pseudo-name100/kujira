@@ -1,6 +1,6 @@
 # Deploys KUJI from the Actions tab (works from a phone browser).
 # Needs the repository secret PRIVATE_KEY (operator wallet with a little ETH on the
-# chosen network) and the repository variables TEAM_ADDRESS and LIQUIDITY_ADDRESS.
+# chosen network) and the repository variable LIQUIDITY_ADDRESS.
 name: Deploy
 
 on:
@@ -40,7 +40,6 @@ jobs:
       - name: Deploy
         env:
           PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
-          TEAM_ADDRESS: ${{ vars.TEAM_ADDRESS }}
           LIQUIDITY_ADDRESS: ${{ vars.LIQUIDITY_ADDRESS }}
         run: npx hardhat run scripts/deploy.js --network "$NETWORK"
       - name: Save addresses

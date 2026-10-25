@@ -81,10 +81,9 @@
   const ALLOC_NOTES = {
     liquidity: "Paired on an Ink DEX. LP tokens burned or locked.",
     stakingRewards: "Paid to the Pod over time from a fixed pool.",
-    team: "Locked, then vested slowly.",
     airdrop: "Locked in the Drop, released in claim rounds.",
   };
-  const ALLOC_NAMES = { liquidity: "Liquidity", stakingRewards: "Pod rewards", team: "Team", airdrop: "The Drop" };
+  const ALLOC_NAMES = { liquidity: "Liquidity", stakingRewards: "Pod rewards", airdrop: "The Drop" };
 
   const TELEGRAM_SVG =
     '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.9 4.3 18.7 19.4c-.2 1.1-.9 1.3-1.8.8l-4.9-3.6-2.4 2.3c-.3.3-.5.5-1 .5l.3-5 9.2-8.3c.4-.4-.1-.6-.6-.2L6.2 13.1 1.3 11.6c-1.1-.3-1.1-1.1.2-1.6L20.6 2.7c.9-.3 1.7.2 1.3 1.6Z"/></svg>';
@@ -136,8 +135,7 @@
     $("contracts").innerHTML =
       link("KUJI token", c.KujiraToken) +
       link("Pod (staking)", c.KujiraPod) +
-      link("Drop (airdrop pool)", c.KujiraDrop) +
-      (c.VestingWallet ? link("Team vesting", c.VestingWallet) : "");
+      link("Drop (airdrop pool)", c.KujiraDrop);
   }
 
   // ------------------------------------------------------------------ wallet
