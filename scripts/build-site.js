@@ -21,6 +21,14 @@ const NETWORKS = {
 fs.rmSync(out, { recursive: true, force: true });
 fs.cpSync(path.join(root, "site"), out, { recursive: true });
 fs.copyFileSync(require.resolve("ethers").replace(/lib\.commonjs.*$/, "dist/ethers.umd.min.js"), path.join(out, "ethers.umd.min.js"));
+// Privy login bundle (wallet/), loaded by the page only when config.json has an App ID.
+if (fs.existsSync(path.join(root, "wallet", "node_modules"))) {
+  require("child_process").execFileSync(process.execPath, [path.join(root, "wallet", "build.js"), path.join(out, "wallet")], {
+    stdio: "inherit",
+  });
+} else {
+  console.warn("wallet/node_modules missing: run `npm ci --prefix wallet` to include Privy login");
+}
 fs.mkdirSync(path.join(out, "data"));
 fs.mkdirSync(path.join(out, "fonts"));
 for (const w of [300, 400, 600, 800]) {

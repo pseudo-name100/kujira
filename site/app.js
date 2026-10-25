@@ -19,6 +19,10 @@
     "function stake(uint256)",
     "function withdraw(uint256)",
     "function claim()",
+    "function poke(address)",
+    "function multiplierOf(address) view returns (uint256)",
+    "function appliedMultiplierOf(address) view returns (uint256)",
+    "function stakedSince(address) view returns (uint256)",
   ];
   const DROP_ABI = [
     "function claimed(uint256,address) view returns (bool)",
@@ -27,14 +31,17 @@
     "function claimAndStake(uint256,uint256,bytes32[])",
   ];
 
-  // Ranks by KUJI held (wallet + Pod), out of a 1,000,000,000 supply.
+  // Ranks by KUJI held (wallet + Pod). `boost` is the Pod size bonus for staking that much.
   const TIERS = [
-    { name: "Krill", min: 0, line: "Small, but the whole sea runs on you." },
-    { name: "Fish", min: 10_000, line: "Swimming with the current." },
-    { name: "Dolphin", min: 100_000, line: "Quick, clever, never alone." },
-    { name: "Orca", min: 1_000_000, line: "Feared by everything near the surface." },
-    { name: "Kujira", min: 10_000_000, line: "The deep itself moves when you do." },
+    { name: "Krill", min: 0, boost: "", line: "Small, but the whole sea runs on you." },
+    { name: "Fish", min: 10_000, boost: "", line: "Swimming with the current." },
+    { name: "Dolphin", min: 100_000, boost: "+0.10×", line: "Quick, clever, never alone." },
+    { name: "Orca", min: 1_000_000, boost: "+0.25×", line: "Feared by everything near the surface." },
+    { name: "Kujira", min: 10_000_000, boost: "+0.50×", line: "The deep itself moves when you do." },
   ];
+  const TIME_STEP = 30 * 24 * 60 * 60;
+  const MAX_TIME_STEPS = 4;
+  const x = (bps) => (Number(bps) / 10000).toFixed(2).replace(/0$/, "") + "×";
 
   const network = new URLSearchParams(location.search).get("network") || "ink";
   let site = { lists: [] };
@@ -89,10 +96,12 @@
     '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.9 4.3 18.7 19.4c-.2 1.1-.9 1.3-1.8.8l-4.9-3.6-2.4 2.3c-.3.3-.5.5-1 .5l.3-5 9.2-8.3c.4-.4-.1-.6-.6-.2L6.2 13.1 1.3 11.6c-1.1-.3-1.1-1.1.2-1.6L20.6 2.7c.9-.3 1.7.2 1.3 1.6Z"/></svg>';
 
   async function loadSite() {
-    const [s, links] = await Promise.all(
-      ["data/site.json", "links.json"].map((f) => fetch(f, { cache: "no-store" }).then((r) => (r.ok ? r.json() : {})))
+    const [s, links, config] = await Promise.all(
+      ["data/site.json", "links.json", "config.json"].map((f) =>
+        fetch(f, { cache: "no-store" }).then((r) => (r.ok ? r.json() : {}))
+      )
     );
-    site = { lists: [], ...s };
+    site = { lists: [], ...s, config };
     $("alloc").innerHTML = Object.entries(site.allocations || {})
       .map(
         ([k, pct]) =>
@@ -119,7 +128,8 @@
     }
     $("tiers").innerHTML = TIERS.map(
       (t, i) =>
-        `<li data-tier="${i}"><b>${t.name}</b><span>${i === 0 ? "Any KUJI" : fmtNum(t.min) + "+ KUJI"}</span></li>`
+        `<li data-tier="${i}"><b>${t.name}</b><span>${i === 0 ? "Any KUJI" : fmtNum(t.min) + "+ KUJI"}</span>` +
+        `<span class="tier-boost">${t.boost || "&nbsp;"}</span></li>`
     ).join("");
   }
 
@@ -160,9 +170,71 @@
     }
   }
 
-  async function connect() {
-    const eth = window.ethereum;
+  // Privy (wallets, email, X) when site/config.json has an App ID, else the browser wallet.
+  let privy;
+  async function loadPrivy() {
+    if (!site.config?.privyAppId) return null;
+    if (!privy) {
+      privy = import("./wallet/wallet.js")
+        .then(() => {
+          window.KujiraPrivy.start({
+            appId: site.config.privyAppId,
+            chainId: data?.chainId ?? 57073,
+            logo: new URL("img/logo-192.png", location.href).href,
+          });
+          return window.KujiraPrivy;
+        })
+        .catch(() => null); // fall back to the browser wallet
+    }
+    return privy;
+  }
+  const remember = (on) => {
+    try {
+      on ? localStorage.setItem("kujira.privy", "1") : localStorage.removeItem("kujira.privy");
+    } catch {}
+  };
+  const remembered = () => {
+    try {
+      return localStorage.getItem("kujira.privy") === "1";
+    } catch {
+      return false;
+    }
+  };
+
+  async function walletProvider({ silent = false } = {}) {
+    const p = await loadPrivy();
+    if (p) {
+      // If Privy can't start (blocked, offline, bad App ID), fall back to the browser wallet
+      // rather than leaving the button doing nothing.
+      const ready = await Promise.race([p.whenReady().then(() => true), new Promise((r) => setTimeout(() => r(false), 12000))]);
+      if (ready) {
+        const session = await p.connect({ silent });
+        if (session) remember(true);
+        return session?.provider || null;
+      }
+      if (!silent) notice("Login service didn't respond; using your browser wallet instead.");
+    }
+    return window.ethereum || null;
+  }
+
+  async function connect({ silent = false } = {}) {
+    if (account && !silent) {
+      if (confirm("Disconnect this wallet?")) {
+        remember(false);
+        (await loadPrivy())?.disconnect();
+        location.reload();
+      }
+      return;
+    }
+    let eth;
+    try {
+      eth = await walletProvider({ silent });
+    } catch (e) {
+      notice(`Couldn't connect: ${errText(e)}`, "err");
+      return;
+    }
     if (!eth) {
+      if (silent) return;
       const here = location.href.replace(/^https?:\/\//, "");
       notice("No wallet found. Open this page in your wallet app's browser.");
       $("rounds").innerHTML =
@@ -325,9 +397,32 @@
     $("pod-end").textContent = finish > 0n ? date(finish) : "–";
     if (!account) return;
     const token = new ethers.Contract(data.contracts.KujiraToken, TOKEN_ABI, reader);
-    const [mine, earned, bal] = await Promise.all([pod.balanceOf(account), pod.earned(account), token.balanceOf(account)]);
+    const [mine, earned, bal, live, applied, since, head] = await Promise.all([
+      pod.balanceOf(account),
+      pod.earned(account),
+      token.balanceOf(account),
+      pod.multiplierOf(account),
+      pod.appliedMultiplierOf(account),
+      pod.stakedSince(account),
+      reader.getBlock("latest"),
+    ]);
     $("pod-mine").textContent = fmt(mine);
     $("pod-earned").textContent = fmt(earned);
+    $("pod-boost").textContent = mine > 0n ? x(applied) : "–";
+    // The time boost grows on its own but only counts once applied (poke).
+    $("poke").hidden = !(live > applied);
+    $("poke").textContent = `Refresh boost to ${x(live)}`;
+    const note = $("boost-note");
+    note.hidden = mine === 0n;
+    if (mine > 0n) {
+      const age = head.timestamp - Number(since); // chain time, not the phone's clock
+      const steps = Math.floor(age / TIME_STEP);
+      const days = Math.max(1, Math.ceil(((steps + 1) * TIME_STEP - age) / 86400));
+      note.textContent =
+        steps >= MAX_TIME_STEPS
+          ? "Full time boost reached. Stay staked to keep it."
+          : `Next +0.25× in ${days} ${days === 1 ? "day" : "days"}. Withdrawing restarts the clock.`;
+    }
     $("wallet-bal").textContent = fmt(bal);
     $("stake").disabled = bal === 0n;
     $("withdraw").disabled = mine === 0n;
@@ -530,7 +625,7 @@
     }
   }
 
-  $("connect").onclick = connect;
+  $("connect").onclick = () => connect();
   $("check").onclick = () => checkWallet($("check-addr").value);
   $("check-addr").addEventListener("keydown", (e) => e.key === "Enter" && checkWallet($("check-addr").value));
   $("stake").onclick = async () => {
@@ -549,6 +644,11 @@
     const pod = new ethers.Contract(data.contracts.KujiraPod, POD_ABI, signer);
     send("Withdraw", () => pod.withdraw(v));
   };
+  $("poke").onclick = () => {
+    if (!signer) return;
+    const pod = new ethers.Contract(data.contracts.KujiraPod, POD_ABI, signer);
+    send("Refresh boost", () => pod.poke(account));
+  };
   $("claim-rewards").onclick = () => {
     if (!signer) return;
     const pod = new ethers.Contract(data.contracts.KujiraPod, POD_ABI, signer);
@@ -560,9 +660,13 @@
     .then(async () => {
       await refresh();
       if (launched()) setInterval(() => renderSonar().catch(() => {}), 30000);
-      // Reconnect silently if the wallet already authorised this page.
-      const accts = await window.ethereum?.request({ method: "eth_accounts" }).catch(() => []);
-      if (accts?.length) connect();
+      // Reconnect silently if this visitor connected before.
+      if (site.config?.privyAppId) {
+        if (remembered()) connect({ silent: true });
+      } else {
+        const accts = await window.ethereum?.request({ method: "eth_accounts" }).catch(() => []);
+        if (accts?.length) connect({ silent: true });
+      }
     })
     .catch((e) => notice(errText(e), "err"));
 })();

@@ -111,7 +111,7 @@
     <section id="rank" class="lore" data-depth="5000" data-zone="The Abyss">
       <p class="zone-label">5,000 m — The Pod's order</p>
       <h2 class="lore-head">Your place in the pod</h2>
-      <p class="lore-body">Every creature of the deep has its place. Hold KUJI, in your wallet or in the Pod, and rise through the ranks.</p>
+      <p class="lore-body">Every creature of the deep has its place. Hold KUJI, in your wallet or in the Pod, and rise through the ranks. Orcas and up earn bigger Pod boosts and are first in line for whale-only Drops.</p>
       <ol class="tiers" id="tiers"></ol>
       <div class="panel" id="rank-panel"><p class="muted">Connect your wallet after launch to find your rank.</p></div>
     </section>
@@ -119,15 +119,22 @@
     <section id="pod" class="lore" data-depth="5500" data-zone="The Abyss">
       <p class="zone-label">5,500 m — The Pod</p>
       <h2 class="lore-head">The Pod</h2>
-      <p class="lore-body">Whales travel together. Stake KUJI in the Pod and share in its rewards. Leave whenever you choose.</p>
+      <p class="lore-body">Whales travel together, and the pod rewards those who stay. Bigger stakes and longer stays earn more, up to 2.5 times. Leave whenever you choose, but leaving restarts the clock.</p>
+      <ul class="boosts">
+        <li><b>Size</b><span>Dolphin 100K+ <em>+0.10×</em></span><span>Orca 1M+ <em>+0.25×</em></span><span>Kujira 10M+ <em>+0.50×</em></span></li>
+        <li><b>Time</b><span>Every 30 days staked <em>+0.25×</em></span><span>Up to 120 days <em>+1.00×</em></span></li>
+      </ul>
       <div class="panel">
         <dl class="stats">
           <div><dt>Total staked</dt><dd id="pod-total">–</dd></div>
           <div><dt>Rewards end</dt><dd id="pod-end">–</dd></div>
           <div><dt>Your stake</dt><dd id="pod-mine">–</dd></div>
           <div><dt>Your rewards</dt><dd id="pod-earned">–</dd></div>
+          <div><dt>Your boost</dt><dd id="pod-boost">–</dd></div>
           <div><dt>Wallet</dt><dd id="wallet-bal">–</dd></div>
         </dl>
+        <p id="boost-note" class="muted boost-note" hidden></p>
+        <button id="poke" class="btn" hidden>Refresh boost</button>
         <div class="row">
           <input id="amount" inputmode="decimal" placeholder="Amount of KUJI" autocomplete="off">
           <button id="max" class="btn">Max</button>

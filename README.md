@@ -2,8 +2,9 @@
 
 > For a long time, the surface looked still. Something has been growing in the deep. 🐋
 
-KUJI is a meme token on [Ink](https://inkonchain.com), Kraken's OP Stack L2. What makes it
-better than most memecoins is that the rug-pull levers are missing from the code:
+KUJI is a whale-incentive memecoin on [Ink](https://inkonchain.com), Kraken's OP Stack L2,
+launched Ryoshi's way: no team tokens, liquidity burned or locked, everything else to holders.
+The rug-pull levers are missing from the code:
 
 | Common memecoin risk | KUJI |
 | --- | --- |
@@ -11,41 +12,51 @@ better than most memecoins is that the rug-pull levers are missing from the code
 | Hidden buy/sell tax | None. Transfers move the exact amount. |
 | Blacklist / pause / "anti-bot" switches | None. |
 | Upgradeable proxy that can be swapped | Not upgradeable. |
-| Team dumps on day one | Team share sits in a vesting contract (cliff, then linear). |
+| Team dumps on day one | There is no team allocation. |
 | "Staking APY" paid by printing tokens | Rewards come only from a pool deposited up front. |
+
+**Whale incentives.** The Pod pays bigger stakes and longer stays more, up to 2.5x, and the
+Drop can run whale-only rounds for large holders. Whales are paid to stay rather than dump.
 
 The utility is **the Pod** (`KujiraPod`): stake KUJI, earn KUJI. The owner can only add
 rewards; it cannot touch staked tokens or rewards already deposited, and stakers can
 withdraw whenever they want.
 
-Distribution is **the Drop** (`KujiraDrop`): 20% of supply is locked in a contract and
-released in small claim-based airdrop rounds as the project grows. Round 1 goes to Ink DEX
-traders.
+Distribution is **the Drop** (`KujiraDrop`): 25% of supply is locked in a contract and
+released in claim-based airdrop rounds as the project grows. Round 1 goes to Ink DEX traders.
 
 ## Contracts
 
 - `contracts/KujiraToken.sol`: ERC-20 with burn and ERC-2612 `permit` (gasless approvals). Fixed supply, no owner.
-- `contracts/KujiraPod.sol`: staking. `fundRewards(amount, duration)` streams a deposit
-  linearly to stakers in proportion to their stake. A new deposit before a period ends rolls
-  the unstreamed remainder into the new period. If nobody is staked, the stream pauses
-  instead of stranding the rewards. `recoverERC20` can rescue other tokens sent by mistake,
-  never KUJI.
+- `contracts/KujiraPod.sol`: staking with whale boosts. `fundRewards(amount, duration)` streams
+  a deposit linearly to stakers in proportion to their *boosted* stake:
+
+  | Boost | On top of 1x |
+  | --- | --- |
+  | Stake of 100,000+ / 1,000,000+ / 10,000,000+ KUJI | +0.10x / +0.25x / +0.50x |
+  | Every 30 days staked, up to 120 days | +0.25x each, +1.00x max |
+
+  So the most a stake earns is 2.5x. Topping up blends the stake's start time by amount (a
+  small early stake can't lend its age to a big later one); withdrawing anything restarts it.
+  The time boost is applied when the stake changes or when anyone calls `poke(account)`, which
+  can only raise it; the site shows a "Refresh boost" button when one is due. A new deposit
+  before a period ends rolls the unstreamed remainder in; if nobody is staked, the stream
+  pauses instead of stranding rewards. `recoverERC20` can rescue other tokens, never KUJI.
 - `contracts/KujiraDrop.sol`: airdrop pool. The owner starts rounds by publishing a Merkle
   root of (wallet, amount) plus a claim deadline; the round's total is reserved from the pool
   and can't exceed what's free. Claimers either `claim` the tokens or `claimAndStake` them
   into the Pod for a bonus (+25% by default, capped at +100%). After the deadline anyone can
   `closeRound` to return unclaimed tokens to the pool. The owner can burn unreserved pool
   tokens but can never withdraw them.
-- OpenZeppelin `VestingWallet`: holds the team allocation.
 
-Default split (edit `scripts/tokenomics.js` before deploying):
+Split (edit `scripts/tokenomics.js` before deploying):
 
 | Bucket | % | Where it goes |
 | --- | --- | --- |
-| Liquidity | 55 | Stays with the deployer to pair on a DEX. Burn or lock the LP tokens afterwards. |
-| Staking rewards | 15 | Deposited into the Pod, streamed over 180 days |
-| Team | 10 | `VestingWallet`: 180-day cliff, then linear over 365 days |
-| Airdrop | 20 | Locked in the Drop, released in rounds |
+| Liquidity | 55 | Sent to `LIQUIDITY_ADDRESS` to pair on a DEX. Burn the LP tokens afterwards. |
+| Pod rewards | 20 | Deposited into the Pod, streamed over 180 days |
+| The Drop | 25 | Locked in the Drop, released in rounds |
+| Team | 0 | None, Ryoshi's way |
 
 ## Running everything from a phone
 
@@ -59,12 +70,20 @@ phone browser. The workflows must be on the repository's default branch to show 
    airdrop rounds. It never holds the liquidity tokens.
 2. **Secrets and variables > Actions > Secrets:** add `PRIVATE_KEY` (the operator wallet's key).
 3. **Secrets and variables > Actions > Variables:** add `LIQUIDITY_ADDRESS` (your own wallet,
-   receives the 55%) and `TEAM_ADDRESS` (receives the vested 10%).
+   receives the 55% to pair on a DEX).
 4. **Pages:** set Source to **GitHub Actions**, then set Custom domain to `kujira.ink` and tick
    **Enforce HTTPS** once it's offered. At the domain registrar, add these DNS records:
    - `A` records for `kujira.ink` (host `@`): `185.199.108.153`, `185.199.109.153`,
      `185.199.110.153`, `185.199.111.153`
    - `CNAME` for `www`: `pseudo-name100.github.io`
+5. **Privy login (optional, recommended).** At dashboard.privy.io create an app, then:
+   - Login methods: turn on **Wallet**, **Email** and **X (Twitter)**.
+   - Allowed domains: add `https://kujira.ink`.
+   - Copy the App ID into `site/config.json` (`"privyAppId": "..."`), editable on github.com.
+
+   Without an App ID the site uses the browser's wallet, which doesn't work in X's in-app
+   browser; with Privy, visitors can connect any wallet (including mobile wallets through
+   WalletConnect) or sign in with email or X and get a wallet made for them.
 
 ### Workflows
 
@@ -80,7 +99,9 @@ the page with `?network=inkSepolia` added to its URL.
 
 ### The site (kujira.ink)
 
-`site/` is a static page that works in wallet apps' built-in browsers.
+`site/` is a static page. Wallet connection goes through Privy (`wallet/`, bundled by
+`scripts/build-site.js` and loaded only when someone taps Connect), falling back to the
+browser's wallet if Privy isn't configured or can't be reached.
 
 - **The Dive.** Scrolling is a descent: the water darkens from surface blue to black, a depth
   gauge reads the zone (Twilight, Midnight, Abyss, Hadal), marine snow drifts down and turns
@@ -93,7 +114,8 @@ the page with `?network=inkSepolia` added to its URL.
 - **Rank.** A connected wallet is ranked by KUJI held in the wallet plus the Pod: Krill (any),
   Fish (10,000+), Dolphin (100,000+), Orca (1,000,000+), Kujira (10,000,000+), with a share card.
 - **Claim and stake.** Claim or claim-and-stake open rounds, and stake, withdraw or collect Pod
-  rewards.
+  rewards. The Pod panel shows your boost, when the next time step arrives, and a "Refresh
+  boost" button when a higher boost is waiting to be applied.
 
 The page reads `data/site.json` (token split, every airdrop list) and, after launch,
 `data/<network>.json` (contracts and started rounds), both built from `deployments/` and
@@ -103,7 +125,8 @@ The page reads `data/site.json` (token split, every airdrop list) and, after lau
 
 ```sh
 npm install
-cp .env.example .env   # add PRIVATE_KEY, TEAM_ADDRESS, LIQUIDITY_ADDRESS
+cp .env.example .env   # add PRIVATE_KEY, LIQUIDITY_ADDRESS
+npm ci --prefix wallet # Privy login bundle for the site
 npm test
 npm run deploy:ink-sepolia
 npx hardhat run scripts/verify.js --network inkSepolia
@@ -149,8 +172,14 @@ The steps (the Airdrop workflow runs them for you):
 The `airdrop/round-<n>/` files are committed so anyone can check the list against the
 on-chain root.
 
-For later rounds, add a block to `config.js` with new criteria (for example Pod stakers,
-KUJI holders, or wallets from an X campaign) and announce what triggers it (holder count,
+**Whale-only rounds** (`source: "kuji-holders"`, round 2 in the config is an example) snapshot
+every holder's wallet balance plus Pod stake (`collect-kuji-holders.js`), leaving out contracts,
+the burn address and the liquidity wallet. Holders at or above `minHeld` (1,000,000 KUJI, Orca
+size) are listed, with shares by KUJI held counted up to `weightCap` (10,000,000). Announce the
+snapshot date ahead of time: it's the reason to buy up to Orca and stake.
+
+`node scripts/airdrop/build-list.js <round>` runs the right steps for either kind of round (the
+Airdrop workflow's `build-list` uses it). Announce what triggers each later round (holder count,
 volume, followers) before it happens.
 
 ## Launch checklist
@@ -158,11 +187,11 @@ volume, followers) before it happens.
 1. Deploy on Ink Sepolia, start a test airdrop round, and claim and stake from the page.
 2. Deploy on Ink mainnet.
 3. From your liquidity wallet, create the KUJI/ETH pool on an Ink DEX.
-4. Burn the LP tokens (send them to `0x000000000000000000000000000000000000dEaD`) or lock them
-   with a public locker, and post the transaction.
+4. Burn the LP tokens (send them to `0x000000000000000000000000000000000000dEaD`), Ryoshi's
+   way, and post the transaction. (A public locker works too, but burning is permanent.)
 5. Optionally hand Pod and Drop ownership to a multisig (`transferOwnership`, then `acceptOwnership`
    from the multisig) or renounce it once no more reward rounds are planned.
-6. Post the contract addresses, verification links, LP burn/lock tx, vesting and airdrop contracts on
+6. Post the contract addresses, verification links, LP burn/lock tx and airdrop contracts on
    X (@KujiraToken) and the website so people can check everything themselves.
 
 ## Notes
@@ -170,5 +199,5 @@ volume, followers) before it happens.
 - The ticker `KUJI` is already used by the Kujira Cosmos chain's token. Consider a different
   symbol to avoid confusion on aggregators; change it in `KujiraToken.sol`.
 - These contracts have tests but no professional audit. Get one before holding significant value.
-- Staking rewards and team allocations can raise securities questions in some jurisdictions.
+- Staking rewards can raise securities questions in some jurisdictions.
   Talk to a lawyer before marketing yields.
