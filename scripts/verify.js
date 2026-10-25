@@ -21,6 +21,14 @@ async function main() {
   await verify("KujiraToken", d.KujiraToken, [d.deployer]);
   await verify("KujiraPod", d.KujiraPod, [d.KujiraToken, d.deployer]);
   await verify("KujiraDrop", d.KujiraDrop, [d.KujiraPod, d.deployer]);
+  if (d.KujiraLiquidityLock) {
+    const { uniswapV3 } = require("./tokenomics");
+    await verify("KujiraLiquidityLock", d.KujiraLiquidityLock, [
+      uniswapV3[hre.network.name].positionManager,
+      d.KujiraToken,
+      d.feeRecipient,
+    ]);
+  }
 }
 
 main().catch((e) => {

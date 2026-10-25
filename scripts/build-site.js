@@ -90,6 +90,7 @@ for (const [name, meta] of Object.entries(NETWORKS)) {
       KujiraToken: d.KujiraToken,
       KujiraPod: d.KujiraPod,
       KujiraDrop: d.KujiraDrop,
+      KujiraLiquidityLock: d.KujiraLiquidityLock || null,
     },
     rounds,
   };

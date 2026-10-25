@@ -145,7 +145,8 @@
     $("contracts").innerHTML =
       link("KUJI token", c.KujiraToken) +
       link("Pod (staking)", c.KujiraPod) +
-      link("Drop (airdrop pool)", c.KujiraDrop);
+      link("Drop (airdrop pool)", c.KujiraDrop) +
+      (c.KujiraLiquidityLock ? link("Liquidity lock (1% pool fee)", c.KujiraLiquidityLock) : "");
   }
 
   // ------------------------------------------------------------------ wallet
