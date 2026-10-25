@@ -235,7 +235,7 @@
     clearTimeout(sing.timer);
     sing.timer = setTimeout(() => coin.classList.remove("singing"), 8500);
   }
-  $("sing").addEventListener("click", sing);
+  $("sing")?.addEventListener("click", sing); // only on the home page
 
   measure();
   update();

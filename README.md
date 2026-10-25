@@ -121,6 +121,13 @@ The page reads `data/site.json` (token split, every airdrop list) and, after lau
 `data/<network>.json` (contracts and started rounds), both built from `deployments/` and
 `airdrop/` by `scripts/build-site.js`.
 
+### X account
+
+`docs/x-playbook.md` has the profile copy, the voice (the fisherman, 漁師), a posting rhythm and
+ready-to-post content for each phase. Images for X are in `brand/out/` (header, profile photo,
+post graphics); edit `brand/templates.html` and run `node brand/render.js` to regenerate them.
+The Whalepaper is at `site/whalepaper.html` (kujira.ink/whalepaper).
+
 ## Running locally
 
 ```sh

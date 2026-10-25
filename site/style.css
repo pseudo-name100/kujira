@@ -255,3 +255,6 @@ a.btn { text-align: center; }
 .boost-note { margin-top: 12px; font-size: 13px; }
 #poke { margin-top: 10px; width: 100%; }
 #poke[hidden], .boost-note[hidden] { display: none; }
+
+/* Whalepaper: longer title than the home page */
+.paper .name { font-size: clamp(28px, 8.4vw, 52px); letter-spacing: 0.16em; margin-right: -0.16em; }
