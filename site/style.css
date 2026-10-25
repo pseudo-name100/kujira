@@ -188,6 +188,9 @@ dd { margin: 0; font-weight: 700; color: var(--head); font-variant-numeric: tabu
 .round .muted { margin-top: 12px; }
 .round .track { height: 4px; border-radius: 2px; background: var(--line); margin-top: 16px; overflow: hidden; }
 .round .fill { height: 100%; background: var(--accent); }
+.cap { border-top: 1px solid var(--line); padding-top: 14px; margin-top: 14px; }
+.cap .track { height: 6px; border-radius: 3px; background: var(--line); margin: 12px 0 8px; overflow: hidden; }
+.cap .fill { height: 100%; background: linear-gradient(90deg, #0a4a62, var(--accent)); }
 .pill { display: inline-block; font-size: 13px; padding: 2px 12px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
 .pill.ok { color: var(--ok); border-color: var(--ok); }
 

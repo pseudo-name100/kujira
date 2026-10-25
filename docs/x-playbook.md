@@ -54,6 +54,9 @@ asks how the project is funded, answer with exactly that and link the lock contr
 
 **Safety line, repeat it often:** *The fisherman never DMs first. The only site is kujira.ink.*
 
+**The Drop never outgrows the market.** A round only opens once buyers have taken twice its
+size out of the pool. When people ask "when airdrop", answer with the bar on kujira.ink.
+
 ## Rhythm
 
 | Day | Post |
@@ -113,7 +116,7 @@ one has a reason to share their card.
 >
 > 14,981 wallets that trade on Ink are on the first Drop list. 81,766 $KUJI each.
 >
-> Claims open at launch. First come, first served.
+> Round 1 opens once the market can carry it: when buyers have taken 200M $KUJI from the pool, about a $25k market cap. First come, first served.
 >
 > Check yours: kujira.ink
 
@@ -167,11 +170,11 @@ Post the thread in order, then pin it in place of the Whalepaper post.
 
 > 3/ Liquidity is in a 1% Uniswap pool, owned by a lock contract with no way to remove it: [LOCK]
 >
-> Nobody can pull it. Not the fisherman, not anyone. The pool's 1% fee is his only toll.
+> It started at a $10k market cap with KUJI only. No presale, no insider ETH: every ETH in the pool came from a buyer. The pool's 1% fee is the fisherman's only toll.
 
-> 4/ The Drop is open. 14,981 Ink traders, 81,766 $KUJI each, first come first served until the 80M round is gone.
+> 4/ The Drop never outgrows the market. Round 1 (14,981 Ink traders, 81,766 $KUJI each) opens once buyers have taken 200M $KUJI from the pool, about a $25k market cap.
 >
-> Claim straight into the Pod for +25%: kujira.ink
+> Watch it fill on kujira.ink. Claim straight into the Pod for +25%.
 
 > 5/ The Pod pays whales to stay. Bigger stakes and longer stays earn up to 2.5x.
 >

@@ -6,6 +6,12 @@ module.exports = {
   explorerRpcApi: "https://explorer.inkonchain.com/api", // Etherscan-style endpoints
   rpcUrl: process.env.INK_RPC_URL || "https://rpc-gel.inkonchain.com",
 
+  // The Drop never outgrows the market (gate.js). Everything the Drop has paid or reserved,
+  // plus a new round, must be at most this share of the KUJI buyers have taken out of the
+  // launch pool. At 50%, round 1 (80M, up to 100M with the stake bonus) opens once buyers
+  // have taken 200M KUJI: about a $25k market cap from a $10k start.
+  dropCap: { shareOfBoughtBps: 5000 },
+
   rounds: {
     1: {
       // Tokens the round takes from the 200M pool.

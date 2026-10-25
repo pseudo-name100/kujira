@@ -62,7 +62,7 @@ Split (edit `scripts/tokenomics.js` before deploying):
 
 | Bucket | % | Where it goes |
 | --- | --- | --- |
-| Liquidity | 55 | Sent to `LIQUIDITY_ADDRESS`, paired in a 1% Uniswap v3 pool, position locked in `KujiraLiquidityLock` |
+| Liquidity | 55 | Put one-sided into a 1% Uniswap v3 pool by Launch pool, position locked in `KujiraLiquidityLock` |
 | Pod rewards | 20 | Deposited into the Pod, streamed over 180 days |
 | The Drop | 25 | Locked in the Drop, released in rounds |
 | Team | 0 | None |
@@ -75,12 +75,12 @@ phone browser. The workflows must be on the repository's default branch to show 
 ### One-time setup (Settings on github.com)
 
 1. **Operator wallet.** Create a fresh wallet used only for this, and send it a little ETH on
-   Ink (plus Ink Sepolia ETH from a faucet for testing). It deploys the contracts and starts
-   airdrop rounds. It never holds the liquidity tokens.
+   Ink (0.003 ETH covers the deploy and the launch with room to spare). It deploys the
+   contracts, opens the pool and starts airdrop rounds. Between Deploy and Launch pool it holds
+   the 550M liquidity KUJI; Launch pool puts them straight into the locked position.
 2. **Secrets and variables > Actions > Secrets:** add `PRIVATE_KEY` (the operator wallet's key).
-3. **Secrets and variables > Actions > Variables:** add `LIQUIDITY_ADDRESS` (your own wallet,
-   receives the 55% to pair on a DEX) and `FEE_RECIPIENT` (the wallet that receives the 1% pool
-   fees).
+3. **Secrets and variables > Actions > Variables:** add `FEE_RECIPIENT` (the wallet that
+   receives the 1% pool fees).
 4. **Pages:** set Source to **GitHub Actions**, then set Custom domain to `kujira.ink` and tick
    **Enforce HTTPS** once it's offered. At the domain registrar, add these DNS records:
    - `A` records for `kujira.ink` (host `@`): `185.199.108.153`, `185.199.109.153`,
@@ -100,7 +100,8 @@ phone browser. The workflows must be on the repository's default branch to show 
 | Workflow | What it does |
 | --- | --- |
 | **Deploy** | Runs the tests, deploys to the chosen network (type `DEPLOY` to confirm), saves the addresses to `deployments/`, and verifies the source on the explorer. Refuses to deploy twice to the same network. |
-| **Airdrop** | `build-list`: finds Ink DEX routers and traders and builds the round's list. `start-round`: publishes it on-chain. `close-round`: after the deadline, returns unclaimed tokens to the pool. |
+| **Launch pool** | Opens trading (type `LAUNCH` to confirm): creates the 1% KUJI/WETH Uniswap pool at the starting market cap (default $10,000; the ETH price comes from Kraken unless you enter one) and adds the operator wallet's KUJI on one side only, so no ETH is needed. The position is minted straight into `KujiraLiquidityLock`. Run it right after Deploy. |
+| **Airdrop** | `build-list`: finds Ink DEX routers and traders and builds the round's list. `start-round`: publishes it on-chain, if the market can carry it (see below). `close-round`: after the deadline, returns unclaimed tokens to the pool. |
 | **Claim page** | Rebuilds the claim page whenever deployments or airdrop files change. |
 | **Test** | Runs the tests on every push. |
 
@@ -116,7 +117,8 @@ browser's wallet if Privy isn't configured or can't be reached.
 - **The Dive.** Scrolling is a descent: the water darkens from surface blue to black, a depth
   gauge reads the zone (Twilight, Midnight, Abyss, Hadal), marine snow drifts down and turns
   bioluminescent in the abyss (`site/dive.js`).
-- **Whale song.** Tapping the whale plays a song synthesized in the browser (no audio file).
+- **Whale song.** "Hear the song" plays `site/audio/song.wav`, rendered from `site/song.js`, while
+  the 52 Hz sonar screen draws it.
 - **Sonar.** Live stats once launched: holders (from the explorer), KUJI staked, and how much
   of the Drop is claimed. Refreshes every 30 seconds.
 - **Drop checker.** Anyone can paste an address to see if it's on a round's list, before or
@@ -142,7 +144,7 @@ The Whalepaper is at `site/whalepaper.html` (kujira.ink/whalepaper).
 
 ```sh
 npm install
-cp .env.example .env   # add PRIVATE_KEY, LIQUIDITY_ADDRESS, FEE_RECIPIENT
+cp .env.example .env   # add PRIVATE_KEY, FEE_RECIPIENT
 npm ci --prefix wallet # Privy login bundle for the site
 npm test
 npm run deploy:ink-sepolia
@@ -199,18 +201,28 @@ snapshot date ahead of time: it's the reason to buy up to Orca and stake.
 Airdrop workflow's `build-list` uses it). Announce what triggers each later round (holder count,
 volume, followers) before it happens.
 
+### The Drop never outgrows the market
+
+`start-round` refuses a round unless everything the Drop has paid or reserved, plus the new
+round, is at most half the KUJI buyers have taken out of the launch pool (`dropCap` in
+`scripts/airdrop/config.js`, checked by `scripts/airdrop/gate.js`). Every KUJI a buyer takes
+was paid for in ETH, so the Drop only ever puts out what the market has already absorbed.
+From a $10,000 start, round 1 (80M, up to 100M with the stake bonus) opens once buyers have
+taken 200M KUJI, a market cap of about $25,000. The refusal says exactly what's still needed.
+
 ## Launch checklist
 
 1. Deploy on Ink mainnet (Actions → Deploy → `ink`). This also deploys `KujiraLiquidityLock`.
-2. From your liquidity wallet, on app.uniswap.org (network: Ink), create a KUJI/ETH position:
-   fee tier **1%**, **full range**, with the 550M KUJI and the ETH you choose. The ETH sets the
-   starting price and how far large trades move it.
-3. Send the position NFT from your wallet to the `KujiraLiquidityLock` address. If the wallet used
-   a plain transfer, call `track(tokenId)` on the lock (anyone can) so it's listed. Post the
-   transaction: the liquidity can never be removed.
-5. Optionally hand Pod and Drop ownership to a multisig (`transferOwnership`, then `acceptOwnership`
+2. Straight after, open trading: Actions → Launch pool → `ink`, market cap `10000`, type
+   `LAUNCH`. The pool starts with KUJI only, from the starting price upward: buyers bring the
+   ETH, nobody can sell below the start, and Drop claimers can only sell into ETH buyers have
+   already put in. The run saves the pool and position to `deployments/ink.json` and the site
+   picks them up. Post the transaction: the liquidity can never be removed.
+3. Start Airdrop round 1 once the market can carry it. The site's Drop section shows how close
+   it is.
+4. Optionally hand Pod and Drop ownership to a multisig (`transferOwnership`, then `acceptOwnership`
    from the multisig) or renounce it once no more reward rounds are planned.
-6. Post the contract addresses, verification links, liquidity lock tx and airdrop contracts on
+5. Post the contract addresses, verification links, liquidity lock tx and airdrop contracts on
    X (@KujiraToken) and the website so people can check everything themselves.
 
 ## Notes

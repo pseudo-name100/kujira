@@ -1,7 +1,7 @@
 # Deploys KUJI from the Actions tab (works from a phone browser).
 # Needs the repository secret PRIVATE_KEY (operator wallet with a little ETH on the
-# chosen network) and the repository variables LIQUIDITY_ADDRESS and FEE_RECIPIENT (the
-# wallet that receives the 1% Uniswap pool fees).
+# chosen network) and the repository variable FEE_RECIPIENT (the wallet that receives the
+# 1% Uniswap pool fees). The liquidity share stays in the operator wallet for Launch pool.
 name: Deploy
 
 on:
@@ -41,7 +41,6 @@ jobs:
       - name: Deploy
         env:
           PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
-          LIQUIDITY_ADDRESS: ${{ vars.LIQUIDITY_ADDRESS }}
           FEE_RECIPIENT: ${{ vars.FEE_RECIPIENT }}
         run: npx hardhat run scripts/deploy.js --network "$NETWORK"
       - name: Save addresses

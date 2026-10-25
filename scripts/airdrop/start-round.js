@@ -5,6 +5,7 @@ const path = require("path");
 const hre = require("hardhat");
 const { rounds } = require("./config");
 const { roundDir } = require("./lib");
+const { checkDropCap } = require("./gate");
 
 async function main() {
   const { ethers, network } = hre;
@@ -25,6 +26,10 @@ async function main() {
   }
 
   const drop = await ethers.getContractAt("KujiraDrop", deployment.KujiraDrop);
+  const total = BigInt(claims.total);
+  const reserve = total + (total * BigInt(cfg.stakeBonusBps)) / 10_000n;
+  // Local test chains without a pool skip the cap; every real network must pass it.
+  if (deployment.launch || !suffix) await checkDropCap(ethers, deployment, drop, reserve);
   const now = (await ethers.provider.getBlock("latest")).timestamp;
   const deadline = now + cfg.claimDays * 24 * 60 * 60;
 
