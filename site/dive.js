@@ -161,10 +161,8 @@
   // Any [data-sing] element starts the song; [data-sing-label] ones also show its state.
   const singers = () => document.querySelectorAll("[data-sing]");
   function setSinging(on, label) {
-    for (const el of singers()) {
-      el.classList.toggle("singing", on);
-      if (el.hasAttribute("data-sing-label")) el.textContent = label;
-    }
+    for (const el of singers()) el.classList.toggle("singing", on);
+    for (const el of document.querySelectorAll("[data-sing-label]")) el.textContent = label;
   }
   function sing() {
     // Ask iOS to treat this as media playback, not an ambient sound.
@@ -185,7 +183,10 @@
       () => setSinging(false, "Tap again to listen")
     );
   }
-  for (const el of singers()) el.addEventListener("click", sing); // home page only
+  for (const el of singers()) {
+    el.addEventListener("click", sing); // home page only
+    el.addEventListener("keydown", (e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), sing()));
+  }
 
   // ------------------------------------------------------------------ the sonar screen
   // A scrolling spectrogram, 0-400 Hz: faint ocean noise, and the 52 Hz whale's pulsed call.

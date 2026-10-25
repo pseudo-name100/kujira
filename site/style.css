@@ -23,7 +23,7 @@
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; background: var(--bg); }
+html { scroll-behavior: smooth; scroll-padding-top: 72px; background: var(--bg); }
 html, body { margin: 0; }
 body {
   background: transparent; /* the fixed #ocean layer shows through */
@@ -67,6 +67,11 @@ nav {
 }
 .nav-mark { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--head); font: 400 20px var(--serif); }
 .nav-mark img { display: block; border-radius: 50%; }
+/* Drop and Pod stay one tap away from anywhere on the page. */
+.nav-links { display: flex; align-items: center; gap: 6px; margin-left: auto; margin-right: 8px; }
+.nav-links a { padding: 8px 12px; border-radius: 999px; color: var(--head); text-decoration: none; font: 700 14px var(--sans); }
+.nav-links a:hover, .nav-links a:focus-visible { background: rgba(63, 198, 234, 0.12); }
+@media (max-width: 400px) { .nav-mark span { display: none; } }
 
 /* ---------------------------------------------------------------- hero: the sonar screen */
 .hero { max-width: 760px; margin: 0 auto; padding: 24px 16px 56px; }
@@ -80,6 +85,14 @@ nav {
 .hz-label { left: 12px; bottom: calc(52 / 400 * 100% + 6px); text-shadow: 0 0 8px rgba(63, 198, 234, 0.8); }
 .axis-label { right: 12px; top: 10px; color: var(--muted); }
 .hero-copy { padding: 34px 4px 0; }
+.sonar-screen[data-sing] { cursor: pointer; }
+.sonar-play {
+  position: absolute; left: 14px; top: 14px; padding: 8px 14px 8px 30px; border-radius: 999px;
+  font: 700 13px var(--sans); color: #00141c; background: var(--accent); pointer-events: none;
+}
+.sonar-play::before { content: ""; position: absolute; left: 13px; top: 50%; margin-top: -5px; border: 5px solid transparent; border-left: 8px solid #00141c; border-right: 0; }
+.sonar-screen.singing .sonar-play { background: rgba(63, 198, 234, 0.25); color: var(--accent-hi); }
+.sonar-screen.singing .sonar-play::before { border-left-color: var(--accent-hi); }
 /* The logo art is on black; screen blending drops the black so the whale sits on the water. */
 .hero-logo { display: block; width: min(230px, 58vw); height: auto; margin: 8px auto 26px; mix-blend-mode: screen; }
 .eyebrow { margin: 0 0 12px; font: 500 13px var(--sans); letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
