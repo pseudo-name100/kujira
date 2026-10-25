@@ -6,6 +6,11 @@ on:
   push:
     branches: [main]
     paths: ["site/**", "wallet/**", "airdrop/**", "deployments/**", "scripts/build-site.js", "scripts/tokenomics.js"]
+  # Deploy and Airdrop commit with the workflow token, which doesn't trigger push
+  # events, so rebuild after they finish too.
+  workflow_run:
+    workflows: [Deploy, Airdrop]
+    types: [completed]
   workflow_dispatch:
 
 permissions:
@@ -20,6 +25,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main # the latest main, including what Deploy or Airdrop just committed
       - uses: actions/setup-node@v4
         with:
           node-version: 22
