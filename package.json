@@ -20,6 +20,7 @@
   "homepage": "https://github.com/pseudo-name100/kujira#readme",
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^6.1.2",
+    "@openzeppelin/merkle-tree": "^1.0.8",
     "dotenv": "^18.0.9",
     "hardhat": "^2.29.1"
   },

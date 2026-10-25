@@ -87,6 +87,17 @@ describe("KujiraPod", function () {
     await expect(pod.connect(alice).withdraw(e(61))).to.be.reverted;
   });
 
+  it("stakeFor credits the beneficiary, who alone can withdraw", async function () {
+    const { alice, bob, token, pod } = await loadFixture(deploy);
+    await pod.connect(bob).stakeFor(alice.address, e(50));
+    expect(await pod.balanceOf(alice.address)).to.equal(e(50));
+    expect(await pod.balanceOf(bob.address)).to.equal(0n);
+    await expect(pod.connect(bob).withdraw(e(50))).to.be.reverted;
+    await pod.connect(alice).withdraw(e(50));
+    expect(await token.balanceOf(alice.address)).to.equal(e(1050));
+    await expect(pod.stakeFor(ethers.ZeroAddress, 1n)).to.be.revertedWithCustomError(pod, "ZeroAddress");
+  });
+
   it("restricts funding to the owner", async function () {
     const { alice, pod } = await loadFixture(deploy);
     await expect(pod.connect(alice).fundRewards(e(1), DAY)).to.be.revertedWithCustomError(

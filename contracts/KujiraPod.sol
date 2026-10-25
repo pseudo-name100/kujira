@@ -65,12 +65,14 @@ contract KujiraPod is Ownable2Step, ReentrancyGuard {
     // --------------------------------------------------------------- stakers
 
     function stake(uint256 amount) external nonReentrant {
-        if (amount == 0) revert ZeroAmount();
-        _updateReward(msg.sender);
-        totalStaked += amount;
-        balanceOf[msg.sender] += amount;
-        token.safeTransferFrom(msg.sender, address(this), amount);
-        emit Staked(msg.sender, amount);
+        _stake(msg.sender, amount);
+    }
+
+    /// @notice Stake the caller's tokens on behalf of `account` (used by KujiraDrop's
+    ///         claim-and-stake). Only `account` can withdraw them.
+    function stakeFor(address account, uint256 amount) external nonReentrant {
+        if (account == address(0)) revert ZeroAddress();
+        _stake(account, amount);
     }
 
     function withdraw(uint256 amount) public nonReentrant {
@@ -129,6 +131,15 @@ contract KujiraPod is Ownable2Step, ReentrancyGuard {
     }
 
     // -------------------------------------------------------------- internal
+
+    function _stake(address account, uint256 amount) internal {
+        if (amount == 0) revert ZeroAmount();
+        _updateReward(account);
+        totalStaked += amount;
+        balanceOf[account] += amount;
+        token.safeTransferFrom(msg.sender, address(this), amount);
+        emit Staked(account, amount);
+    }
 
     function _updateReward(address account) internal {
         if (totalStaked == 0 && lastUpdateTime < periodFinish && block.timestamp > lastUpdateTime) {

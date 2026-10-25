@@ -8,6 +8,7 @@ const DAY = 24 * 60 * 60;
 async function main() {
   const { ethers, network } = hre;
   const [deployer] = await ethers.getSigners();
+  const chainId = Number((await ethers.provider.getNetwork()).chainId);
   const teamAddress = process.env.TEAM_ADDRESS;
 
   const pct = Object.values(cfg.allocations).reduce((a, b) => a + b, 0);
@@ -19,7 +20,7 @@ async function main() {
     throw new Error(`TEAM_ADDRESS ${teamAddress} is not a valid address (check for typos / checksum)`);
   }
 
-  console.log(`Network:  ${network.name} (chainId ${network.config.chainId})`);
+  console.log(`Network:  ${network.name} (chainId ${chainId})`);
   console.log(`Deployer: ${deployer.address}`);
 
   const token = await ethers.deployContract("KujiraToken", [deployer.address]);
@@ -42,6 +43,13 @@ async function main() {
     console.log(`Funded ${ethers.formatEther(rewards)} KUJI over ${cfg.rewardDurationDays} days`);
   }
 
+  const drop = await ethers.deployContract("KujiraDrop", [podAddress, deployer.address]);
+  await drop.waitForDeployment();
+  const dropAddress = await drop.getAddress();
+  const airdrop = share(cfg.allocations.airdrop);
+  if (airdrop > 0n) await (await token.transfer(dropAddress, airdrop)).wait();
+  console.log(`KujiraDrop:  ${dropAddress} (${ethers.formatEther(airdrop)} KUJI pool)`);
+
   let vestingAddress = null;
   const team = share(cfg.allocations.team);
   if (team > 0n) {
@@ -61,10 +69,11 @@ async function main() {
 
   const out = {
     network: network.name,
-    chainId: network.config.chainId,
+    chainId,
     deployer: deployer.address,
     KujiraToken: tokenAddress,
     KujiraPod: podAddress,
+    KujiraDrop: dropAddress,
     VestingWallet: vestingAddress,
     teamAddress: teamAddress || null,
   };
@@ -74,7 +83,7 @@ async function main() {
   fs.writeFileSync(path.join(dir, `${network.name}${suffix}.json`), JSON.stringify(out, null, 2) + "\n");
 
   const left = await token.balanceOf(deployer.address);
-  console.log(`Deployer still holds ${ethers.formatEther(left)} KUJI (liquidity + community)`);
+  console.log(`Deployer still holds ${ethers.formatEther(left)} KUJI (liquidity)`);
 }
 
 main().catch((e) => {
