@@ -60,8 +60,11 @@ phone browser. The workflows must be on the repository's default branch to show 
 2. **Secrets and variables > Actions > Secrets:** add `PRIVATE_KEY` (the operator wallet's key).
 3. **Secrets and variables > Actions > Variables:** add `LIQUIDITY_ADDRESS` (your own wallet,
    receives the 55%) and `TEAM_ADDRESS` (receives the vested 10%).
-4. **Pages:** set Source to **GitHub Actions**. The claim page is then published at
-   `https://<owner>.github.io/<repo>/`.
+4. **Pages:** set Source to **GitHub Actions**, then set Custom domain to `kujira.ink` and tick
+   **Enforce HTTPS** once it's offered. At the domain registrar, add these DNS records:
+   - `A` records for `kujira.ink` (host `@`): `185.199.108.153`, `185.199.109.153`,
+     `185.199.110.153`, `185.199.111.153`
+   - `CNAME` for `www`: `pseudo-name100.github.io`
 
 ### Workflows
 
