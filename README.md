@@ -18,7 +18,7 @@ The utility is **the Pod** (`KujiraPod`): stake KUJI, earn KUJI. The owner can o
 rewards; it cannot touch staked tokens or rewards already deposited, and stakers can
 withdraw whenever they want.
 
-Distribution is **the Drop** (`KujiraDrop`): 10% of supply is locked in a contract and
+Distribution is **the Drop** (`KujiraDrop`): 20% of supply is locked in a contract and
 released in small claim-based airdrop rounds as the project grows. Round 1 goes to Ink DEX
 traders.
 
@@ -42,10 +42,10 @@ Default split (edit `scripts/tokenomics.js` before deploying):
 
 | Bucket | % | Where it goes |
 | --- | --- | --- |
-| Liquidity | 65 | Stays with the deployer to pair on a DEX. Burn or lock the LP tokens afterwards. |
+| Liquidity | 55 | Stays with the deployer to pair on a DEX. Burn or lock the LP tokens afterwards. |
 | Staking rewards | 15 | Deposited into the Pod, streamed over 180 days |
 | Team | 10 | `VestingWallet`: 180-day cliff, then linear over 365 days |
-| Airdrop | 10 | Locked in the Drop, released in rounds |
+| Airdrop | 20 | Locked in the Drop, released in rounds |
 
 ## Running everything from a phone
 
@@ -59,7 +59,7 @@ phone browser. The workflows must be on the repository's default branch to show 
    airdrop rounds. It never holds the liquidity tokens.
 2. **Secrets and variables > Actions > Secrets:** add `PRIVATE_KEY` (the operator wallet's key).
 3. **Secrets and variables > Actions > Variables:** add `LIQUIDITY_ADDRESS` (your own wallet,
-   receives the 65%) and `TEAM_ADDRESS` (receives the vested 10%).
+   receives the 55%) and `TEAM_ADDRESS` (receives the vested 10%).
 4. **Pages:** set Source to **GitHub Actions**. The claim page is then published at
    `https://<owner>.github.io/<repo>/`.
 
@@ -97,13 +97,18 @@ Addresses are written to `deployments/<network>.json`.
 
 ## Airdrop rounds
 
-Round settings live in `scripts/airdrop/config.js`. Round 1 defaults: 10M KUJI (a tenth of
-the pool), 30-day claim window, +25% for claim-and-stake.
+Round settings live in `scripts/airdrop/config.js`. Round 1: 80M KUJI reserved (out of the
+200M pool), 30-day claim window, +25% for claim-and-stake.
 
-**Who qualifies for round 1:** wallets (not contracts) that sent at least 3 successful swaps
-to Ink DEX routers on at least 2 different days in the window, minus anything over 5,000
-swaps (bots) and the `exclude` list. Each wallet's share is weighted by active days, capped at
-10, so habitual traders get more but whales can't take the whole round.
+**Who qualifies for round 1:** the 2,446 wallets that made at least 3 successful swaps through
+Ink DEX routers on at least 10 different days between 2026-01-01 and 2026-10-25, minus
+anything over 5,000 swaps (bots) and the `exclude` list. Each is listed for about 81,766 KUJI.
+(Shares are weighted by active days capped at 10, so with a 10-day minimum they're equal.)
+
+**Oversubscribed, first come first served.** Most listed wallets never claim, so the list adds
+up to 2.5 times what the round reserves (200M listed, 80M reserved). Once the reserve is paid
+out, later claims fail; the claim page shows how much is left. `oversubscribe` in the config
+sets the multiple.
 
 **Which routers count** is decided from on-chain data rather than a hand-made list.
 `discover-routers.js` samples Uniswap v2/v3/v4 and Velodrome swap events across the window,

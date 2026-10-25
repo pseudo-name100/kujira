@@ -6,19 +6,24 @@ const fs = require("fs");
 const path = require("path");
 const { formatEther } = require("ethers");
 const { rounds } = require("./config");
-const { roundDir, allocate, buildTree, readCsv, writeCsv } = require("./lib");
+const { roundDir, filterTraders, allocate, buildTree, readCsv, writeCsv } = require("./lib");
 
 const round = process.argv[2];
 const cfg = rounds[round];
 if (!cfg) throw new Error(`no config for round ${round} in scripts/airdrop/config.js`);
 
 const dir = roundDir(round);
-const traders = readCsv(path.join(dir, "traders.csv")).map((t) => ({
-  address: t.address,
-  activeDays: Number(t.activeDays),
-}));
-const oversubscribe = BigInt(cfg.oversubscribe ?? 1);
-const allocations = allocate(traders, cfg.total * oversubscribe, cfg.maxWeightDays);
+// Re-apply the filters so config changes take effect without collecting again.
+const traders = filterTraders(
+  readCsv(path.join(dir, "traders.csv")).map((t) => ({
+    address: t.address,
+    swaps: Number(t.swaps),
+    activeDays: Number(t.activeDays),
+  })),
+  cfg.eligibility
+);
+const listedTarget = (cfg.total * BigInt(Math.round((cfg.oversubscribe ?? 1) * 100))) / 100n;
+const allocations = allocate(traders, listedTarget, cfg.maxWeightDays);
 const { root, total: listed, claims } = buildTree(allocations);
 // The contract reserves this much; it can't be more than the list adds up to.
 const total = listed < cfg.total ? listed : cfg.total;

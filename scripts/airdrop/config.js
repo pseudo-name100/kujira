@@ -8,13 +8,13 @@ module.exports = {
 
   rounds: {
     1: {
-      // Tokens the round takes from the 100M pool. Keep early rounds small.
-      total: parseEther("10000000"),
+      // Tokens the round takes from the 200M pool.
+      total: parseEther("80000000"),
       // Most listed wallets never claim, so allocations add up to `oversubscribe` times
       // `total` while only `total` is reserved. Claims are first come, first served: once
-      // `total` (plus stake bonuses) is paid out, later claims fail. 3 covers a claim
-      // rate up to a third of the listed amount.
-      oversubscribe: 3,
+      // `total` (plus stake bonuses) is paid out, later claims fail. 2.5 covers a claim
+      // rate up to 40% of the listed amount.
+      oversubscribe: 2.5,
       claimDays: 30,
       stakeBonusBps: 2500, // claim-and-stake gets +25%
 
@@ -43,7 +43,7 @@ module.exports = {
         to: "2026-10-25",
         // Sybil and bot filters
         minSwaps: 3,
-        minActiveDays: 2, // distinct UTC days with at least one swap
+        minActiveDays: 10, // distinct UTC days with at least one swap
         maxSwaps: 5000, // above this is almost certainly a bot
         exclude: [], // addresses to leave out (team, deployer, known bots)
       },
