@@ -100,10 +100,10 @@ Addresses are written to `deployments/<network>.json`.
 Round settings live in `scripts/airdrop/config.js`. Round 1: 80M KUJI reserved (out of the
 200M pool), 30-day claim window, +25% for claim-and-stake.
 
-**Who qualifies for round 1:** the 2,446 wallets that made at least 3 successful swaps through
-Ink DEX routers on at least 10 different days between 2026-01-01 and 2026-10-25, minus
-anything over 5,000 swaps (bots) and the `exclude` list. Each is listed for about 81,766 KUJI.
-(Shares are weighted by active days capped at 10, so with a 10-day minimum they're equal.)
+**Who qualifies for round 1:** the 14,981 wallets that made at least 3 successful swaps through
+Ink DEX routers on at least 2 different days between 2026-01-01 and 2026-10-25, minus
+anything over 5,000 swaps (bots) and the `exclude` list. Shares are weighted by active days,
+capped at 10: about 5,585 KUJI for 2 days up to about 27,924 KUJI for 10 or more.
 
 **Oversubscribed, first come first served.** Most listed wallets never claim, so the list adds
 up to 2.5 times what the round reserves (200M listed, 80M reserved). Once the reserve is paid

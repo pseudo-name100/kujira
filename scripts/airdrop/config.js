@@ -43,7 +43,7 @@ module.exports = {
         to: "2026-10-25",
         // Sybil and bot filters
         minSwaps: 3,
-        minActiveDays: 10, // distinct UTC days with at least one swap
+        minActiveDays: 2, // distinct UTC days with at least one swap
         maxSwaps: 5000, // above this is almost certainly a bot
         exclude: [], // addresses to leave out (team, deployer, known bots)
       },
