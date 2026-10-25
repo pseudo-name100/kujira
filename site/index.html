@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kujira · The Deep</title>
+  <meta name="description" content="Claim your KUJI airdrop and stake in the Pod on Ink.">
+  <meta name="theme-color" content="#04121c">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <span class="logo" aria-hidden="true">🐋</span>
+      <div>
+        <h1>Kujira</h1>
+        <p class="sub">Something has been growing in the deep.</p>
+      </div>
+    </div>
+    <button id="connect" class="btn primary">Connect wallet</button>
+  </header>
+
+  <main>
+    <p id="notice" class="notice" hidden></p>
+
+    <section class="card" id="drop-card">
+      <h2>Airdrop</h2>
+      <p class="muted">Claim to your wallet, or claim straight into the Pod for a bonus.</p>
+      <div id="rounds"><p class="muted">Connect your wallet to check if you're eligible.</p></div>
+    </section>
+
+    <section class="card" id="pod-card">
+      <h2>The Pod</h2>
+      <p class="muted">Stake KUJI, earn KUJI. Withdraw any time.</p>
+      <dl class="stats">
+        <div><dt>Total staked</dt><dd id="pod-total">–</dd></div>
+        <div><dt>Rewards end</dt><dd id="pod-end">–</dd></div>
+        <div><dt>Your stake</dt><dd id="pod-mine">–</dd></div>
+        <div><dt>Your rewards</dt><dd id="pod-earned">–</dd></div>
+        <div><dt>Wallet</dt><dd id="wallet-bal">–</dd></div>
+      </dl>
+      <div class="row">
+        <input id="amount" inputmode="decimal" placeholder="Amount of KUJI" autocomplete="off">
+        <button id="max" class="btn ghost">Max</button>
+      </div>
+      <div class="actions">
+        <button id="stake" class="btn primary" disabled>Stake</button>
+        <button id="withdraw" class="btn" disabled>Withdraw</button>
+        <button id="claim-rewards" class="btn" disabled>Claim rewards</button>
+      </div>
+    </section>
+
+    <section class="card small">
+      <h2>Contracts</h2>
+      <ul id="contracts" class="links"><li class="muted">Loading…</li></ul>
+      <p class="muted">Fixed supply. No mint, no tax, no blacklist. Every contract is verified on the explorer.</p>
+    </section>
+  </main>
+
+  <footer>
+    <a href="https://x.com/KujiraToken" rel="noopener">@KujiraToken</a>
+  </footer>
+
+  <script src="ethers.umd.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+# Runs one step of an airdrop round from the Actions tab.
+#   build-list   find Ink DEX routers and traders, build the round's list (no key needed)
+#   start-round  publish the list's Merkle root to KujiraDrop (uses PRIVATE_KEY)
+#   close-round  return a finished round's unclaimed tokens to the pool (uses PRIVATE_KEY)
+name: Airdrop
+
+on:
+  workflow_dispatch:
+    inputs:
+      round:
+        description: Round number (as in scripts/airdrop/config.js)
+        required: true
+        default: "1"
+      step:
+        description: Step
+        type: choice
+        options: [build-list, start-round, close-round]
+      network:
+        description: Network for start-round / close-round
+        type: choice
+        options: [inkSepolia, ink]
+        default: inkSepolia
+
+permissions:
+  contents: write
+
+concurrency: airdrop
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    env:
+      ROUND: ${{ inputs.round }}
+      STEP: ${{ inputs.step }}
+      NETWORK: ${{ inputs.network }}
+    steps:
+      - name: Check round number
+        run: |
+          if ! [[ "$ROUND" =~ ^[0-9]+$ ]]; then echo "Round must be a number"; exit 1; fi
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      - name: Build list
+        if: inputs.step == 'build-list'
+        run: |
+          node scripts/airdrop/discover-routers.js "$ROUND"
+          node scripts/airdrop/collect-dex-traders.js "$ROUND"
+          node scripts/airdrop/build-round.js "$ROUND"
+      - name: Start round
+        if: inputs.step == 'start-round'
+        env:
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+        run: npx hardhat run scripts/airdrop/start-round.js --network "$NETWORK"
+      - name: Close round
+        if: inputs.step == 'close-round'
+        env:
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+        run: npx hardhat run scripts/airdrop/close-round.js --network "$NETWORK"
+
+      - name: Save files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add airdrop
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Airdrop round $ROUND: $STEP ($NETWORK)"
+          git push

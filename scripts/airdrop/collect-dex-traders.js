@@ -1,6 +1,7 @@
 // Usage: node scripts/airdrop/collect-dex-traders.js <round>
-// Pulls every transaction sent to the configured DEX routers from Ink's Blockscout
+// Pulls every transaction sent to the DEX routers (routers.json plus config) from Ink's Blockscout
 // explorer and writes airdrop/round-<n>/traders.csv with the wallets that pass the filters.
+const fs = require("fs");
 const path = require("path");
 const { explorerApi, rounds } = require("./config");
 const { roundDir, aggregateTraders, filterTraders, writeCsv } = require("./lib");
@@ -49,10 +50,14 @@ async function main() {
   const cfg = rounds[round];
   if (!cfg) throw new Error(`no config for round ${round} in scripts/airdrop/config.js`);
   const e = cfg.eligibility;
-  if (e.routers.length === 0) throw new Error("add DEX router addresses to eligibility.routers first");
+  const discovered = path.join(roundDir(round), "routers.json");
+  const routers = [...e.routers];
+  if (fs.existsSync(discovered)) routers.push(...JSON.parse(fs.readFileSync(discovered, "utf8")).routers);
+  if (routers.length === 0) throw new Error("run discover-routers.js or add addresses to eligibility.routers");
 
   const all = [];
-  for (const r of e.routers) {
+  const unique = [...new Map(routers.map((r) => [r.address.toLowerCase(), r])).values()];
+  for (const r of unique) {
     console.log(`${r.name} (${r.address})`);
     all.push(...(await routerTransactions(r.address, Date.parse(e.from))));
   }

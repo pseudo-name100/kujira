@@ -3,6 +3,7 @@ const { parseEther } = require("ethers");
 // Round settings. Round numbers here are 1-based; on-chain round ids start at 0.
 module.exports = {
   explorerApi: "https://explorer.inkonchain.com/api/v2",
+  rpcUrl: process.env.INK_RPC_URL || "https://rpc-gel.inkonchain.com",
 
   rounds: {
     1: {
@@ -12,12 +13,17 @@ module.exports = {
       stakeBonusBps: 2500, // claim-and-stake gets +25%
 
       eligibility: {
-        // Router contracts of the Ink DEXes to count. Traders send their swap
-        // transactions to these, so their senders are the traders. Take the addresses
-        // from each DEX's official docs and check them on explorer.inkonchain.com.
+        // DEX routers to count. Leave empty to use airdrop/round-<n>/routers.json from
+        // discover-routers.js; entries here are added on top of that file.
         routers: [
           // { name: "Example DEX router", address: "0x..." },
         ],
+        discovery: {
+          slices: 24, // sample slices spread evenly over the window
+          blocksPerSlice: 10000, // ~2.8 hours each at 1s blocks
+          minSenders: 10, // distinct wallets in the sample
+          minSwapShare: 0.8, // share of the contract's latest 50 transactions that are swaps
+        },
         // Only count swaps in this window (ISO dates, UTC).
         from: "2026-01-01",
         to: "2026-10-25",

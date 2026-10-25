@@ -19,6 +19,11 @@ async function main() {
   const claimsFile = path.join(roundDir(round), "claims.json");
   const claims = JSON.parse(fs.readFileSync(claimsFile, "utf8"));
 
+  claims.started ||= {};
+  if (claims.started[network.name]) {
+    throw new Error(`round ${round} already started on ${network.name} as id ${claims.started[network.name].roundId}`);
+  }
+
   const drop = await ethers.getContractAt("KujiraDrop", deployment.KujiraDrop);
   const now = (await ethers.provider.getBlock("latest")).timestamp;
   const deadline = now + cfg.claimDays * 24 * 60 * 60;
@@ -27,9 +32,13 @@ async function main() {
   const tx = await drop.startRound(claims.root, claims.total, deadline, cfg.stakeBonusBps);
   await tx.wait();
 
-  claims.roundId = Number(id);
-  claims.deadline = deadline;
-  claims.stakeBonusBps = cfg.stakeBonusBps;
+  claims.started[network.name] = {
+    roundId: Number(id),
+    deadline,
+    stakeBonusBps: cfg.stakeBonusBps,
+    drop: deployment.KujiraDrop,
+    tx: tx.hash,
+  };
   fs.writeFileSync(claimsFile, JSON.stringify(claims, null, 2) + "\n");
 
   console.log(`Started round ${round} as on-chain id ${id} (tx ${tx.hash})`);
