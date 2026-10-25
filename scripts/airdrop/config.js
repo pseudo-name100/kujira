@@ -15,6 +15,9 @@ module.exports = {
       // `total` (plus stake bonuses) is paid out, later claims fail. 2.5 covers a claim
       // rate up to 40% of the listed amount.
       oversubscribe: 2.5,
+      // If set, every eligible wallet is listed for exactly this amount instead of a
+      // weighted share of `total * oversubscribe`. Only `total` is still reserved.
+      amountEach: parseEther("81766"),
       claimDays: 30,
       stakeBonusBps: 2500, // claim-and-stake gets +25%
 

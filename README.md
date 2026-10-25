@@ -102,13 +102,14 @@ Round settings live in `scripts/airdrop/config.js`. Round 1: 80M KUJI reserved (
 
 **Who qualifies for round 1:** the 14,981 wallets that made at least 3 successful swaps through
 Ink DEX routers on at least 2 different days between 2026-01-01 and 2026-10-25, minus
-anything over 5,000 swaps (bots) and the `exclude` list. Shares are weighted by active days,
-capped at 10: about 5,585 KUJI for 2 days up to about 27,924 KUJI for 10 or more.
+anything over 5,000 swaps (bots) and the `exclude` list. Every one of them is listed for
+81,766 KUJI (`amountEach` in the config).
 
-**Oversubscribed, first come first served.** Most listed wallets never claim, so the list adds
-up to 2.5 times what the round reserves (200M listed, 80M reserved). Once the reserve is paid
-out, later claims fail; the claim page shows how much is left. `oversubscribe` in the config
-sets the multiple.
+**First come, first served.** The listed amounts add up to about 1.22B KUJI, but the round
+reserves 80M (plus up to 20M for stake bonuses). Payouts stop when the reserve is used up,
+which is about the first 980 claims (fewer if claimers take the stake bonus); later claims
+fail. The contract can never pay out more than the reserve, and the claim page shows how much
+is left.
 
 **Which routers count** is decided from on-chain data rather than a hand-made list.
 `discover-routers.js` samples Uniswap v2/v3/v4 and Velodrome swap events across the window,

@@ -23,7 +23,9 @@ const traders = filterTraders(
   cfg.eligibility
 );
 const listedTarget = (cfg.total * BigInt(Math.round((cfg.oversubscribe ?? 1) * 100))) / 100n;
-const allocations = allocate(traders, listedTarget, cfg.maxWeightDays);
+const allocations = cfg.amountEach
+  ? traders.map((t) => ({ address: t.address, amount: cfg.amountEach }))
+  : allocate(traders, listedTarget, cfg.maxWeightDays);
 const { root, total: listed, claims } = buildTree(allocations);
 // The contract reserves this much; it can't be more than the list adds up to.
 const total = listed < cfg.total ? listed : cfg.total;
