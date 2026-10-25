@@ -122,9 +122,10 @@ async function main() {
   }
 
   // 3. Keep widely used contracts whose recent transactions are mostly swaps
+  const excluded = new Set((e.excludeRouters || []).map((r) => getAddress(r.address)));
   const routers = [];
   for (const [address, g] of byTarget) {
-    if (g.senders.size < d.minSenders || address === ENTRYPOINT) continue;
+    if (g.senders.size < d.minSenders || address === ENTRYPOINT || excluded.has(address)) continue;
     const page = await getJson(`${explorerApi}/addresses/${address}/transactions?filter=to`);
     const items = page.items || [];
     if (items.length === 0) continue;

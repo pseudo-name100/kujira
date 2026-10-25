@@ -16,7 +16,15 @@ module.exports = {
         // DEX routers to count. Leave empty to use airdrop/round-<n>/routers.json from
         // discover-routers.js; entries here are added on top of that file.
         routers: [
-          // { name: "Example DEX router", address: "0x..." },
+          // Velodrome's router also handles liquidity, so discovery's 80%-swaps test drops it.
+          { name: "Velodrome UniversalRouter", address: "0x01D40099fCD87C018969B0e8D4aB1633Fb34763C" },
+        ],
+        // Never count these, even if discovery picks them up.
+        excludeRouters: [
+          {
+            address: "0x3E23E075f27a2c67Eda58790121e22B2aae2a4d9",
+            reason: "Wallet farm: all txs in one 50-minute burst on 2026-10-13 from scripted wallets",
+          },
         ],
         discovery: {
           slices: 24, // sample slices spread evenly over the window

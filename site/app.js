@@ -61,6 +61,32 @@
     }
   }
 
+  const ALLOC_NOTES = {
+    liquidity: "Paired on an Ink DEX. LP tokens burned or locked.",
+    stakingRewards: "Paid to the Pod over time from a fixed pool.",
+    team: "Locked, then vested slowly.",
+    airdrop: "Locked in the Drop, released in claim rounds.",
+  };
+  const ALLOC_NAMES = { liquidity: "Liquidity", stakingRewards: "Pod rewards", team: "Team", airdrop: "The Drop" };
+
+  async function loadSite() {
+    const [site, links] = await Promise.all(
+      ["data/site.json", "links.json"].map((f) => fetch(f, { cache: "no-store" }).then((r) => (r.ok ? r.json() : {})))
+    );
+    $("alloc").innerHTML = Object.entries(site.allocations || {})
+      .map(
+        ([k, pct]) =>
+          `<li><div class="label"><b>${ALLOC_NAMES[k] || k}</b><span>${pct}%</span></div>` +
+          `<div class="track"><div class="fill" style="width:${pct}%"></div></div>` +
+          `<div class="note">${ALLOC_NOTES[k] || ""}</div></li>`
+      )
+      .join("");
+    if (links.buy) {
+      $("buy").href = links.buy;
+      $("buy").hidden = false;
+    }
+  }
+
   async function loadData() {
     const res = await fetch(`data/${network}.json`, { cache: "no-store" });
     if (!res.ok) throw new Error("KUJI hasn't launched on this network yet.");
@@ -68,7 +94,7 @@
     reader = new ethers.JsonRpcProvider(data.rpc, data.chainId, { staticNetwork: true });
     const c = data.contracts;
     const link = (label, addr) =>
-      `<li>${label}: <a href="${data.explorer}/address/${addr}" rel="noopener">${addr.slice(0, 8)}…${addr.slice(-6)}</a></li>`;
+      `<li>${label}<br><a href="${data.explorer}/address/${addr}" rel="noopener" class="addr">${addr.slice(0, 8)}…${addr.slice(-6)}</a></li>`;
     $("contracts").innerHTML =
       link("KUJI token", c.KujiraToken) +
       link("Pod (staking)", c.KujiraPod) +
@@ -112,6 +138,7 @@
       signer = await provider.getSigner();
       account = await signer.getAddress();
       $("connect").textContent = account.slice(0, 6) + "…" + account.slice(-4);
+      $("connect").classList.add("addr");
       eth.on?.("accountsChanged", () => location.reload());
       eth.on?.("chainChanged", () => location.reload());
       notice("");
@@ -134,7 +161,7 @@
     const open = data.rounds.filter((r) => !r.closed && r.deadline > now);
     if (!account) return;
     if (open.length === 0) {
-      box.innerHTML = `<p class="muted">No airdrop round is open right now. Follow @KujiraToken for the next one.</p>`;
+      box.innerHTML = `<p class="muted">The water is still. No round is open right now. Follow @KujiraToken for the next one.</p>`;
       return;
     }
     const drop = new ethers.Contract(data.contracts.KujiraDrop, DROP_ABI, reader);
@@ -146,7 +173,7 @@
       div.className = "round";
       const head = `<span class="pill">Round ${r.round} · closes ${date(r.deadline)}</span>`;
       if (!mine) {
-        div.innerHTML = `${head}<p class="muted" style="margin-top:8px">This wallet isn't on the round ${r.round} list.</p>`;
+        div.innerHTML = `${head}<p class="muted">This wallet isn't on the round ${r.round} list.</p>`;
         box.append(div);
         continue;
       }
@@ -161,7 +188,7 @@
         `${head}<p class="amount">${fmt(amount)}</p>` +
         `<div class="actions"><button class="btn">Claim</button>` +
         `<button class="btn primary">Claim &amp; stake +${r.stakeBonusBps / 100}%</button></div>` +
-        `<p class="muted" style="margin:10px 0 0">Claim &amp; stake puts ${fmt(amount + bonus)} in the Pod, earning rewards. Withdraw any time.</p>`;
+        `<p class="muted">Claim &amp; stake puts ${fmt(amount + bonus)} in the Pod, earning rewards. Withdraw any time.</p>`;
       const [plain, staked] = div.querySelectorAll("button");
       const d = new ethers.Contract(data.contracts.KujiraDrop, DROP_ABI, signer);
       plain.onclick = () => send("Claim", () => d.claim(r.roundId, amount, mine.proof));
@@ -226,6 +253,7 @@
     send("Claim rewards", () => pod.claim());
   };
 
+  loadSite().catch(() => {});
   loadData()
     .then(async () => {
       await refresh();

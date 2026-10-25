@@ -22,6 +22,15 @@ fs.rmSync(out, { recursive: true, force: true });
 fs.cpSync(path.join(root, "site"), out, { recursive: true });
 fs.copyFileSync(require.resolve("ethers").replace(/lib\.commonjs.*$/, "dist/ethers.umd.min.js"), path.join(out, "ethers.umd.min.js"));
 fs.mkdirSync(path.join(out, "data"));
+fs.mkdirSync(path.join(out, "fonts"));
+for (const w of [300, 400, 600, 800]) {
+  fs.copyFileSync(
+    path.join(root, "node_modules/@fontsource/poppins/files", `poppins-latin-${w}-normal.woff2`),
+    path.join(out, "fonts", `poppins-${w}.woff2`)
+  );
+}
+const { allocations } = require("./tokenomics");
+fs.writeFileSync(path.join(out, "data", "site.json"), JSON.stringify({ allocations }, null, 2) + "\n");
 
 const roundDirs = fs.existsSync(path.join(root, "airdrop"))
   ? fs.readdirSync(path.join(root, "airdrop")).filter((d) => /^round-\d+$/.test(d))
