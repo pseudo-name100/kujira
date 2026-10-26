@@ -83,6 +83,9 @@ function start({ appId, chainId, logo }) {
           landingHeader: "Enter the deep",
           walletChainType: "ethereum-only",
           showWalletLoginFirst: true,
+          // Wallets Ink traders actually use, listed by name so they show even when Privy
+          // can't detect them; any other installed wallet appears under detected wallets.
+          walletList: ["detected_ethereum_wallets", "metamask", "rabby_wallet", "zerion", "rainbow", "okx_wallet", "coinbase_wallet", "wallet_connect"],
         },
         embeddedWallets: { ethereum: { createOnLogin: "users-without-wallets" } },
         defaultChain: chain,
