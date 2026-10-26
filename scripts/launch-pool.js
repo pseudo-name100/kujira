@@ -1,4 +1,4 @@
-// Usage: MARKET_CAP_USD=10000 [ETH_USD=3500] npx hardhat run scripts/launch-pool.js --network ink
+// Usage: MARKET_CAP_USD=15500 [ETH_USD=3500] npx hardhat run scripts/launch-pool.js --network ink
 // Opens trading, one-sided: creates the 1% KUJI/WETH Uniswap v3 pool at the starting market
 // cap and adds the deployer's KUJI in a range from that price upward. No ETH goes in; buyers
 // bring it. The position is minted straight to KujiraLiquidityLock, so it is locked from the
@@ -21,7 +21,7 @@ async function main() {
   if (d.launch) throw new Error(`already launched: pool ${d.launch.pool}, position #${d.launch.positionId}`);
   if (!d.KujiraLiquidityLock) throw new Error("no KujiraLiquidityLock in the deployment");
 
-  const marketCapUsd = Number(process.env.MARKET_CAP_USD || 10000);
+  const marketCapUsd = Number(process.env.MARKET_CAP_USD || 15500);
   if (!(marketCapUsd > 0)) throw new Error("MARKET_CAP_USD must be a positive number");
   const ethUsd = await ethPriceUsd();
 

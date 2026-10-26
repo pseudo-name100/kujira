@@ -101,7 +101,7 @@ phone browser. The workflows must be on the repository's default branch to show 
 | Workflow | What it does |
 | --- | --- |
 | **Deploy** | Runs the tests, deploys to the chosen network (type `DEPLOY` to confirm), saves the addresses to `deployments/`, and verifies the source on the explorer. Refuses to deploy twice to the same network. |
-| **Launch pool** | Opens trading (type `LAUNCH` to confirm): creates the 1% KUJI/WETH Uniswap pool at the starting market cap (default $10,000; the ETH price comes from Kraken unless you enter one) and adds the operator wallet's KUJI on one side only, so no ETH is needed. The position is minted straight into `KujiraLiquidityLock`. Run it right after Deploy. |
+| **Launch pool** | Opens trading (type `LAUNCH` to confirm): creates the 1% KUJI/WETH Uniswap pool at the starting market cap (default $15,500; the ETH price comes from Kraken unless you enter one) and adds the operator wallet's KUJI on one side only, so no ETH is needed. The position is minted straight into `KujiraLiquidityLock`. Run it right after Deploy. |
 | **Airdrop** | `build-list`: finds Ink DEX routers and traders and builds the round's list. `start-round`: publishes it on-chain, if the market can carry it (see below). `close-round`: after the deadline, returns unclaimed tokens to the pool. |
 | **Claim page** | Rebuilds the claim page whenever deployments or airdrop files change. |
 | **Test** | Runs the tests on every push. |
@@ -210,6 +210,10 @@ rounds. Build it after round 1 is closed; the Drop cap still decides when it can
 tax put in the fee wallet to the `KujiraDrop` address and post the transaction. It becomes
 part of round 2.
 
+**Round 3: the loyal pod.** Same method over a longer window: 8 hidden snapshots, one a
+week, any wallet holding 100,000+ (Dolphin) at all of them, at its lowest, Pod KUJI at its
+boost. It takes everything left in the Drop (`keep: 0n`). Build it after round 2 is closed.
+
 Older single-snapshot whale rounds (no `snapshots`) still use `collect-kuji-holders.js`.
 
 `node scripts/airdrop/build-list.js <round>` runs the right steps for either kind of round (the
@@ -222,13 +226,13 @@ volume, followers) before it happens.
 round, is at most half the KUJI buyers have taken out of the launch pool (`dropCap` in
 `scripts/airdrop/config.js`, checked by `scripts/airdrop/gate.js`). Every KUJI a buyer takes
 was paid for in ETH, so the Drop only ever puts out what the market has already absorbed.
-From a $10,000 start, round 1 (80M, up to 100M with the stake bonus) opens once buyers have
-taken 200M KUJI, a market cap of about $25,000. The refusal says exactly what's still needed.
+From a $15,500 start, round 1 (80M, up to 100M with the stake bonus) opens once buyers have
+taken 200M KUJI, a market cap of about $38,000. The refusal says exactly what's still needed.
 
 ## Launch checklist
 
 1. Deploy on Ink mainnet (Actions → Deploy → `ink`). This also deploys `KujiraLiquidityLock`.
-2. Straight after, open trading: Actions → Launch pool → `ink`, market cap `10000`, type
+2. Straight after, open trading: Actions → Launch pool → `ink`, market cap `15500`, type
    `LAUNCH`. The pool starts with KUJI only, from the starting price upward: buyers bring the
    ETH, nobody can sell below the start, and Drop claimers can only sell into ETH buyers have
    already put in. The run saves the pool and position to `deployments/ink.json` and the site

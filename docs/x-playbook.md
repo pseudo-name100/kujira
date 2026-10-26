@@ -117,7 +117,7 @@ one has a reason to share their card.
 >
 > 14,981 wallets that trade on Ink are on the first Drop list. 81,766 $KUJI each.
 >
-> Round 1 opens once the market can carry it: when buyers have taken 200M $KUJI from the pool, about a $25k market cap. First come, first served.
+> Round 1 opens once the market can carry it: when buyers have taken 200M $KUJI from the pool, about a $38k market cap. First come, first served.
 >
 > Check yours: kujira.ink
 
@@ -173,9 +173,9 @@ Post the thread in order, then pin it in place of the Whalepaper post.
 
 > 3/ Liquidity is in a 1% Uniswap pool, owned by a lock contract with no way to remove it: [LOCK]
 >
-> It started at a $10k market cap with KUJI only. No presale, no insider ETH: every ETH in the pool came from a buyer. The pool's 1% fee goes to the fisherman.
+> It started at a $15.5k market cap with KUJI only. No presale, no insider ETH: every ETH in the pool came from a buyer. The pool's 1% fee goes to the fisherman.
 
-> 4/ The Drop never outgrows the market. Round 1 (14,981 Ink traders, 81,766 $KUJI each) opens once buyers have taken 200M $KUJI from the pool, about a $25k market cap.
+> 4/ The Drop never outgrows the market. Round 1 (14,981 Ink traders, 81,766 $KUJI each) opens once buyers have taken 200M $KUJI from the pool, about a $38k market cap.
 >
 > Watch it fill on kujira.ink. Claim straight into the Pod for +25%.
 
@@ -206,6 +206,12 @@ Post the thread in order, then pin it in place of the Whalepaper post.
 > Hold 1M+ $KUJI the whole time, in your wallet or the Pod. You count at your lowest. Pod KUJI counts at its boost, up to 2.5x.
 >
 > 50M $KUJI to start, plus everything round 1 left unclaimed, plus every KUJI the snipers paid in launch tax.
+
+> Round 3 is for the whole pod.
+>
+> Eight weeks, eight hidden snapshots. Hold 100K+ $KUJI through all of them, wallet or Pod, and share everything left in the Drop.
+>
+> Dolphins welcome. 🐋
 
 > The snipers paid [N] $KUJI in launch tax.
 >

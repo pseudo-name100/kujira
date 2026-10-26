@@ -15,7 +15,7 @@ on:
       market_cap_usd:
         description: Starting market cap in USD
         required: true
-        default: "10000"
+        default: "15500"
       eth_usd:
         description: ETH price in USD (leave empty to use Kraken's price)
         required: false

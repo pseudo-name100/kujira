@@ -9,7 +9,7 @@ module.exports = {
   // The Drop never outgrows the market (gate.js). Everything the Drop has paid or reserved,
   // plus a new round, must be at most this share of the KUJI buyers have taken out of the
   // launch pool. At 50%, round 1 (80M, up to 100M with the stake bonus) opens once buyers
-  // have taken 200M KUJI: about a $25k market cap from a $10k start.
+  // have taken 200M KUJI: about a $38k market cap from a $15.5k start.
   dropCap: { shareOfBoughtBps: 5000 },
 
   rounds: {
@@ -74,12 +74,29 @@ module.exports = {
       // Size: everything the Drop has free beyond `keep`, leaving room for the stake bonus.
       // With round 1 fully claimed that's 50M; round 1's leftovers and any launch-tax KUJI
       // sent to the Drop make it bigger. `keep` stays in the Drop for later rounds.
-      sizeFromPool: { keep: parseEther("87500000") },
+      sizeFromPool: { keep: parseEther("87500000") }, // kept for round 3
       claimDays: 30,
       stakeBonusBps: 2500,
       eligibility: {
         minHeld: parseEther("1000000"), // Orca and up
         exclude: [], // known exchange or bridge wallets
+      },
+      weightCap: parseEther("10000000"),
+    },
+
+    // Round 3: the loyal pod, any size from Dolphin up. Same hidden-snapshot method as round
+    // 2 over a longer window: 8 snapshots, one a week, each wallet at its lowest, Pod KUJI at
+    // its boost. Takes everything left in the Drop. Build it after round 2 is closed.
+    3: {
+      source: "kuji-holders",
+      network: "ink",
+      snapshots: { count: 8, from: "2027-01-05T00:00:00Z", to: "2027-03-02T00:00:00Z" }, // set when announced
+      sizeFromPool: { keep: 0n },
+      claimDays: 30,
+      stakeBonusBps: 2500,
+      eligibility: {
+        minHeld: parseEther("100000"), // Dolphin and up
+        exclude: [],
       },
       weightCap: parseEther("10000000"),
     },
