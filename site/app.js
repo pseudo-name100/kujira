@@ -246,7 +246,22 @@
     return window.ethereum || null;
   }
 
-  async function connect({ silent = false } = {}) {
+  // One connection attempt at a time: a second tap, or the silent reconnect on page load,
+  // joins the attempt in flight instead of starting another.
+  let connecting = null;
+  function connect(opts = {}) {
+    if (connecting) return connecting;
+    const btn = $("connect");
+    const label = btn.textContent;
+    if (!account) btn.textContent = "Connecting…";
+    connecting = connectNow(opts).finally(() => {
+      connecting = null;
+      if (!account) btn.textContent = label === "Connecting…" ? "Connect" : label;
+    });
+    return connecting;
+  }
+
+  async function connectNow({ silent = false } = {}) {
     if (account && !silent) {
       if (confirm("Disconnect this wallet?")) {
         remember(false);
@@ -282,8 +297,14 @@
       }
       $("connect").textContent = short(account);
       $("connect").classList.add("addr");
-      eth.on?.("accountsChanged", () => location.reload());
-      eth.on?.("chainChanged", () => location.reload());
+      // Wallets often repeat these events while connecting; reload only on a real change.
+      eth.on?.("accountsChanged", (accts) => {
+        const next = accts?.[0];
+        if (!next || next.toLowerCase() !== account.toLowerCase()) location.reload();
+      });
+      eth.on?.("chainChanged", (id) => {
+        if (launched() && Number(id) !== data.chainId) location.reload();
+      });
       if (!$("check-addr").value) $("check-addr").value = account;
       notice("");
       checkWallet(account);
