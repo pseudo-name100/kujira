@@ -192,11 +192,25 @@ The steps (the Airdrop workflow runs them for you):
 The `airdrop/round-<n>/` files are committed so anyone can check the list against the
 on-chain root.
 
-**Whale-only rounds** (`source: "kuji-holders"`, round 2 in the config is an example) snapshot
-every holder's wallet balance plus Pod stake (`collect-kuji-holders.js`), leaving out contracts,
-the burn address and the liquidity wallet. Holders at or above `minHeld` (1,000,000 KUJI, Orca
-size) are listed, with shares by KUJI held counted up to `weightCap` (10,000,000). Announce the
-snapshot date ahead of time: it's the reason to buy up to Orca and stake.
+**Round 2: whales who hold** (`source: "kuji-holders"` with `snapshots`,
+`collect-holding-snapshots.js`). Announce a four-week window, not the snapshots. When it
+ends, the hash of the window's last block picks one hidden block in each week (anyone can
+recompute them), and every wallet's KUJI, wallet plus Pod, is read at all four. A wallet
+must hold 1,000,000+ (Orca) at every snapshot. It counts at its lowest, KUJI in the Pod
+counts at its Pod boost (up to 2.5x), and anything above 10,000,000 counts as 10,000,000.
+Buying in for a week, or selling in between, gets little or nothing. Contracts and the
+project's wallets are left out.
+
+The round is sized from what the Drop has free (`sizeFromPool`): 50M if round 1 was fully
+claimed, plus round 1's unclaimed KUJI (returned to the pool when anyone calls `closeRound`
+after its 30 days) and any launch-tax KUJI sent to the Drop. 87.5M stays in the Drop for later
+rounds. Build it after round 1 is closed; the Drop cap still decides when it can start.
+
+**The launch-tax KUJI goes to the holders.** After the 30-minute window, send everything the
+tax put in the fee wallet to the `KujiraDrop` address and post the transaction. It becomes
+part of round 2.
+
+Older single-snapshot whale rounds (no `snapshots`) still use `collect-kuji-holders.js`.
 
 `node scripts/airdrop/build-list.js <round>` runs the right steps for either kind of round (the
 Airdrop workflow's `build-list` uses it). Announce what triggers each later round (holder count,

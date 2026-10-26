@@ -201,9 +201,17 @@ Post the thread in order, then pin it in place of the Whalepaper post.
 
 > A whale round is coming.
 >
-> On [DATE] the fisherman takes a snapshot of every $KUJI holder, wallet and Pod together. Orca size and up (1M+) share 25M $KUJI.
+> From [START] to [END], the fisherman listens four times, once a week, at moments nobody knows. Not even him: the chain picks them when the window closes.
 >
-> No tricks: the list will be published, like the last one.
+> Hold 1M+ $KUJI the whole time, in your wallet or the Pod. You count at your lowest. Pod KUJI counts at its boost, up to 2.5x.
+>
+> 50M $KUJI to start, plus everything round 1 left unclaimed, plus every KUJI the snipers paid in launch tax.
+
+> The snipers paid [N] $KUJI in launch tax.
+>
+> All of it just went to the Drop for the whale round: [TX]
+>
+> The fisherman keeps none of the whale.
 
 > The first Orcas have entered the Pod. 🐋
 >

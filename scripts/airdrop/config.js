@@ -62,19 +62,25 @@ module.exports = {
       maxWeightDays: 10,
     },
 
-    // Example whale-only round, for after launch. Snapshot KUJI holders (wallet + Pod)
-    // with Airdrop -> build-list, then start it. Announce the snapshot date in advance.
+    // Round 2: whales who hold. KUJI holders (wallet + Pod) are read at 4 hidden blocks, one
+    // in each week of the window, picked from the hash of the block where the window ends.
+    // Each wallet counts at its lowest: it must hold 1M+ (Orca) at every snapshot, KUJI in
+    // the Pod counts at its Pod boost (up to 2.5x), and anything above 10M counts as 10M.
+    // Announce the window, not the snapshots. Build it after round 1 is closed.
     2: {
       source: "kuji-holders",
       network: "ink",
-      total: parseEther("25000000"),
+      snapshots: { count: 4, from: "2026-12-01T00:00:00Z", to: "2026-12-29T00:00:00Z" }, // set when announced
+      // Size: everything the Drop has free beyond `keep`, leaving room for the stake bonus.
+      // With round 1 fully claimed that's 50M; round 1's leftovers and any launch-tax KUJI
+      // sent to the Drop make it bigger. `keep` stays in the Drop for later rounds.
+      sizeFromPool: { keep: parseEther("87500000") },
       claimDays: 30,
       stakeBonusBps: 2500,
       eligibility: {
         minHeld: parseEther("1000000"), // Orca and up
-        exclude: [], // known exchange or bridge wallets, the project's own wallets
+        exclude: [], // known exchange or bridge wallets
       },
-      // Shares by KUJI held, counted up to Kujira size (10M) so one giant can't take it all.
       weightCap: parseEther("10000000"),
     },
   },

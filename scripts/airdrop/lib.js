@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const { getAddress } = require("ethers");
+const { getAddress, solidityPackedKeccak256 } = require("ethers");
 const { StandardMerkleTree } = require("@openzeppelin/merkle-tree");
 
 const roundDir = (round) => path.join(__dirname, "..", "..", "airdrop", `round-${round}`);
@@ -81,6 +81,48 @@ function mergeHolders(wallets, stakes, exclude = []) {
     .sort((a, b) => (b.held > a.held ? 1 : b.held < a.held ? -1 : a.address.localeCompare(b.address)));
 }
 
+/**
+ * Hidden snapshot blocks for a holding round: the window [fromBlock, toBlock) is cut into
+ * `count` equal parts and one block is picked inside each, from `seed` (the hash of a block
+ * at or after the window's end, so nobody can know the picks while the window is open, and
+ * anyone can recompute them afterwards).
+ */
+function snapshotBlocks(seed, fromBlock, toBlock, count) {
+  const len = Math.floor((toBlock - fromBlock) / count);
+  if (len < 1) throw new Error("snapshot window too short");
+  return Array.from({ length: count }, (_, i) => {
+    const r = BigInt(solidityPackedKeccak256(["bytes32", "uint256"], [seed, i]));
+    return fromBlock + i * len + Number(r % BigInt(len));
+  });
+}
+
+/**
+ * Scores holders across snapshots. `snaps` is one Map per snapshot of address ->
+ * { wallet, staked, boosted } (bigints; Pod `boosted` is the stake times its boost).
+ * A wallet qualifies if it held at least `minHeld` (wallet + Pod) at every snapshot. At each
+ * snapshot its value is what it held, counted up to `cap`, times its blended Pod boost
+ * (1x for wallet KUJI); its weight is the lowest value across snapshots, so buying in for a
+ * day or selling in between both cost the wallet.
+ */
+function holdingWeights(snaps, { minHeld, cap }) {
+  const BPS = 10_000n;
+  const addresses = new Set(snaps.flatMap((m) => [...m.keys()]));
+  const rows = [];
+  for (const address of addresses) {
+    let lowestHeld = null, weight = null;
+    for (const m of snaps) {
+      const { wallet = 0n, staked = 0n, boosted = 0n } = m.get(address) || {};
+      const held = wallet + staked;
+      const mult = held === 0n ? BPS : ((wallet + boosted) * BPS) / held;
+      const value = ((cap && held > cap ? cap : held) * mult) / BPS;
+      if (lowestHeld === null || held < lowestHeld) lowestHeld = held;
+      if (weight === null || value < weight) weight = value;
+    }
+    if (lowestHeld >= minHeld && weight > 0n) rows.push({ address, lowestHeld, weight });
+  }
+  return rows.sort((a, b) => (b.weight > a.weight ? 1 : b.weight < a.weight ? -1 : a.address.localeCompare(b.address)));
+}
+
 /** Split `total` (bigint) in proportion to each item's `weight` (bigint), rounding down. */
 function allocateWeighted(items, total) {
   const sum = items.reduce((s, i) => s + i.weight, 0n);
@@ -112,4 +154,4 @@ function readCsv(file) {
   return lines.map((l) => Object.fromEntries(l.split(",").map((v, i) => [cols[i], v])));
 }
 
-module.exports = { roundDir, mergeHolders, allocateWeighted, createAggregator, aggregateTraders, filterTraders, allocate, buildTree, writeCsv, readCsv };
+module.exports = { roundDir, mergeHolders, snapshotBlocks, holdingWeights, allocateWeighted, createAggregator, aggregateTraders, filterTraders, allocate, buildTree, writeCsv, readCsv };
