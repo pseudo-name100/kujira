@@ -171,7 +171,7 @@
       const pct = (25 * left) / 1800;
       const m = Math.floor(left / 60), s = Math.floor(left % 60);
       banner.hidden = false;
-      banner.textContent = `Launch tax on buys right now: ${pct.toFixed(1)}%, falling to 0 in ${m}:${String(s).padStart(2, "0")}. It stops sniper bots and never comes back.`;
+      banner.textContent = `Launch tax on buys right now: ${pct.toFixed(1)}%, falling to 0 in ${m}:${String(s).padStart(2, "0")}. It stops sniper bots and never comes back. Uniswap may show more KUJI than you'll receive while it lasts.`;
     };
     const timer = setInterval(tick, 1000);
     tick();

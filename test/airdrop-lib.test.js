@@ -103,3 +103,39 @@ describe("whale rounds", function () {
     expect(res.map((r) => r.amount)).to.deep.equal([750n, 250n]);
   });
 });
+
+describe("holding rounds", function () {
+  const { snapshotBlocks, holdingWeights } = require("../scripts/airdrop/lib");
+  const M = 10n ** 24n; // 1M KUJI
+  const D = "0x00000000000000000000000000000000000000d4";
+  const seed = "0x" + "52".repeat(32);
+
+  it("picks one block inside each part of the window, reproducibly", function () {
+    const blocks = snapshotBlocks(seed, 1000, 1400, 4);
+    expect(blocks).to.have.length(4);
+    blocks.forEach((b, i) => {
+      expect(b).to.be.gte(1000 + i * 100);
+      expect(b).to.be.lt(1000 + (i + 1) * 100);
+    });
+    expect(snapshotBlocks(seed, 1000, 1400, 4)).to.deep.equal(blocks);
+    expect(snapshotBlocks("0x" + "53".repeat(32), 1000, 1400, 4)).to.not.deep.equal(blocks);
+  });
+
+  it("counts each wallet at its lowest, rewards Pod boosts, and caps whales", function () {
+    const snap = (rows) => new Map(Object.entries(rows));
+    const s1 = snap({
+      [A]: { wallet: 2n * M }, // steady holder
+      [B]: { staked: 2n * M, boosted: 5n * M }, // staked at 2.5x
+      [C]: { wallet: 0n }, // bought in for one snapshot only
+      [D]: { wallet: 50n * M }, // giant
+    });
+    const s2 = snap({ [A]: { wallet: 3n * M }, [B]: { staked: 2n * M, boosted: 5n * M }, [C]: { wallet: 9n * M }, [D]: { wallet: 50n * M } });
+    const s3 = snap({ [A]: { wallet: 2n * M }, [B]: { staked: 2n * M, boosted: 5n * M }, [D]: { wallet: 50n * M } });
+    const rows = holdingWeights([s1, s2, s3], { minHeld: M, cap: 10n * M });
+    const w = Object.fromEntries(rows.map((r) => [r.address, r.weight]));
+    expect(w[A]).to.equal(2n * M); // lowest of 2M, 3M, 2M
+    expect(w[B]).to.equal(5n * M); // 2M staked at 2.5x
+    expect(w[C]).to.equal(undefined); // held 0 at two snapshots
+    expect(w[D]).to.equal(10n * M); // capped
+  });
+});

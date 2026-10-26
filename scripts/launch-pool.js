@@ -1,4 +1,4 @@
-// Usage: MARKET_CAP_USD=10000 [ETH_USD=3500] npx hardhat run scripts/launch-pool.js --network ink
+// Usage: MARKET_CAP_USD=15500 [ETH_USD=3500] npx hardhat run scripts/launch-pool.js --network ink
 // Opens trading, one-sided: creates the 1% KUJI/WETH Uniswap v3 pool at the starting market
 // cap and adds the deployer's KUJI in a range from that price upward. No ETH goes in; buyers
 // bring it. The position is minted straight to KujiraLiquidityLock, so it is locked from the
@@ -21,13 +21,18 @@ async function main() {
   if (d.launch) throw new Error(`already launched: pool ${d.launch.pool}, position #${d.launch.positionId}`);
   if (!d.KujiraLiquidityLock) throw new Error("no KujiraLiquidityLock in the deployment");
 
-  const marketCapUsd = Number(process.env.MARKET_CAP_USD || 10000);
+  const marketCapUsd = Number(process.env.MARKET_CAP_USD || 15500);
   if (!(marketCapUsd > 0)) throw new Error("MARKET_CAP_USD must be a positive number");
   const ethUsd = await ethPriceUsd();
 
   const kuji = await ethers.getContractAt("KujiraToken", d.KujiraToken);
   const supply = await kuji.TOTAL_SUPPLY();
   const amount = await kuji.balanceOf(deployer.address);
+  // The tax clock starts with the first KUJI into the pool's address. If anything got there
+  // before this run, the 30 minutes would already be running: stop rather than launch late.
+  if ((await kuji.pool()) !== ethers.ZeroAddress && (await kuji.launchedAt()) !== 0n) {
+    throw new Error("the launch tax clock has already started (KUJI reached the pool address before launch); nothing was added");
+  }
   if (amount === 0n) throw new Error(`${deployer.address} holds no KUJI to add`);
 
   const plan = launchPlan({ kuji: d.KujiraToken, weth: uni.weth, supply, marketCapUsd, ethUsd });

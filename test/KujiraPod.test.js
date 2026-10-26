@@ -37,8 +37,8 @@ describe("KujiraPod", function () {
       const { alice, bob, pod } = await loadFixture(deploy);
       await pod.connect(alice).stake(e(100));
       await pod.connect(bob).stake(e(300));
-      await pod.fundRewards(e(400), 4 * DAY);
-      await time.increase(4 * DAY);
+      await pod.fundRewards(e(400), 8 * DAY);
+      await time.increase(8 * DAY);
       close(await pod.earned(alice.address), e(100));
       close(await pod.earned(bob.address), e(300));
     });
@@ -215,7 +215,25 @@ describe("KujiraPod", function () {
       const { alice, pod } = await loadFixture(deploy);
       await expect(pod.connect(alice).stake(0)).to.be.revertedWithCustomError(pod, "ZeroAmount");
       await expect(pod.fundRewards(0, DAY)).to.be.revertedWithCustomError(pod, "ZeroAmount");
-      await expect(pod.fundRewards(e(1), 0)).to.be.revertedWithCustomError(pod, "ZeroAmount");
+    });
+
+    it("keeps reward periods between a week and two years", async function () {
+      const { pod } = await loadFixture(deploy);
+      await expect(pod.fundRewards(e(1000), 7 * DAY - 1)).to.be.revertedWithCustomError(pod, "BadDuration");
+      await expect(pod.fundRewards(e(1000), 731 * DAY)).to.be.revertedWithCustomError(pod, "BadDuration");
+    });
+
+    it("won't let a top-up squeeze or stall rewards already promised", async function () {
+      const { alice, pod } = await loadFixture(deploy);
+      await pod.connect(alice).stake(e(100));
+      await pod.fundRewards(e(1000), 100 * DAY);
+      await time.increase(10 * DAY);
+      // ending sooner than the current period (squeezing the leftover into a short window)
+      await expect(pod.fundRewards(1n, 7 * DAY)).to.be.revertedWithCustomError(pod, "CannotSpeedUpOrSlowDown");
+      // stretching the leftover over a much longer time (paying out slower)
+      await expect(pod.fundRewards(1n, 700 * DAY)).to.be.revertedWithCustomError(pod, "CannotSpeedUpOrSlowDown");
+      // adding enough to keep the pace while running longer is fine
+      await pod.fundRewards(e(1000), 190 * DAY);
     });
   });
 });

@@ -12,11 +12,13 @@ import {ERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20P
 ///         Holders can burn their own tokens, and ERC-2612 permit allows gasless approvals.
 ///
 ///         Launch tax, against sniper bots: for the first 30 minutes after the pool opens,
-///         buys from KUJI's 1% Uniswap v3 pool pay a tax that starts at 25% and falls every
-///         second to 0. It goes to `taxRecipient`. After that there is no tax on anything,
-///         ever. The pool address is derived from the Uniswap factory in the constructor, so
-///         nothing can be taxed but buys from that one pool. Sells aren't taxed: Uniswap v3
-///         rejects a token that delivers less than it was sent into the pool.
+///         KUJI leaving KUJI's 1% Uniswap v3 pool (buys, and LP fee collections) pays a tax
+///         that starts at 25% and falls every second to 0. It goes to `taxRecipient`. After
+///         that there is no tax on anything, ever. The pool address is derived from the
+///         Uniswap factory in the constructor, so nothing else can be taxed. Sells aren't
+///         taxed: Uniswap v3 rejects a token that delivers less than it was sent into the pool.
+///         The clock starts with the first KUJI sent to the pool's address, so no KUJI may
+///         leave the deployer before the launch liquidity goes in.
 contract KujiraToken is ERC20, ERC20Burnable, ERC20Permit {
     uint256 public constant TOTAL_SUPPLY = 1_000_000_000 ether;
 

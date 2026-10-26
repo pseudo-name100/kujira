@@ -77,12 +77,32 @@ describe("KujiraDrop", function () {
   });
 
   it("cannot start a round bigger than the free pool", async function () {
-    const { drop, list, deadline } = await loadFixture(deploy);
-    await expect(drop.startRound(list.root, e(626), deadline, 0)).to.be.revertedWithCustomError(
+    const { carol, drop, deadline } = await loadFixture(deploy);
+    const other = buildTree([{ address: carol.address, amount: e(1) }]);
+    await expect(drop.startRound(other.root, e(626), deadline, 0)).to.be.revertedWithCustomError(
       drop,
       "InsufficientPool"
     );
-    await drop.startRound(list.root, e(500), deadline, 2500); // 625 exactly
+    await drop.startRound(other.root, e(500), deadline, 2500); // 625 exactly
+  });
+
+  it("never reuses a list, so nobody on it can claim twice", async function () {
+    const { drop, list, deadline } = await loadFixture(deploy);
+    await expect(drop.startRound(list.root, list.total, deadline, 0)).to.be.revertedWithCustomError(
+      drop,
+      "RootAlreadyUsed"
+    );
+  });
+
+  it("keeps claim windows to 180 days at most", async function () {
+    const { carol, drop } = await loadFixture(deploy);
+    const other = buildTree([{ address: carol.address, amount: e(1) }]);
+    const now = await time.latest();
+    await expect(drop.startRound(other.root, e(1), now + 181 * DAY, 0)).to.be.revertedWithCustomError(
+      drop,
+      "InvalidRound"
+    );
+    await drop.startRound(other.root, e(1), now + 179 * DAY, 0);
   });
 
   it("caps payouts at the round reserve even if the list oversums", async function () {

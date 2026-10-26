@@ -45,6 +45,7 @@ interface INonfungiblePositionManager {
 contract KujiraLiquidityLock is IERC721Receiver {
     INonfungiblePositionManager public immutable positionManager;
     address public immutable token; // KUJI
+    address public immutable pairToken; // WETH: only KUJI/WETH positions are accepted
 
     address public feeRecipient;
     uint256[] public lockedPositions;
@@ -59,12 +60,16 @@ contract KujiraLiquidityLock is IERC721Receiver {
     error NotFeeRecipient();
     error NotOwned();
 
-    constructor(INonfungiblePositionManager positionManager_, address token_, address feeRecipient_) {
-        if (address(positionManager_) == address(0) || token_ == address(0) || feeRecipient_ == address(0)) {
+    constructor(INonfungiblePositionManager positionManager_, address token_, address pairToken_, address feeRecipient_) {
+        if (
+            address(positionManager_) == address(0) || token_ == address(0) || pairToken_ == address(0)
+                || feeRecipient_ == address(0)
+        ) {
             revert ZeroAddress();
         }
         positionManager = positionManager_;
         token = token_;
+        pairToken = pairToken_;
         feeRecipient = feeRecipient_;
     }
 
@@ -86,7 +91,10 @@ contract KujiraLiquidityLock is IERC721Receiver {
 
     function _record(uint256 tokenId, address from) internal {
         (,, address token0, address token1,,,, uint128 liquidity,,,,) = positionManager.positions(tokenId);
-        if (token0 != token && token1 != token) revert NotKujiraPosition();
+        // Only KUJI/WETH: a position with some other token could make collection revert.
+        if (!((token0 == token && token1 == pairToken) || (token0 == pairToken && token1 == token))) {
+            revert NotKujiraPosition();
+        }
         if (isLocked[tokenId]) return;
         isLocked[tokenId] = true;
         lockedPositions.push(tokenId);
@@ -106,10 +114,11 @@ contract KujiraLiquidityLock is IERC721Receiver {
         emit FeesCollected(tokenId, feeRecipient, amount0, amount1);
     }
 
-    /// @notice Collect fees from every recorded position.
+    /// @notice Collect fees from every recorded position. A position whose collection fails
+    ///         is skipped, so one can never block the rest; `collect(tokenId)` still works on it.
     function collectAll() external {
         for (uint256 i = 0; i < lockedPositions.length; i++) {
-            collect(lockedPositions[i]);
+            try this.collect(lockedPositions[i]) {} catch {}
         }
     }
 

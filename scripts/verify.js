@@ -26,6 +26,7 @@ async function main() {
     await verify("KujiraLiquidityLock", d.KujiraLiquidityLock, [
       uniswapV3[hre.network.name].positionManager,
       d.KujiraToken,
+      uniswapV3[hre.network.name].weth,
       d.feeRecipient,
     ]);
   }

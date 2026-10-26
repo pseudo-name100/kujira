@@ -14,10 +14,21 @@ const cfg = rounds[round];
 if (!cfg) throw new Error(`no config for round ${round} in scripts/airdrop/config.js`);
 
 const dir = roundDir(round);
-const listedTarget = (cfg.total * BigInt(Math.round((cfg.oversubscribe ?? 1) * 100))) / 100n;
+// Holding rounds are sized from the Drop's free KUJI when the snapshots are read.
+const roundTotal = cfg.sizeFromPool
+  ? BigInt(JSON.parse(fs.readFileSync(path.join(dir, "snapshot.json"), "utf8")).total)
+  : cfg.total;
+const listedTarget = (roundTotal * BigInt(Math.round((cfg.oversubscribe ?? 1) * 100))) / 100n;
 
 let allocations;
-if (cfg.source === "kuji-holders") {
+if (cfg.source === "kuji-holders" && cfg.snapshots) {
+  // Holding rounds: holders.csv already has each qualifying wallet's weight (lowest across
+  // the hidden snapshots, Pod boost counted, capped); see collect-holding-snapshots.js.
+  allocations = allocateWeighted(
+    readCsv(path.join(dir, "holders.csv")).map((h) => ({ address: h.address, weight: parseEther(h.weight) })),
+    listedTarget
+  );
+} else if (cfg.source === "kuji-holders") {
   // Whale rounds: holders at or above minHeld, shares by KUJI held (wallet + Pod),
   // counted up to weightCap so the very largest holder can't take the whole round.
   const cap = cfg.weightCap;
@@ -47,7 +58,7 @@ if (cfg.source === "kuji-holders") {
 }
 const { root, total: listed, claims } = buildTree(allocations);
 // The contract reserves this much; it can't be more than the list adds up to.
-const total = listed < cfg.total ? listed : cfg.total;
+const total = listed < roundTotal ? listed : roundTotal;
 
 writeCsv(
   path.join(dir, "allocations.csv"),
