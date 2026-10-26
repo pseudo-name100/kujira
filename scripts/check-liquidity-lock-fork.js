@@ -33,7 +33,7 @@ async function main() {
   const fmt = ethers.formatEther;
 
   const kuji = await ethers.deployContract("KujiraToken", [lp.address, ethers.ZeroAddress, ethers.ZeroAddress, ethers.ZeroAddress]);
-  const lock = await ethers.deployContract("KujiraLiquidityLock", [ink.positionManager, await kuji.getAddress(), feeWallet.address]);
+  const lock = await ethers.deployContract("KujiraLiquidityLock", [ink.positionManager, await kuji.getAddress(), ink.weth, feeWallet.address]);
   const npm = new ethers.Contract(ink.positionManager, NPM_ABI, lp);
   const weth = new ethers.Contract(ink.weth, WETH_ABI, lp);
   const router = new ethers.Contract(ink.router, ROUTER_ABI, trader);

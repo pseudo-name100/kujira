@@ -80,10 +80,11 @@ async function main() {
 
   let lockAddress = null;
   if (uni || local) {
-    const positionManager = uni?.positionManager ?? cfg.uniswapV3.ink.positionManager;
+    const { positionManager, weth } = uni ?? cfg.uniswapV3.ink;
     const lock = await ethers.deployContract("KujiraLiquidityLock", [
       positionManager,
       tokenAddress,
+      weth,
       feeRecipient || deployer.address,
     ]);
     await lock.waitForDeployment();

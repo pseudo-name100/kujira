@@ -51,7 +51,15 @@ contract MockPositionManager is ERC721 {
         return (0, address(0), p.token0, p.token1, 10_000, -887_200, 887_200, p.liquidity, 0, 0, p.owed0, p.owed1);
     }
 
+    /// Make a position's collect revert, like one holding a hostile token would.
+    mapping(uint256 => bool) public broken;
+
+    function breakCollect(uint256 id) external {
+        broken[id] = true;
+    }
+
     function collect(CollectParams calldata c) external payable returns (uint256 a0, uint256 a1) {
+        require(!broken[c.tokenId], "broken");
         require(_isAuthorized(ownerOf(c.tokenId), msg.sender, c.tokenId), "not approved");
         Position storage p = pos[c.tokenId];
         a0 = p.owed0 < c.amount0Max ? p.owed0 : c.amount0Max;

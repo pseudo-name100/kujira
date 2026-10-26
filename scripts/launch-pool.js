@@ -28,6 +28,11 @@ async function main() {
   const kuji = await ethers.getContractAt("KujiraToken", d.KujiraToken);
   const supply = await kuji.TOTAL_SUPPLY();
   const amount = await kuji.balanceOf(deployer.address);
+  // The tax clock starts with the first KUJI into the pool's address. If anything got there
+  // before this run, the 30 minutes would already be running: stop rather than launch late.
+  if ((await kuji.pool()) !== ethers.ZeroAddress && (await kuji.launchedAt()) !== 0n) {
+    throw new Error("the launch tax clock has already started (KUJI reached the pool address before launch); nothing was added");
+  }
   if (amount === 0n) throw new Error(`${deployer.address} holds no KUJI to add`);
 
   const plan = launchPlan({ kuji: d.KujiraToken, weth: uni.weth, supply, marketCapUsd, ethUsd });

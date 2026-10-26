@@ -20,6 +20,7 @@ contract KujiraDrop is Ownable2Step, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     uint256 public constant MAX_STAKE_BONUS_BPS = 10_000; // at most +100%
+    uint256 public constant MAX_CLAIM_WINDOW = 180 days;
 
     struct Round {
         bytes32 merkleRoot;
@@ -36,6 +37,8 @@ contract KujiraDrop is Ownable2Step, ReentrancyGuard {
     Round[] public rounds;
     uint256 public totalReserved; // reserved by open rounds and not yet paid
     mapping(uint256 => mapping(address => bool)) public claimed;
+    /// @notice Every list can be used for one round only, so nobody on it can claim twice.
+    mapping(bytes32 => bool) public rootUsed;
 
     event RoundStarted(uint256 indexed id, bytes32 merkleRoot, uint256 total, uint64 deadline, uint16 stakeBonusBps);
     event Claimed(uint256 indexed id, address indexed account, uint256 amount, bool staked);
@@ -51,6 +54,7 @@ contract KujiraDrop is Ownable2Step, ReentrancyGuard {
     error AlreadyClaimed();
     error InvalidProof();
     error RoundExhausted();
+    error RootAlreadyUsed();
 
     constructor(KujiraPod pod_, address owner_) Ownable(owner_) {
         if (address(pod_) == address(0)) revert ZeroAddress();
@@ -78,6 +82,9 @@ contract KujiraDrop is Ownable2Step, ReentrancyGuard {
         returns (uint256 id)
     {
         if (merkleRoot == bytes32(0) || total == 0 || deadline <= block.timestamp) revert InvalidRound();
+        if (deadline > block.timestamp + MAX_CLAIM_WINDOW) revert InvalidRound();
+        if (rootUsed[merkleRoot]) revert RootAlreadyUsed();
+        rootUsed[merkleRoot] = true;
         if (stakeBonusBps > MAX_STAKE_BONUS_BPS) revert BonusTooHigh();
         uint256 reserve = total + (total * stakeBonusBps) / 10_000;
         if (reserve > available()) revert InsufficientPool();

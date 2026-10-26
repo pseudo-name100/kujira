@@ -36,6 +36,10 @@ contract KujiraPod is Ownable2Step, ReentrancyGuard {
     uint256 public constant TIME_STEP_BONUS = 2_500; // +0.25x per step
     uint256 public constant MAX_TIME_BONUS = 10_000; // +1.00x
 
+    /// Reward periods last between a week and two years.
+    uint256 public constant MIN_DURATION = 7 days;
+    uint256 public constant MAX_DURATION = 730 days;
+
     IERC20 public immutable token;
 
     uint256 public totalStaked;
@@ -62,6 +66,8 @@ contract KujiraPod is Ownable2Step, ReentrancyGuard {
     error ZeroAmount();
     error ZeroAddress();
     error RewardTooSmall();
+    error BadDuration();
+    error CannotSpeedUpOrSlowDown();
     error CannotRecoverStakingToken();
 
     constructor(IERC20 token_, address owner_) Ownable(owner_) {
@@ -166,9 +172,12 @@ contract KujiraPod is Ownable2Step, ReentrancyGuard {
     // ----------------------------------------------------------------- owner
 
     /// @notice Deposit `amount` KUJI and stream it, plus any unstreamed remainder of the
-    ///         current period, over the next `duration` seconds.
+    ///         current period, over the next `duration` seconds. Rewards already promised can
+    ///         only be added to: while a period runs, a top-up can't end it sooner or pay out
+    ///         slower, so the owner can't squeeze the pool into a moment or stall it.
     function fundRewards(uint256 amount, uint256 duration) external onlyOwner nonReentrant {
-        if (amount == 0 || duration == 0) revert ZeroAmount();
+        if (amount == 0) revert ZeroAmount();
+        if (duration < MIN_DURATION || duration > MAX_DURATION) revert BadDuration();
         _updateReward(address(0));
 
         uint256 leftover;
@@ -177,6 +186,10 @@ contract KujiraPod is Ownable2Step, ReentrancyGuard {
         }
         uint256 rate = (amount + leftover) / duration;
         if (rate == 0) revert RewardTooSmall();
+        // The 1% allowance absorbs rounding and the seconds between blocks.
+        if (leftover > 0 && (block.timestamp + duration < periodFinish || rate * 100 < rewardRate * 99)) {
+            revert CannotSpeedUpOrSlowDown();
+        }
 
         token.safeTransferFrom(msg.sender, address(this), amount);
 

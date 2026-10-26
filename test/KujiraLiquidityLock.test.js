@@ -12,6 +12,7 @@ async function deploy() {
   const lock = await ethers.deployContract("KujiraLiquidityLock", [
     await npm.getAddress(),
     await kuji.getAddress(),
+    await weth.getAddress(),
     fees.address,
   ]);
   const [k, w] = [await kuji.getAddress(), await weth.getAddress()];
@@ -77,6 +78,26 @@ describe("KujiraLiquidityLock", function () {
     await npm.accrue(id, e(5), 0n);
     await lock.collect(id);
     expect(await t0.balanceOf(newFees.address)).to.equal(e(5));
+  });
+
+  it("only accepts KUJI/WETH positions", async function () {
+    const { lp, npm, lock, kuji } = await loadFixture(deploy);
+    const other = await ethers.deployContract("MockToken");
+    await npm.mint(lp.address, await kuji.getAddress(), await other.getAddress(), 1n); // id 2: KUJI/other
+    await expect(
+      npm.connect(lp)["safeTransferFrom(address,address,uint256)"](lp.address, await lock.getAddress(), 2n)
+    ).to.be.revertedWithCustomError(lock, "NotKujiraPosition");
+  });
+
+  it("collectAll skips a position whose collection fails", async function () {
+    const { lp, fees, npm, lock, t0, t1, id } = await loadFixture(deploy);
+    await npm.mint(lp.address, await t0.getAddress(), await t1.getAddress(), 1n); // id 2
+    await npm.connect(lp)["safeTransferFrom(address,address,uint256)"](lp.address, await lock.getAddress(), 2n);
+    await npm.breakCollect(2n);
+    await npm.accrue(id, e(5), e(1));
+    await lock.collectAll();
+    expect(await t0.balanceOf(fees.address)).to.equal(e(5));
+    await expect(lock.collect(2n)).to.be.reverted;
   });
 
   it("rejects NFTs from other contracts and positions without KUJI", async function () {
