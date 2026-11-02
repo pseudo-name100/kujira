@@ -77,27 +77,60 @@
 </div>
 
 <!-- Link cards (1200x630), copied to site/img/ for the og:image / twitter:image tags -->
-<div class="board snow" id="og-home" style="width:1200px;height:630px">
-  <img class="ghost" src="../site/img/mark-800.webp" style="width:760px;right:-170px;top:-90px;opacity:0.2">
-  <div class="wave" style="top:520px;opacity:0.7"></div>
-  <p class="k" style="position:absolute;left:64px;top:492px;font-size:16px;color:var(--hi)">52 Hz</p>
-  <div style="position:absolute;left:64px;top:70px;right:64px">
-    <p class="k" style="font-size:22px">Kujira · 鯨 · on Ink</p>
-    <h1 class="big" style="font-size:78px;margin-top:22px;max-width:900px">Something has been growing in the deep.</h1>
-    <p style="font-size:24px;color:var(--muted);margin-top:28px;font-weight:700">No team · Liquidity locked forever · The pod pays whales to stay</p>
+<style>
+  .og { width: 1200px; height: 630px; background: radial-gradient(90% 120% at 22% 40%, #0c5a78 0%, #052a3b 38%, #010d14 72%, #000 100%); }
+  .og .rings { position: absolute; border-radius: 50%; border: 2px solid rgba(143, 230, 255, 0.10); }
+  .og .medal { position: absolute; border-radius: 50%; overflow: hidden; background: #000;
+    border: 3px solid rgba(63, 198, 234, 0.7);
+    box-shadow: 0 0 0 12px rgba(0, 0, 0, 0.45), 0 0 0 14px rgba(63, 198, 234, 0.25), 0 0 90px rgba(63, 198, 234, 0.45); }
+  .og .medal img { width: 112%; height: 112%; margin: -6%; display: block; }
+  .og .eyebrow { font-size: 19px; color: var(--accent); font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; }
+  .og .stats { display: flex; gap: 14px; margin-top: 34px; }
+  .og .stat { flex: 1; padding: 16px 18px 15px; border-radius: 16px; background: rgba(0, 10, 16, 0.55); border: 1.5px solid rgba(143, 230, 255, 0.18); }
+  .og .stat b { display: block; font-family: S, serif; font-weight: 400; font-size: 42px; line-height: 1; color: var(--hi); }
+  .og .stat span { display: block; margin-top: 9px; font-size: 19px; line-height: 1.3; color: var(--text); font-weight: 700; }
+  .og .bar { position: absolute; left: 0; right: 0; bottom: 0; height: 64px; display: flex; align-items: center; justify-content: space-between;
+    padding: 0 48px; background: linear-gradient(to top, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0)); font-size: 19px; font-weight: 700; color: var(--muted); }
+  .og .bar b { color: var(--head); font-weight: 700; letter-spacing: 0.02em; }
+  .og .hz { position: absolute; left: 0; right: 0; bottom: 64px; height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(170, 240, 255, 0.9) 12%, rgba(170, 240, 255, 0.9) 88%, transparent); box-shadow: 0 0 14px rgba(63, 198, 234, 0.8); }
+  .og .tate { position: absolute; writing-mode: vertical-rl; text-orientation: upright; font-family: S, serif; font-size: 22px; letter-spacing: 0.32em; color: var(--accent);
+    padding-left: 14px; border-left: 1.5px solid rgba(63, 198, 234, 0.5); }
+</style>
+
+<div class="board snow og" id="og-home">
+  <div class="rings" style="width:520px;height:520px;left:-30px;top:30px"></div>
+  <div class="rings" style="width:680px;height:680px;left:-110px;top:-50px;opacity:0.6"></div>
+  <div class="medal" style="width:300px;height:300px;left:80px;top:140px"><img src="../site/img/mark-800.webp"></div>
+  <div style="position:absolute;left:455px;top:62px;right:52px">
+    <p class="eyebrow">Kujira · 鯨 · on Ink</p>
+    <h1 class="big" style="font-size:58px;margin-top:16px">Something has been growing in the deep.</h1>
+    <p style="font-size:22px;margin-top:16px;color:var(--text);line-height:1.45">The memecoin that pays whales to stay. Launched the fisherman's way.</p>
+    <div class="stats">
+      <div class="stat"><b>0%</b><span>Team tokens</span></div>
+      <div class="stat"><b>55%</b><span>Liquidity locked forever</span></div>
+      <div class="stat"><b>2.5×</b><span>Pod boost for whales</span></div>
+    </div>
   </div>
-  <div class="foot" style="left:64px;right:64px;bottom:34px;font-size:22px"><span>$KUJI</span><b>kujira.ink</b></div>
+  <div class="hz"></div>
+  <div class="bar"><span>52 Hz · $KUJI</span><b>kujira.ink</b></div>
 </div>
 
-<div class="board snow" id="og-whalepaper" style="width:1200px;height:630px">
-  <img class="ghost" src="../site/img/mark-800.webp" style="width:760px;right:-200px;top:-60px;opacity:0.2">
-  <div style="position:absolute;left:64px;top:64px;right:64px">
-    <p class="k" style="font-size:22px">The Whalepaper · 漁師</p>
-    <h2 class="big" style="font-size:66px;margin-top:22px;max-width:1000px">A fisherman found a whale in his net.<br><span style="color:var(--hi)">He cut the net.</span></h2>
-    <div class="rule" style="margin:26px 0"></div>
-    <div class="chips" style="margin-top:0;gap:10px"><span style="font-size:20px;padding:9px 20px">No team tokens</span><span style="font-size:20px;padding:9px 20px">No tax after launch</span><span style="font-size:20px;padding:9px 20px">Liquidity locked</span><span style="font-size:20px;padding:9px 20px">Code verified</span></div>
+<div class="board snow og" id="og-whalepaper">
+  <div class="rings" style="width:440px;height:440px;right:-60px;top:-70px"></div>
+  <div class="medal" style="width:190px;height:190px;right:52px;top:44px"><img src="../site/img/mark-800.webp"></div>
+  <p class="tate" style="left:52px;top:58px">漁師の手記</p>
+  <div style="position:absolute;left:118px;top:56px;right:290px">
+    <p class="eyebrow">The Whalepaper</p>
+    <h2 class="big" style="font-size:54px;margin-top:16px">A fisherman found a whale in his net.<br><span style="color:var(--hi)">He cut the net.</span></h2>
   </div>
-  <div class="foot" style="left:64px;right:64px;bottom:34px;font-size:22px"><span>$KUJI on Ink</span><b>kujira.ink/whalepaper</b></div>
+  <div class="stats" style="position:absolute;left:118px;right:52px;top:326px">
+    <div class="stat"><b>1B</b><span>KUJI, minted once. No owner, no mint</span></div>
+    <div class="stat"><b>0%</b><span>Team tokens. Nothing held back</span></div>
+    <div class="stat"><b>45%</b><span>To holders through the Drop and the Pod</span></div>
+  </div>
+  <div class="hz"></div>
+  <div class="bar"><span>What it is, where every token goes, what the fisherman can't do</span><b>kujira.ink/whalepaper</b></div>
 </div>
 
 <!-- Ranks ladder -->
