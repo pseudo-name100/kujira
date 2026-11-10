@@ -73,16 +73,33 @@ const { allocations } = require("./tokenomics");
 const { rounds: roundCfg, dropCap } = require("./airdrop/config");
 function nextRound(started) {
   const done = new Set(started.map((r) => r.round));
-  const next = lists.find((l) => !done.has(l.round) && roundCfg[l.round]);
+  // The lowest configured round not yet started; its built list's total if it has one,
+  // else its configured total (round 1 before its buy window closes).
+  const next = Object.keys(roundCfg).map(Number).sort((a, b) => a - b).find((n) => !done.has(n));
   if (!next) return null;
-  const total = BigInt(claimsByDir[`round-${next.round}`].total);
-  const reserve = total + (total * BigInt(roundCfg[next.round].stakeBonusBps)) / 10000n;
-  return { round: next.round, reserve: reserve.toString() };
+  const built = claimsByDir[`round-${next}`];
+  const cfgTotal = roundCfg[next].total;
+  if (!built && !cfgTotal) return null;
+  const total = built ? BigInt(built.total) : cfgTotal;
+  const reserve = total + (total * BigInt(roundCfg[next].stakeBonusBps)) / 10000n;
+  return { round: next, reserve: reserve.toString() };
 }
+// Rounds whose list isn't built yet, with the terms the checker shows meanwhile.
+const pending = Object.entries(roundCfg)
+  .filter(([n, c]) => c.buyers && !claimsByDir[`round-${n}`])
+  .map(([n, c]) => ({
+    round: Number(n),
+    total: (c.total / 10n ** 18n).toString(),
+    buyersShare: 100 - c.traderShareBps / 100,
+    buyersUntil: c.buyers.until,
+    minBought: (c.buyers.minBought / 10n ** 18n).toString(),
+    tradersFrom: c.eligibility.from,
+    tradersTo: c.eligibility.to,
+  }));
 const networks = Object.keys(NETWORKS).filter((name) =>
   name === "localhost" ? local && fs.existsSync(path.join(root, "deployments", "localhost.local.json")) : fs.existsSync(path.join(root, "deployments", `${name}.json`))
 );
-fs.writeFileSync(path.join(out, "data", "site.json"), JSON.stringify({ allocations, lists, networks }, null, 2) + "\n");
+fs.writeFileSync(path.join(out, "data", "site.json"), JSON.stringify({ allocations, lists, networks, pending }, null, 2) + "\n");
 
 for (const [name, meta] of Object.entries(NETWORKS)) {
   const file = path.join(root, "deployments", name === "localhost" ? "localhost.local.json" : `${name}.json`);

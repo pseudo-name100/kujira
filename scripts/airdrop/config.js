@@ -15,15 +15,18 @@ module.exports = {
   rounds: {
     1: {
       // Tokens the round takes from the 200M pool.
+      // Round 1: the first pod. 70% to wallets that bought KUJI and held it, 30% split evenly
+      // among Ink DEX traders active in the six months before launch. The list adds up to
+      // exactly `total`, so everyone on it is guaranteed their amount (no first-come race).
       total: parseEther("80000000"),
-      // Most listed wallets never claim, so allocations add up to `oversubscribe` times
-      // `total` while only `total` is reserved. Claims are first come, first served: once
-      // `total` (plus stake bonuses) is paid out, later claims fail. 2.5 covers a claim
-      // rate up to 40% of the listed amount.
-      oversubscribe: 2.5,
-      // If set, every eligible wallet is listed for exactly this amount instead of a
-      // weighted share of `total * oversubscribe`. Only `total` is still reserved.
-      amountEach: parseEther("81766"),
+      traderShareBps: 3000, // the Ink-trader part; the rest goes to KUJI buyers
+      buyers: {
+        until: "2026-12-01T00:00:00Z", // buys from launch to here count; announce it
+        snapshots: 3, // hidden, one in each third of the window
+        minBought: parseEther("100000"),
+        cap: parseEther("10000000"), // anything above 10M counts as 10M
+        exclude: [],
+      },
       claimDays: 30,
       stakeBonusBps: 2500, // claim-and-stake gets +25%
 
@@ -47,9 +50,9 @@ module.exports = {
           minSenders: 10, // distinct wallets in the sample
           minSwapShare: 0.8, // share of the contract's latest 50 transactions that are swaps
         },
-        // Only count swaps in this window (ISO dates, UTC).
-        from: "2026-01-01",
-        to: "2026-10-25",
+        // Only count swaps in this window (ISO dates, UTC): the six months before launch.
+        from: "2026-05-10",
+        to: "2026-11-09",
         // Sybil and bot filters
         minSwaps: 3,
         minActiveDays: 2, // distinct UTC days with at least one swap

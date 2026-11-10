@@ -7,7 +7,7 @@ const fs = require("fs");
 const path = require("path");
 const { formatEther, parseEther } = require("ethers");
 const { rounds } = require("./config");
-const { roundDir, filterTraders, allocate, allocateWeighted, buildTree, readCsv, writeCsv } = require("./lib");
+const { roundDir, filterTraders, allocate, allocateWeighted, mergeAllocations, buildTree, readCsv, writeCsv } = require("./lib");
 
 const round = process.argv[2];
 const cfg = rounds[round];
@@ -21,7 +21,23 @@ const roundTotal = cfg.sizeFromPool
 const listedTarget = (roundTotal * BigInt(Math.round((cfg.oversubscribe ?? 1) * 100))) / 100n;
 
 let allocations;
-if (cfg.source === "kuji-holders" && cfg.snapshots) {
+if (cfg.buyers) {
+  // Round 1: KUJI buyers who held (weighted, from collect-kuji-buyers.js) plus an even split
+  // among the filtered Ink traders. Sums to exactly the round total.
+  const traderPart = (roundTotal * BigInt(cfg.traderShareBps)) / 10_000n;
+  const buyers = readCsv(path.join(dir, "buyers.csv")).map((b) => ({ address: b.address, weight: parseEther(b.weight) }));
+  const traders = filterTraders(
+    readCsv(path.join(dir, "traders.csv")).map((t) => ({ address: t.address, swaps: Number(t.swaps), activeDays: Number(t.activeDays) })),
+    cfg.eligibility
+  );
+  if (buyers.length === 0 || traders.length === 0) throw new Error("need both buyers.csv and traders.csv with wallets in them");
+  const each = traderPart / BigInt(traders.length);
+  allocations = mergeAllocations(
+    allocateWeighted(buyers, roundTotal - traderPart),
+    traders.map((t) => ({ address: t.address, amount: each }))
+  );
+  console.log(`${buyers.length} KUJI buyers share ${formatEther(roundTotal - traderPart)}; ${traders.length} Ink traders get ${formatEther(each)} each`);
+} else if (cfg.source === "kuji-holders" && cfg.snapshots) {
   // Holding rounds: holders.csv already has each qualifying wallet's weight (lowest across
   // the hidden snapshots, Pod boost counted, capped); see collect-holding-snapshots.js.
   allocations = allocateWeighted(

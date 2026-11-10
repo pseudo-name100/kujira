@@ -115,13 +115,17 @@ one has a reason to share their card.
 
 > When the whale breaches, the spray falls on all who stand near.
 >
-> 14,981 wallets that trade on Ink are on the first Drop list. 81,766 $KUJI each.
+> Round 1 is for the first pod: 80M $KUJI.
 >
-> Round 1 opens once the market can carry it: when buyers have taken 200M $KUJI from the pool, about a $100k market cap. First come, first served.
+> 70% to wallets that buy $KUJI and hold it. Buys from launch to Dec 1 count, checked at three hidden moments. Buy and dump, get nothing.
+>
+> 30% split evenly among Ink traders active in the six months before launch.
+>
+> Every amount is reserved. No race. It opens once the market can carry it, around a $100k market cap.
 >
 > Check yours: kujira.ink
 
-> If you've swapped on Ink on two different days this year, you might already be in the spray.
+> If you swapped on Ink on two different days between May and launch, you're in the spray. If you buy $KUJI and hold it to Dec 1, you're in the deep end.
 >
 > Paste your address at kujira.ink. Takes five seconds.
 
@@ -175,7 +179,7 @@ Post the thread in order, then pin it in place of the Whalepaper post.
 >
 > It started at a $40k market cap with KUJI only. No presale, no insider ETH: every ETH in the pool came from a buyer. The pool's 1% fee goes to the fisherman.
 
-> 4/ The Drop never outgrows the market. Round 1 (14,981 Ink traders, 81,766 $KUJI each) opens once buyers have taken 200M $KUJI from the pool, about a $100k market cap.
+> 4/ The Drop never outgrows the market. Round 1 (80M: 70% to wallets that buy and hold $KUJI to Dec 1, 30% to Ink's active traders) opens once buyers have taken 200M $KUJI from the pool, about a $100k market cap.
 >
 > Watch it fill on kujira.ink. Claim straight into the Pod for +25%.
 

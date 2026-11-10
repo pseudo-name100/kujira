@@ -157,19 +157,24 @@ Addresses are written to `deployments/<network>.json`.
 
 ## Airdrop rounds
 
-Round settings live in `scripts/airdrop/config.js`. Round 1: 80M KUJI reserved (out of the
-200M pool), 30-day claim window, +25% for claim-and-stake.
+Round settings live in `scripts/airdrop/config.js`. Round 1: 80M KUJI, 30-day claim window,
++25% for claim-and-stake.
 
-**Who qualifies for round 1:** the 14,981 wallets that made at least 3 successful swaps through
-Ink DEX routers on at least 2 different days between 2026-01-01 and 2026-10-25, minus
-anything over 5,000 swaps (bots) and the `exclude` list. Every one of them is listed for
-81,766 KUJI (`amountEach` in the config).
+**Round 1, the first pod** (redesigned after launch; the first list, 14,981 Ink traders at
+81,766 KUJI each, first come first served, is kept in `airdrop/superseded/`):
 
-**First come, first served.** The listed amounts add up to about 1.22B KUJI, but the round
-reserves 80M (plus up to 20M for stake bonuses). Payouts stop when the reserve is used up,
-which is about the first 980 claims (fewer if claimers take the stake bonus); later claims
-fail. The contract can never pay out more than the reserve, and the claim page shows how much
-is left.
+- **70% to KUJI buyers who hold** (`collect-kuji-buyers.js`). Every wallet that bought
+  100,000+ KUJI from the launch pool between launch and `buyers.until` (Dec 1). KUJI that a
+  router passes on counts for the wallet that sent the transaction. Holdings (wallet + Pod)
+  are read at 3 hidden snapshots in that window, picked from the hash of its last block. Each
+  wallet counts at the lower of what it bought and the least it held, capped at 10M: buying
+  and dumping earns nothing.
+- **30% split evenly among Ink traders** active from 2026-05-10 to 2026-11-09 (the six months
+  before launch): at least 3 successful swaps through Ink DEX routers on at least 2 days, no
+  more than 5,000 swaps, minus `exclude`.
+- **Every amount is reserved.** The list adds up to exactly 80M, so nobody races.
+  `LOGS_VIA_RPC=1` reads the buys straight from the chain if the explorer rate-limits, and
+  `BUYERS_UNTIL` moves the window's end.
 
 **Which routers count** is decided from on-chain data rather than a hand-made list.
 `discover-routers.js` samples Uniswap v2/v3/v4 and Velodrome swap events across the window,
