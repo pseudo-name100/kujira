@@ -1,5 +1,5 @@
 {
-  "buy": "",
+  "buy": "https://app.uniswap.org/swap?chain=ink&inputCurrency=NATIVE&outputCurrency=0xc361D2BF3317E52ccACF316015B2e3ed50eb0937",
   "telegram": "",
-  "chart": ""
+  "chart": "https://dexscreener.com/ink/0xa656742Aed82fD244329C22A6d6d698f77d8342f"
 }
