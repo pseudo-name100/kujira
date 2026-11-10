@@ -48,6 +48,8 @@ jobs:
 
       - name: Build list
         if: inputs.step == 'build-list'
+        env:
+          PRIVY_APP_SECRET: ${{ secrets.PRIVY_APP_SECRET }} # X sign-ups (round 1)
         run: node scripts/airdrop/build-list.js "$ROUND"
       - name: Start round
         if: inputs.step == 'start-round'

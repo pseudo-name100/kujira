@@ -147,6 +147,36 @@ function buyerWeights(bought, snaps, { minBought, cap }) {
   return rows.sort((a, b) => (b.weight > a.weight ? 1 : b.weight < a.weight ? -1 : a.address.localeCompare(b.address)));
 }
 
+/**
+ * Drop sign-ups from Privy's user records (GET /api/v1/users). Counts a user who linked an X
+ * account by `until` (unix seconds), once per X account and once per wallet, paid to their
+ * own Ethereum wallet if they connected one (the earliest), else the wallet Privy made for
+ * them. Must match dropWallet() in wallet/src/privy.jsx.
+ */
+function signupsFromPrivyUsers(users, { until, exclude = [] }) {
+  const skip = new Set(exclude.filter(Boolean).map((a) => getAddress(a)));
+  const seenX = new Set(), seenWallet = new Set(), out = [];
+  const sorted = [...users].sort((a, b) => (a.created_at ?? 0) - (b.created_at ?? 0));
+  for (const u of sorted) {
+    const acc = u.linked_accounts || [];
+    const x = acc.find((a) => a.type === "twitter_oauth");
+    if (!x || seenX.has(x.subject)) continue;
+    const xAt = x.first_verified_at ?? x.verified_at ?? Infinity;
+    if (xAt > until) continue;
+    const wallets = acc
+      .filter((a) => a.type === "wallet" && (a.chain_type ?? "ethereum") === "ethereum" && a.address)
+      .sort((a, b) => (a.first_verified_at ?? a.verified_at ?? 0) - (b.first_verified_at ?? b.verified_at ?? 0));
+    const w = wallets.find((a) => a.wallet_client_type !== "privy") || wallets.find((a) => a.wallet_client_type === "privy");
+    if (!w) continue;
+    const address = getAddress(w.address);
+    if (skip.has(address) || seenWallet.has(address)) continue;
+    seenX.add(x.subject);
+    seenWallet.add(address);
+    out.push({ address, x: x.username || x.subject });
+  }
+  return out;
+}
+
 /** Add up allocations from several lists, one row per address. */
 function mergeAllocations(...lists) {
   const sum = new Map();
@@ -185,4 +215,4 @@ function readCsv(file) {
   return lines.map((l) => Object.fromEntries(l.split(",").map((v, i) => [cols[i], v])));
 }
 
-module.exports = { roundDir, mergeHolders, snapshotBlocks, holdingWeights, buyerWeights, mergeAllocations, allocateWeighted, createAggregator, aggregateTraders, filterTraders, allocate, buildTree, writeCsv, readCsv };
+module.exports = { roundDir, mergeHolders, snapshotBlocks, holdingWeights, buyerWeights, mergeAllocations, signupsFromPrivyUsers, allocateWeighted, createAggregator, aggregateTraders, filterTraders, allocate, buildTree, writeCsv, readCsv };

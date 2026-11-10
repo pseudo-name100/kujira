@@ -16,10 +16,16 @@ module.exports = {
     1: {
       // Tokens the round takes from the 200M pool.
       // Round 1: the first pod. 70% to wallets that bought KUJI and held it, 30% split evenly
-      // among Ink DEX traders active in the six months before launch. The list adds up to
-      // exactly `total`, so everyone on it is guaranteed their amount (no first-come race).
+      // among people who signed up on kujira.ink with an X account (the off-chain community).
+      // The list adds up to exactly `total`, so everyone on it is guaranteed their amount.
       total: parseEther("150000000"),
-      traderShareBps: 3000, // the Ink-trader part; the rest goes to KUJI buyers
+      signupShareBps: 3000, // the X sign-up part; the rest goes to KUJI buyers
+      signups: {
+        until: "2026-12-01T00:00:00Z", // X accounts linked by then count; announce it
+        exclude: [],
+      },
+      // The Ink-trader part (`traderShareBps`) is off for round 1; its filters stay below
+      // for a later round.
       buyers: {
         until: "2026-12-01T00:00:00Z", // buys from launch to here count; announce it
         snapshots: 3, // hidden, one in each third of the window

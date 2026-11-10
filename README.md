@@ -27,7 +27,8 @@ rewards; it cannot touch staked tokens or rewards already deposited, and stakers
 withdraw whenever they want.
 
 Distribution is **the Drop** (`KujiraDrop`): 25% of supply is locked in a contract and
-released in claim-based airdrop rounds as the project grows. Round 1 goes to Ink DEX traders.
+released in claim-based airdrop rounds as the project grows. Round 1 goes to KUJI buyers who hold
+and to people who sign up on kujira.ink with X.
 
 ## Contracts
 
@@ -169,9 +170,13 @@ Round settings live in `scripts/airdrop/config.js`. Round 1: 150M KUJI, 30-day c
   are read at 3 hidden snapshots in that window, picked from the hash of its last block. Each
   wallet counts at the lower of what it bought and the least it held, capped at 10M: buying
   and dumping earns nothing.
-- **30% split evenly among Ink traders** active from 2026-05-10 to 2026-11-09 (the six months
-  before launch): at least 3 successful swaps through Ink DEX routers on at least 2 days, no
-  more than 5,000 swaps, minus `exclude`.
+- **30% split evenly among X sign-ups** (`collect-signups.js`): everyone who logs in on
+  kujira.ink ("Join the Drop with X") with an X account linked by `signups.until` (Dec 1). One
+  share per X account and per wallet, paid to the wallet they connected or, for people new to
+  crypto, the one Privy makes for them. The list is read from Privy's API, so the Airdrop
+  workflow needs the repository secret `PRIVY_APP_SECRET` (Privy dashboard → App settings →
+  Basics → App secret). Only wallet addresses are written to the repo; X handles stay private.
+  The Ink-trader share (`traderShareBps`, with the filters in `eligibility`) is off for round 1.
 - **Every amount is reserved.** The list adds up to exactly 150M, so nobody races.
   `LOGS_VIA_RPC=1` reads the buys straight from the chain if the explorer rate-limits, and
   `BUYERS_UNTIL` moves the window's end.

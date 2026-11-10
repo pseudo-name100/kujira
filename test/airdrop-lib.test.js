@@ -170,3 +170,23 @@ describe("round 1: KUJI buyers who hold", function () {
     expect(m[B]).to.equal(1n);
   });
 });
+
+describe("round 1: X sign-ups", function () {
+  const { signupsFromPrivyUsers } = require("../scripts/airdrop/lib");
+  const W = (n) => "0x" + n.repeat(40);
+  const x = (subject, at = 100) => ({ type: "twitter_oauth", subject, username: "u" + subject, first_verified_at: at });
+  const wallet = (addr, client, at = 100) => ({ type: "wallet", chain_type: "ethereum", address: addr, wallet_client_type: client, first_verified_at: at });
+
+  it("counts one share per X account, paid to the person's own wallet first", function () {
+    const users = [
+      { created_at: 1, linked_accounts: [x("1"), wallet(W("a"), "privy", 90), wallet(W("b"), "metamask", 120)] }, // own wallet wins
+      { created_at: 2, linked_accounts: [x("2"), wallet(W("c"), "privy")] }, // newcomer: Privy wallet
+      { created_at: 3, linked_accounts: [wallet(W("d"), "metamask")] }, // no X: not counted
+      { created_at: 4, linked_accounts: [x("4", 999), wallet(W("e"), "privy")] }, // linked X after the deadline
+      { created_at: 5, linked_accounts: [x("5"), wallet(W("c"), "rabby")] }, // same wallet as another sign-up
+      { created_at: 6, linked_accounts: [x("6"), wallet(W("f"), "privy")] }, // excluded (project wallet)
+    ];
+    const res = signupsFromPrivyUsers(users, { until: 500, exclude: [W("f")] });
+    expect(res.map((r) => r.address.toLowerCase())).to.deep.equal([W("b"), W("c")]);
+  });
+});

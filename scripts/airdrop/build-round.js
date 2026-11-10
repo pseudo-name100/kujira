@@ -22,21 +22,30 @@ const listedTarget = (roundTotal * BigInt(Math.round((cfg.oversubscribe ?? 1) * 
 
 let allocations;
 if (cfg.buyers) {
-  // Round 1: KUJI buyers who held (weighted, from collect-kuji-buyers.js) plus an even split
-  // among the filtered Ink traders. Sums to exactly the round total.
-  const traderPart = (roundTotal * BigInt(cfg.traderShareBps)) / 10_000n;
+  // Round 1: KUJI buyers who held (weighted, from collect-kuji-buyers.js), plus even splits
+  // among X sign-ups (collect-signups.js) and/or filtered Ink traders. Sums to exactly the
+  // round total.
+  const even = (file, share, rows) => {
+    if (!share) return [];
+    if (rows.length === 0) throw new Error(`${file} has no wallets in it`);
+    const each = ((roundTotal * BigInt(share)) / 10_000n) / BigInt(rows.length);
+    console.log(`${rows.length} wallets from ${file} get ${formatEther(each)} each`);
+    return rows.map((r) => ({ address: r.address, amount: each }));
+  };
+  const signupPart = cfg.signupShareBps
+    ? even("signups.csv", cfg.signupShareBps, readCsv(path.join(dir, "signups.csv")))
+    : [];
+  const traderPart = cfg.traderShareBps
+    ? even("traders.csv", cfg.traderShareBps, filterTraders(
+        readCsv(path.join(dir, "traders.csv")).map((t) => ({ address: t.address, swaps: Number(t.swaps), activeDays: Number(t.activeDays) })),
+        cfg.eligibility
+      ))
+    : [];
   const buyers = readCsv(path.join(dir, "buyers.csv")).map((b) => ({ address: b.address, weight: parseEther(b.weight) }));
-  const traders = filterTraders(
-    readCsv(path.join(dir, "traders.csv")).map((t) => ({ address: t.address, swaps: Number(t.swaps), activeDays: Number(t.activeDays) })),
-    cfg.eligibility
-  );
-  if (buyers.length === 0 || traders.length === 0) throw new Error("need both buyers.csv and traders.csv with wallets in them");
-  const each = traderPart / BigInt(traders.length);
-  allocations = mergeAllocations(
-    allocateWeighted(buyers, roundTotal - traderPart),
-    traders.map((t) => ({ address: t.address, amount: each }))
-  );
-  console.log(`${buyers.length} KUJI buyers share ${formatEther(roundTotal - traderPart)}; ${traders.length} Ink traders get ${formatEther(each)} each`);
+  if (buyers.length === 0) throw new Error("buyers.csv has no wallets in it");
+  const buyerTotal = (roundTotal * BigInt(10_000 - (cfg.signupShareBps || 0) - (cfg.traderShareBps || 0))) / 10_000n;
+  allocations = mergeAllocations(allocateWeighted(buyers, buyerTotal), signupPart, traderPart);
+  console.log(`${buyers.length} KUJI buyers share ${formatEther(buyerTotal)}`);
 } else if (cfg.source === "kuji-holders" && cfg.snapshots) {
   // Holding rounds: holders.csv already has each qualifying wallet's weight (lowest across
   // the hidden snapshots, Pod boost counted, capped); see collect-holding-snapshots.js.

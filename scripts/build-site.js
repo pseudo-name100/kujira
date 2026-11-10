@@ -90,11 +90,14 @@ const pending = Object.entries(roundCfg)
   .map(([n, c]) => ({
     round: Number(n),
     total: (c.total / 10n ** 18n).toString(),
-    buyersShare: 100 - c.traderShareBps / 100,
+    buyersShare: 100 - (c.traderShareBps || 0) / 100 - (c.signupShareBps || 0) / 100,
     buyersUntil: c.buyers.until,
     minBought: (c.buyers.minBought / 10n ** 18n).toString(),
-    tradersFrom: c.eligibility.from,
-    tradersTo: c.eligibility.to,
+    signupsShare: (c.signupShareBps || 0) / 100,
+    signupsUntil: c.signups?.until,
+    tradersShare: (c.traderShareBps || 0) / 100,
+    tradersFrom: c.eligibility?.from,
+    tradersTo: c.eligibility?.to,
   }));
 const networks = Object.keys(NETWORKS).filter((name) =>
   name === "localhost" ? local && fs.existsSync(path.join(root, "deployments", "localhost.local.json")) : fs.existsSync(path.join(root, "deployments", `${name}.json`))
