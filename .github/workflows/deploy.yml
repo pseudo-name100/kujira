@@ -15,6 +15,9 @@ on:
       confirm:
         description: Type DEPLOY to confirm
         required: true
+      resume_token:
+        description: Resume a deploy that stopped after the token (paste its address); leave empty normally
+        required: false
 
 permissions:
   contents: write
@@ -42,6 +45,7 @@ jobs:
         env:
           PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
           FEE_RECIPIENT: ${{ vars.FEE_RECIPIENT }}
+          KUJI_TOKEN: ${{ inputs.resume_token }}
         run: npx hardhat run scripts/deploy.js --network "$NETWORK"
       - name: Save addresses
         run: |

@@ -8,6 +8,7 @@ const path = require("path");
 const hre = require("hardhat");
 const { uniswapV3 } = require("./tokenomics");
 const { NPM_ABI, FACTORY_ABI, POOL_ABI, launchPlan, ethPriceUsd } = require("./uniswap");
+const { read, send } = require("./rpc");
 
 async function main() {
   const { ethers, network } = hre;
@@ -26,11 +27,12 @@ async function main() {
   const ethUsd = await ethPriceUsd();
 
   const kuji = await ethers.getContractAt("KujiraToken", d.KujiraToken);
-  const supply = await kuji.TOTAL_SUPPLY();
-  const amount = await kuji.balanceOf(deployer.address);
+  const [supply, amount, taxPool, launchedAt] = await read(() =>
+    Promise.all([kuji.TOTAL_SUPPLY(), kuji.balanceOf(deployer.address), kuji.pool(), kuji.launchedAt()])
+  );
   // The tax clock starts with the first KUJI into the pool's address. If anything got there
   // before this run, the 30 minutes would already be running: stop rather than launch late.
-  if ((await kuji.pool()) !== ethers.ZeroAddress && (await kuji.launchedAt()) !== 0n) {
+  if (taxPool !== ethers.ZeroAddress && launchedAt !== 0n) {
     throw new Error("the launch tax clock has already started (KUJI reached the pool address before launch); nothing was added");
   }
   if (amount === 0n) throw new Error(`${deployer.address} holds no KUJI to add`);
@@ -45,21 +47,30 @@ async function main() {
 
   // Someone else could have created the pool first at another price. With no liquidity in
   // it, our position would start at their price, so stop instead.
-  let poolAddress = await factory.getPool(plan.token0, plan.token1, uni.fee);
+  let poolAddress = await read(() => factory.getPool(plan.token0, plan.token1, uni.fee));
   if (poolAddress !== ethers.ZeroAddress) {
-    const [sqrtP] = await new ethers.Contract(poolAddress, POOL_ABI, deployer).slot0();
+    const [sqrtP] = await read(() => new ethers.Contract(poolAddress, POOL_ABI, deployer).slot0());
     if (sqrtP !== 0n && sqrtP !== plan.sqrtPriceX96) {
       throw new Error(`a KUJI/WETH 1% pool already exists at ${poolAddress} at a different price; nothing was added`);
     }
   }
-  await (await npm.createAndInitializePoolIfNecessary(plan.token0, plan.token1, uni.fee, plan.sqrtPriceX96)).wait();
-  poolAddress = await factory.getPool(plan.token0, plan.token1, uni.fee);
-  const [, tickNow] = await new ethers.Contract(poolAddress, POOL_ABI, deployer).slot0();
+  await send("create the pool", () => npm.createAndInitializePoolIfNecessary(plan.token0, plan.token1, uni.fee, plan.sqrtPriceX96));
+  // Read until the RPC has caught up with the new pool.
+  poolAddress = await read(async () => {
+    const a = await factory.getPool(plan.token0, plan.token1, uni.fee);
+    if (a === ethers.ZeroAddress) throw new Error("pool not visible yet");
+    return a;
+  });
+  const [, tickNow] = await read(async () => {
+    const s0 = await new ethers.Contract(poolAddress, POOL_ABI, deployer).slot0();
+    if (s0[0] === 0n) throw new Error("pool not initialized yet");
+    return s0;
+  });
   if (Number(tickNow) !== plan.tick) throw new Error(`pool tick ${tickNow}, expected ${plan.tick}`);
   console.log(`Pool:       ${poolAddress}`);
 
-  await (await kuji.approve(uni.positionManager, amount)).wait();
-  const tx = await npm.mint({
+  await send("approve the position manager", () => kuji.approve(uni.positionManager, amount));
+  const { tx, receipt: rc } = await send("add the liquidity", () => npm.mint({
     token0: plan.token0,
     token1: plan.token1,
     fee: uni.fee,
@@ -71,19 +82,11 @@ async function main() {
     amount1Min: 0n,
     recipient: d.KujiraLiquidityLock,
     deadline: Math.floor(Date.now() / 1000) + 1800,
-  });
-  const rc = await tx.wait();
+  }));
   const ev = rc.logs.map((l) => { try { return npm.interface.parseLog(l); } catch { return null; } }).find((l) => l?.name === "IncreaseLiquidity");
   const positionId = ev.args.tokenId;
   const kujiAdded = plan.kujiIs0 ? ev.args.amount0 : ev.args.amount1;
-  if ((plan.kujiIs0 ? ev.args.amount1 : ev.args.amount0) !== 0n) throw new Error("position took ETH; expected KUJI only");
-  if ((await npm.ownerOf(positionId)) !== d.KujiraLiquidityLock) throw new Error("position isn't owned by the lock");
-
-  // mint() skips onERC721Received, so list the position for collectAll.
-  const lock = await ethers.getContractAt("KujiraLiquidityLock", d.KujiraLiquidityLock);
-  await (await lock.track(positionId)).wait();
-  console.log(`Position:   #${positionId}, ${ethers.formatEther(kujiAdded)} KUJI, owned by the lock (tx ${tx.hash})`);
-
+  // Save straight away: the liquidity is in and locked now, whatever happens next.
   d.launch = {
     pool: poolAddress,
     positionId: positionId.toString(),
@@ -98,6 +101,15 @@ async function main() {
   };
   fs.writeFileSync(file, JSON.stringify(d, null, 2) + "\n");
   console.log(`Saved ${path.relative(process.cwd(), file)}`);
+
+  if ((plan.kujiIs0 ? ev.args.amount1 : ev.args.amount0) !== 0n) throw new Error("position took ETH; expected KUJI only");
+  const owner = await read(() => npm.ownerOf(positionId));
+  if (owner !== d.KujiraLiquidityLock) throw new Error("position isn't owned by the lock");
+
+  // mint() skips onERC721Received, so list the position for collectAll.
+  const lock = await ethers.getContractAt("KujiraLiquidityLock", d.KujiraLiquidityLock);
+  await send("list the position in the lock", () => lock.track(positionId));
+  console.log(`Position:   #${positionId}, ${ethers.formatEther(kujiAdded)} KUJI, owned by the lock (tx ${tx.hash})`);
 }
 
 main().catch((e) => {
