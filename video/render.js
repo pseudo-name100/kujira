@@ -37,6 +37,7 @@ const out = path.join(__dirname, "out");
     "-f", "image2pipe", "-framerate", String(FPS), "-i", "-",
     "-i", wav,
     "-c:v", "libx264", "-pix_fmt", "yuv420p", "-preset", "slow", "-crf", "18",
+    "-af", "loudnorm=I=-15:TP=-1.5:LRA=11", "-ar", "44100", // social-video loudness
     "-c:a", "aac", "-b:a", "192k",
     "-shortest", "-movflags", "+faststart",
     mp4,
