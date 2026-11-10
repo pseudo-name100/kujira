@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const hre = require("hardhat");
 const cfg = require("./tokenomics");
+const { read, send, deployed } = require("./rpc");
 
 const DAY = 24 * 60 * 60;
 
@@ -50,32 +51,59 @@ async function main() {
   const tokenArgs = taxUni
     ? [deployer.address, taxUni.factory, taxUni.weth, feeRecipient || deployer.address]
     : [deployer.address, ethers.ZeroAddress, ethers.ZeroAddress, ethers.ZeroAddress];
-  const token = await ethers.deployContract("KujiraToken", tokenArgs);
-  await token.waitForDeployment();
+  // KUJI_TOKEN resumes a deploy that stopped after the token: reuse that token (after checking
+  // it's untouched and built for this deployer, pool and fee wallet) instead of making a second.
+  const resume = requireAddress(ethers, "KUJI_TOKEN", false);
+  let token;
+  if (resume) {
+    token = await ethers.getContractAt("KujiraToken", resume);
+    await deployed(ethers.provider, resume);
+    const [supplyNow, held, taxTo, launched] = await read(() =>
+      Promise.all([token.TOTAL_SUPPLY(), token.balanceOf(deployer.address), token.taxRecipient(), token.launchedAt()])
+    );
+    const problems = [];
+    if (held !== supplyNow) problems.push(`the deployer holds ${ethers.formatEther(held)} of ${ethers.formatEther(supplyNow)} KUJI`);
+    if (taxUni && taxTo.toLowerCase() !== tokenArgs[3].toLowerCase()) problems.push(`its tax goes to ${taxTo}, not ${tokenArgs[3]}`);
+    if (launched !== 0n) problems.push("its launch clock has started");
+    if (taxUni) {
+      const [t0, t1] = resume.toLowerCase() < taxUni.weth.toLowerCase() ? [resume, taxUni.weth] : [taxUni.weth, resume];
+      const salt = ethers.keccak256(ethers.AbiCoder.defaultAbiCoder().encode(["address", "address", "uint24"], [t0, t1, taxUni.fee]));
+      const expected = ethers.getCreate2Address(taxUni.factory, salt, "0xe34f199b19b2b4f47f68442619d555527d244f78a3297ea89325f843f87b8b54");
+      if ((await read(() => token.pool())) !== expected) problems.push("its pool isn't the KUJI/WETH 1% pool on this network's Uniswap");
+    }
+    if (problems.length) throw new Error(`can't resume with ${resume}: ${problems.join("; ")}`);
+    console.log(`KujiraToken: ${resume} (resumed: untouched, full supply with the deployer)`);
+  } else {
+    token = await ethers.deployContract("KujiraToken", tokenArgs);
+    await token.waitForDeployment();
+    console.log(`KujiraToken: ${await token.getAddress()}`);
+  }
   const tokenAddress = await token.getAddress();
-  console.log(`KujiraToken: ${tokenAddress}`);
-  if (taxUni) console.log(`Launch tax:  25% falling to 0 over 30 minutes on buys from ${await token.pool()}, to ${tokenArgs[3]}`);
+  await deployed(ethers.provider, tokenAddress);
+  if (taxUni) console.log(`Launch tax:  25% falling to 0 over 30 minutes on buys from ${await read(() => token.pool())}, to ${tokenArgs[3]}`);
 
   const pod = await ethers.deployContract("KujiraPod", [tokenAddress, deployer.address]);
   await pod.waitForDeployment();
   const podAddress = await pod.getAddress();
+  await deployed(ethers.provider, podAddress);
   console.log(`KujiraPod:   ${podAddress}`);
 
-  const supply = await token.TOTAL_SUPPLY();
+  const supply = await read(() => token.TOTAL_SUPPLY());
   const share = (p) => (supply * BigInt(p)) / 100n;
 
   const rewards = share(cfg.allocations.stakingRewards);
   if (rewards > 0n) {
-    await (await token.approve(podAddress, rewards)).wait();
-    await (await pod.fundRewards(rewards, cfg.rewardDurationDays * DAY)).wait();
+    await send("approve the Pod", () => token.approve(podAddress, rewards));
+    await send("fund the Pod", () => pod.fundRewards(rewards, cfg.rewardDurationDays * DAY));
     console.log(`Funded ${ethers.formatEther(rewards)} KUJI over ${cfg.rewardDurationDays} days`);
   }
 
   const drop = await ethers.deployContract("KujiraDrop", [podAddress, deployer.address]);
   await drop.waitForDeployment();
   const dropAddress = await drop.getAddress();
+  await deployed(ethers.provider, dropAddress);
   const airdrop = share(cfg.allocations.airdrop);
-  if (airdrop > 0n) await (await token.transfer(dropAddress, airdrop)).wait();
+  if (airdrop > 0n) await send("fill the Drop", () => token.transfer(dropAddress, airdrop));
   console.log(`KujiraDrop:  ${dropAddress} (${ethers.formatEther(airdrop)} KUJI pool)`);
 
   let lockAddress = null;
@@ -89,14 +117,15 @@ async function main() {
     ]);
     await lock.waitForDeployment();
     lockAddress = await lock.getAddress();
+    await deployed(ethers.provider, lockAddress);
     console.log(`KujiraLiquidityLock: ${lockAddress} (fees to ${feeRecipient || deployer.address})`);
   }
 
   if (liquidityAddress !== deployer.address) {
-    const rest = await token.balanceOf(deployer.address);
-    await (await token.transfer(liquidityAddress, rest)).wait();
+    const rest = await read(() => token.balanceOf(deployer.address));
+    await send("send the liquidity share", () => token.transfer(liquidityAddress, rest));
   }
-  console.log(`Liquidity: ${ethers.formatEther(await token.balanceOf(liquidityAddress))} KUJI at ${liquidityAddress}`);
+  console.log(`Liquidity: ${ethers.formatEther(await read(() => token.balanceOf(liquidityAddress)))} KUJI at ${liquidityAddress}`);
 
   const out = {
     network: network.name,
