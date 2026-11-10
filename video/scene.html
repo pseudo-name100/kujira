@@ -2,14 +2,16 @@
 <html>
 <head>
 <meta charset="utf-8">
-<!-- The Kujira launch video, 1080x1080. render(t) draws the frame at t seconds and
-     soundtrack() synthesizes the audio; video/render.js turns both into an MP4. -->
+<!-- The Kujira film, 1080x1080, 30 s. render(t) draws the frame at t seconds and soundtrack()
+     synthesizes the audio; video/render.js turns both into an MP4.
+     0-3 the blue deep, a kraken lurking far behind · 3-13 the Kujira swims past ·
+     13-15 it dives and turns for the light · 15-19 it breaches before an autumn city ·
+     19-25 the city prospers · 25-30 end card -->
 <style>
   @font-face { font-family: Dela; src: url(../node_modules/@fontsource/dela-gothic-one/files/dela-gothic-one-latin-400-normal.woff2); }
   @font-face { font-family: Dela; src: url(../site/fonts/dela-ja.woff2); unicode-range: U+3000-9FFF, U+FF00-FFEF; }
-  @font-face { font-family: Zen; font-weight: 400; src: url(../node_modules/@fontsource/zen-kaku-gothic-new/files/zen-kaku-gothic-new-latin-400-normal.woff2); }
   @font-face { font-family: Zen; font-weight: 700; src: url(../node_modules/@fontsource/zen-kaku-gothic-new/files/zen-kaku-gothic-new-latin-700-normal.woff2); }
-  @font-face { font-family: Zen; font-weight: 400; src: url(../site/fonts/zen-ja-400.woff2); unicode-range: U+3000-9FFF, U+FF00-FFEF; }
+  @font-face { font-family: Zen; font-weight: 700; src: url(../site/fonts/zen-ja-700.woff2); unicode-range: U+3000-9FFF, U+FF00-FFEF; }
   html, body { margin: 0; background: #000; }
   canvas { display: block; }
 </style>
@@ -19,333 +21,435 @@
 <canvas id="c" width="1080" height="1080"></canvas>
 <img id="mark" src="../site/img/mark-800.webp" hidden>
 <script>
-const W = 1080, H = 1080, LENGTH = 24;
+const W = 1080, H = 1080, LENGTH = 30;
 const g = document.getElementById("c").getContext("2d");
 const mark = document.getElementById("mark");
 
 // ------------------------------------------------------------------ helpers
 const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
 const ease = (x) => { x = clamp(x); return x * x * (3 - 2 * x); };
-const span = (t, a, b) => clamp((t - a) / (b - a)); // 0..1 progress through [a, b]
-const fade = (t, a, b, c, d) => Math.min(span(t, a, b), 1 - span(t, c, d)); // in a..b, out c..d
+const span = (t, a, b) => clamp((t - a) / (b - a));
+const fade = (t, a, b, c, d) => Math.min(span(t, a, b), 1 - span(t, c, d));
 const mix = (a, b, x) => a + (b - a) * x;
-let seed = 52;
-const rnd = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
-const SNOW = Array.from({ length: 140 }, () => ({ x: rnd(), y: rnd(), r: 0.6 + rnd() * 1.8, s: 0.01 + rnd() * 0.03, cyan: rnd() < 0.15 }));
-const STARS = Array.from({ length: 120 }, () => ({ x: rnd(), y: rnd() * 0.45, r: 0.5 + rnd() * 1.3, tw: rnd() * 6 }));
-const SPRAY = Array.from({ length: 180 }, () => ({ a: -Math.PI / 2 + (rnd() - 0.5) * 2.2, v: 380 + rnd() * 700, r: 1.5 + rnd() * 3.5 }));
+const rng = (s) => () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296);
 
-function text(str, x, y, { size = 48, font = "Dela", weight = 400, color = "#eef6f8", align = "center", alpha = 1, spacing = 0 } = {}) {
+function text(str, x, y, { size = 48, font = "Dela", weight = 400, color = "#eef6f8", alpha = 1, spacing = 0 } = {}) {
   if (alpha <= 0) return;
   g.save();
   g.globalAlpha = alpha;
   g.fillStyle = color;
-  g.textAlign = align;
+  g.textAlign = "center";
   g.textBaseline = "middle";
   g.font = `${weight} ${size}px "${font}"`;
   if (spacing) g.letterSpacing = spacing + "px";
-  g.shadowColor = "rgba(0,0,0,0.6)";
-  g.shadowBlur = 18;
+  g.shadowColor = "rgba(0,0,0,0.65)";
+  g.shadowBlur = 20;
   g.fillText(str, x, y);
   g.restore();
 }
 
-function whale(cx, cy, size, alpha = 1, glow = 1) {
+// The mascot, swimming: the logo is drawn in thin vertical slices, each shifted by a wave
+// that travels from the head (right) to the tail (left) and grows toward the tail.
+const SLICE = 6;
+function swimmer(cx, cy, size, angle, phase, { alpha = 1, glow = 1, amp = 1, tint = null } = {}) {
   if (!mark.complete || alpha <= 0) return;
   g.save();
   g.globalAlpha = alpha;
-  // the cyan halo behind the whale
-  const halo = g.createRadialGradient(cx, cy, size * 0.1, cx, cy, size * 0.9);
-  halo.addColorStop(0, `rgba(63,198,234,${0.35 * glow})`);
-  halo.addColorStop(1, "rgba(63,198,234,0)");
-  g.fillStyle = halo;
-  g.fillRect(cx - size, cy - size, size * 2, size * 2);
-  // the logo is white on black: screen blending drops the black
+  g.translate(cx, cy);
+  if (glow > 0) {
+    const halo = g.createRadialGradient(0, 0, size * 0.1, 0, 0, size * 0.85);
+    halo.addColorStop(0, tint ? `rgba(255,190,120,${0.3 * glow})` : `rgba(90,210,255,${0.32 * glow})`);
+    halo.addColorStop(1, "rgba(90,210,255,0)");
+    g.fillStyle = halo;
+    g.fillRect(-size, -size, size * 2, size * 2);
+  }
+  g.rotate(angle);
   g.globalCompositeOperation = "screen";
-  g.drawImage(mark, cx - size / 2, cy - size / 2, size, size);
+  const n = Math.ceil(800 / SLICE);
+  for (let k = 0; k < n; k++) {
+    const u = k / n; // 0 tail side .. 1 head side
+    const bend = Math.sin(phase - u * 4.2) * (1 - u) ** 1.6 * 0.09 * amp;
+    const sx = k * SLICE, dx = -size / 2 + u * size, dy = -size / 2 + bend * size;
+    g.drawImage(mark, sx, 0, SLICE + 1, 800, dx, dy, size / n + 1, size);
+  }
   g.restore();
 }
 
-function snow(t, alpha) {
-  for (const p of SNOW) {
-    const y = ((p.y - t * p.s) % 1 + 1) % 1;
-    g.fillStyle = p.cyan ? `rgba(140,235,255,${0.7 * alpha})` : `rgba(220,235,240,${0.28 * alpha})`;
+// The kraken: a giant squid far behind, slow tentacles, two faint eyes.
+function kraken(cx, cy, s, t, alpha) {
+  if (alpha <= 0) return;
+  g.save();
+  g.globalAlpha = alpha;
+  g.filter = "blur(3px)";
+  g.translate(cx, cy);
+  g.scale(s, s);
+  const body = "rgba(10,28,58,1)";
+  g.fillStyle = body;
+  g.strokeStyle = body;
+  g.lineCap = "round";
+  for (let i = 0; i < 8; i++) {
+    const base = -0.9 + i * (1.8 / 7);
+    g.lineWidth = 34 - Math.abs(i - 3.5) * 3;
     g.beginPath();
-    g.arc(p.x * W + Math.sin(t * 0.7 + p.y * 9) * 6, y * H, p.r, 0, Math.PI * 2);
-    g.fill();
+    g.moveTo(base * 90, 120);
+    let x = base * 90, y = 120;
+    for (let k = 1; k <= 14; k++) {
+      const a = Math.sin(t * 0.9 + i * 0.8 + k * 0.45) * (0.25 + k * 0.05);
+      x += Math.sin(base * 1.3 + a) * 32;
+      y += Math.cos(base * 0.6 + a) * 32;
+      g.lineWidth = Math.max(4, g.lineWidth * 0.9);
+      g.lineTo(x, y);
+      g.stroke();
+      g.beginPath();
+      g.moveTo(x, y);
+    }
   }
+  // mantle and fins
+  g.beginPath();
+  g.moveTo(0, -330);
+  g.bezierCurveTo(120, -250, 130, 40, 95, 140);
+  g.lineTo(-95, 140);
+  g.bezierCurveTo(-130, 40, -120, -250, 0, -330);
+  g.fill();
+  g.beginPath(); g.moveTo(0, -330); g.lineTo(140, -260); g.lineTo(60, -210); g.fill();
+  g.beginPath(); g.moveTo(0, -330); g.lineTo(-140, -260); g.lineTo(-60, -210); g.fill();
+  // eyes
+  g.filter = "blur(2px)";
+  const blink = 0.6 + 0.4 * Math.sin(t * 1.7);
+  for (const ex of [-46, 46]) {
+    g.fillStyle = `rgba(120,230,255,${0.75 * blink})`;
+    g.beginPath(); g.arc(ex, 70, 13, 0, Math.PI * 2); g.fill();
+  }
+  g.restore();
 }
 
-// ------------------------------------------------------------------ scenes
+// ------------------------------------------------------------------ underwater
+const R1 = rng(52);
+const MOTES = Array.from({ length: 220 }, () => ({ x: R1(), y: R1(), z: 0.3 + R1() * 0.7, s: 0.006 + R1() * 0.02 }));
+const BUBBLES = Array.from({ length: 70 }, () => ({ x: R1(), born: R1() * 30, r: 2 + R1() * 7, v: 60 + R1() * 90 }));
 
-// 0-12s: the deep. A sonar pulse at 52 Hz, then the whale rises and breaks the surface.
-function deep(t) {
-  const lift = ease(span(t, 4, 12)); // the camera follows the whale up
+// The whale's path underwater: enters from the left, swims past, dives, then turns up.
+function whalePath(t) {
+  if (t < 13) {
+    const p = span(t, 2.6, 13);
+    const x = mix(-300, W + 260, ease(p * 0.9 + 0.05));
+    const y = H * 0.56 + Math.sin(p * Math.PI * 1.6) * 120;
+    const size = mix(420, 680, Math.sin(p * Math.PI)); // closest to the camera mid-way
+    return { x, y, size };
+  }
+  const p = span(t, 13, 15);
+  return { x: mix(W + 120, W * 0.5, ease(p)), y: mix(H * 0.75, H * 0.95, Math.sin(p * Math.PI)), size: mix(560, 300, p) };
+}
+
+function underwater(t) {
+  const up = ease(span(t, 13, 15)); // looking up toward the surface at the end
   const bg = g.createLinearGradient(0, 0, 0, H);
-  bg.addColorStop(0, `rgb(${mix(1, 14, lift)},${mix(14, 96, lift)},${mix(22, 128, lift)})`);
-  bg.addColorStop(1, `rgb(0,${mix(4, 30, lift)},${mix(8, 45, lift)})`);
+  bg.addColorStop(0, `rgb(${mix(22, 60, up)},${mix(140, 190, up)},${mix(196, 230, up)})`);
+  bg.addColorStop(0.45, "rgb(8,86,140)");
+  bg.addColorStop(1, "rgb(2,24,52)");
   g.fillStyle = bg;
   g.fillRect(0, 0, W, H);
 
-  // light rays from the surface, stronger as we rise
+  // god rays from the surface
   g.save();
   g.globalCompositeOperation = "lighter";
-  for (let i = 0; i < 6; i++) {
-    const x = W * (0.15 + i * 0.15) + Math.sin(t * 0.4 + i) * 30;
-    const ray = g.createLinearGradient(x, 0, x + 120, H * 0.9);
-    ray.addColorStop(0, `rgba(120,220,255,${0.05 + 0.12 * lift})`);
-    ray.addColorStop(1, "rgba(120,220,255,0)");
+  for (let i = 0; i < 9; i++) {
+    const x = W * (i / 8) + Math.sin(t * 0.35 + i * 1.7) * 40;
+    const ray = g.createLinearGradient(x, 0, x + 160, H * 0.85);
+    ray.addColorStop(0, `rgba(170,240,255,${0.16 + 0.06 * Math.sin(t * 0.8 + i)})`);
+    ray.addColorStop(1, "rgba(170,240,255,0)");
     g.fillStyle = ray;
     g.beginPath();
-    g.moveTo(x - 30, 0); g.lineTo(x + 50, 0); g.lineTo(x + 260, H); g.lineTo(x + 60, H);
+    g.moveTo(x - 24, 0); g.lineTo(x + 36, 0); g.lineTo(x + 300, H); g.lineTo(x + 110, H);
     g.fill();
+  }
+  // caustics: shimmering light net near the top
+  g.lineWidth = 2;
+  for (let j = 0; j < 7; j++) {
+    g.strokeStyle = `rgba(200,250,255,${0.08 - j * 0.009})`;
+    g.beginPath();
+    for (let x = 0; x <= W; x += 18) {
+      const y = 30 + j * 34 + Math.sin(x * 0.018 + t * 1.6 + j) * 10 + Math.sin(x * 0.041 - t * 1.1) * 6;
+      x === 0 ? g.moveTo(x, y) : g.lineTo(x, y);
+    }
+    g.stroke();
   }
   g.restore();
 
-  snow(t, 1 - lift * 0.5);
+  // the kraken, far behind in the blue
+  kraken(W * 0.8 - t * 5, H * 0.48 + Math.sin(t * 0.5) * 16, 0.62, t, 0.4 * fade(t, 0, 2.5, 12, 14));
 
-  // sonar rings, every 1.6 s, from deep below
-  const sonar = 1 - span(t, 6, 8);
-  for (let k = 0; k < 4; k++) {
-    const age = ((t + k * 1.6) % 6.4) / 6.4;
-    g.strokeStyle = `rgba(143,230,255,${(1 - age) * 0.35 * sonar})`;
-    g.lineWidth = 2;
+  // drifting motes (depth: far ones smaller and slower)
+  for (const m of MOTES) {
+    const y = ((m.y - t * m.s) % 1 + 1) % 1;
+    g.fillStyle = `rgba(210,245,255,${0.25 * m.z})`;
     g.beginPath();
-    g.arc(W / 2, H * 0.78, 40 + age * 620, 0, Math.PI * 2);
-    g.stroke();
-  }
-
-  // the whale: a shape in the dark, then rising, then breaching
-  const rise = ease(span(t, 3.6, 10.6));
-  const cy = mix(H + 260, H * 0.42, rise) - Math.pow(span(t, 10.2, 11.4), 2) * 700;
-  const size = mix(260, 560, rise);
-  whale(W / 2, cy, size, ease(span(t, 2.4, 5)), 0.6 + rise);
-
-  // the surface: a bright band that comes down into view, then the breach flash and spray
-  const surf = ease(span(t, 8.5, 10.6));
-  if (surf > 0) {
-    const sy = mix(-120, H * 0.18, surf);
-    const band = g.createLinearGradient(0, sy - 60, 0, sy + 40);
-    band.addColorStop(0, "rgba(190,245,255,0)");
-    band.addColorStop(0.6, "rgba(190,245,255,0.55)");
-    band.addColorStop(1, "rgba(190,245,255,0)");
-    g.fillStyle = band;
-    g.fillRect(0, sy - 60, W, 100);
-  }
-  const burst = span(t, 10.6, 12);
-  if (burst > 0 && burst < 1) {
-    for (const s of SPRAY) {
-      const d = burst * 1.2;
-      const x = W / 2 + Math.cos(s.a) * s.v * d;
-      const y = H * 0.2 + Math.sin(s.a) * s.v * d + 900 * d * d;
-      g.fillStyle = `rgba(230,250,255,${(1 - burst) * 0.9})`;
-      g.beginPath();
-      g.arc(x, y, s.r, 0, Math.PI * 2);
-      g.fill();
-    }
-    g.fillStyle = `rgba(235,252,255,${Math.max(0, 0.85 - burst * 1.4)})`;
-    g.fillRect(0, 0, W, H);
-  }
-
-  text("52 Hz", W / 2, H * 0.17, { size: 26, font: "Zen", weight: 700, color: "#3fc6ea", spacing: 8, alpha: fade(t, 0.5, 1.5, 4, 5) });
-  text("Something has been", W / 2, H * 0.27, { size: 60, alpha: fade(t, 0.9, 2, 4, 5) });
-  text("growing in the deep.", W / 2, H * 0.27 + 78, { size: 60, alpha: fade(t, 1.2, 2.3, 4, 5) });
-  text("It rises only after the water", W / 2, H * 0.12, { size: 40, font: "Zen", weight: 700, alpha: fade(t, 5.6, 6.6, 8.4, 9.2) });
-  text("has been still for a long time.", W / 2, H * 0.12 + 56, { size: 40, font: "Zen", weight: 700, alpha: fade(t, 5.9, 6.9, 8.4, 9.2) });
-}
-
-// The village: houses on the shore, dark until the whale has surfaced, then lighting up.
-const HOUSES = [];
-{
-  let x = -20;
-  let s = 7;
-  const r = () => ((s = (s * 1103515245 + 12345) >>> 0) / 4294967296);
-  while (x < W + 40) {
-    const w = 70 + r() * 70, h = 60 + r() * 90, pagoda = r() < 0.18;
-    const wins = [];
-    const cols = Math.max(1, Math.floor(w / 34)), rows = Math.max(1, Math.floor(h / 42));
-    for (let i = 0; i < cols; i++) for (let j = 0; j < rows; j++) if (r() < 0.75) wins.push({ i, j, at: 12.6 + r() * 4.6 });
-    // about a third are new: they rise from the ground as the village prospers
-    const built = r() < 0.35 ? 14.4 + r() * 3 : 0;
-    if (built) for (const wn of wins) wn.at = Math.max(wn.at, built + 0.7 + r() * 0.8);
-    HOUSES.push({ x, w, h, pagoda, cols, rows, wins, built });
-    x += w + 6 + r() * 26;
-  }
-}
-const LANTERNS = Array.from({ length: 22 }, (_, i) => ({ x: 40 + i * 48, at: 13.8 + i * 0.12 }));
-const BOATS = [{ x0: -160, x1: 260, y: 0.8, at: 13.2 }, { x0: W + 140, x1: 760, y: 0.86, at: 14.2 }, { x0: -200, x1: 520, y: 0.92, at: 15.2 }];
-
-function village(t) {
-  const dawn = ease(span(t, 12, 18)); // the sky warms as the village wakes
-  const sky = g.createLinearGradient(0, 0, 0, H * 0.62);
-  sky.addColorStop(0, `rgb(${mix(4, 18, dawn)},${mix(10, 30, dawn)},${mix(30, 70, dawn)})`);
-  sky.addColorStop(0.7, `rgb(${mix(10, 120, dawn)},${mix(40, 70, dawn)},${mix(70, 90, dawn)})`);
-  sky.addColorStop(1, `rgb(${mix(20, 240, dawn)},${mix(60, 150, dawn)},${mix(80, 90, dawn)})`);
-  g.fillStyle = sky;
-  g.fillRect(0, 0, W, H * 0.62);
-  for (const st of STARS) {
-    g.fillStyle = `rgba(230,240,255,${(0.35 + 0.35 * Math.sin(t * 2 + st.tw)) * (1 - dawn * 0.8)})`;
-    g.beginPath();
-    g.arc(st.x * W, st.y * H, st.r, 0, Math.PI * 2);
+    g.arc(m.x * W + Math.sin(t * 0.6 + m.y * 9) * 8, y * H, m.z * 2.2, 0, Math.PI * 2);
     g.fill();
   }
-  // the moon-pale sun low over the sea
-  const sun = g.createRadialGradient(W * 0.72, H * 0.6, 4, W * 0.72, H * 0.6, 260);
-  sun.addColorStop(0, `rgba(255,214,150,${0.15 + 0.55 * dawn})`);
-  sun.addColorStop(1, "rgba(255,214,150,0)");
-  g.fillStyle = sun;
-  g.fillRect(0, 0, W, H);
 
-  // the sea, with the whale's back and tail out on the water
-  const sea = g.createLinearGradient(0, H * 0.62, 0, H);
-  sea.addColorStop(0, `rgb(${mix(8, 60, dawn)},${mix(40, 80, dawn)},${mix(60, 100, dawn)})`);
-  sea.addColorStop(1, "rgb(2,14,22)");
-  g.fillStyle = sea;
-  g.fillRect(0, H * 0.62, W, H * 0.38);
-  for (let i = 0; i < 26; i++) {
-    const y = H * 0.64 + i * 15;
-    g.strokeStyle = `rgba(255,${mix(220, 190, dawn)},${mix(240, 140, dawn)},${0.05 + 0.1 * dawn})`;
+  // the Kujira
+  const w = whalePath(t), w2 = whalePath(t + 0.05);
+  const angle = Math.atan2(w2.y - w.y, w2.x - w.x) * (t < 13 ? 0.6 : 1) + (t < 13 ? 0 : 0);
+  const stroke = t * 5.2; // tail beat
+  swimmer(w.x, w.y, w.size, t < 13 ? angle : Math.atan2(w2.y - w.y, w2.x - w.x), stroke, { alpha: ease(span(t, 2.6, 3.4)), glow: 0.9, amp: 1.1 });
+
+  // bubbles: some rise everywhere, a trail streams off the whale's tail
+  for (const b of BUBBLES) {
+    const age = (t - b.born + 30) % 6;
+    const y = H - age * b.v;
+    if (y < -20) continue;
+    g.strokeStyle = "rgba(220,250,255,0.45)";
     g.lineWidth = 1.5;
     g.beginPath();
-    for (let x = 0; x <= W; x += 24) g.lineTo(x, y + Math.sin(x * 0.02 + t * 1.5 + i) * 2.5);
+    g.arc(b.x * W + Math.sin(age * 3 + b.r) * 6, y, b.r, 0, Math.PI * 2);
     g.stroke();
   }
-  // the Kujira in the bay, rising and settling with the swell
-  const bay = ease(span(t, 12.3, 14));
-  whale(W * 0.6, H * 0.79 + Math.sin(t * 1.3) * 6 + (1 - bay) * 40, 250, 0.9 * bay * (1 - span(t, 18.8, 19.6)), 1.2);
-
-  // the shore and the houses
-  const shoreY = H * 0.58;
-  g.fillStyle = "#03070b";
-  g.beginPath();
-  g.moveTo(0, shoreY + 20);
-  for (let x = 0; x <= W; x += 60) g.lineTo(x, shoreY + 10 + Math.sin(x * 0.01) * 10);
-  g.lineTo(W, shoreY + 60); g.lineTo(0, shoreY + 60);
-  g.fill();
-  for (const h0 of HOUSES) {
-    const grow = h0.built ? ease(span(t, h0.built, h0.built + 0.9)) : 1;
-    if (grow <= 0) continue;
-    const h = { ...h0, h: h0.h * grow };
-    const base = shoreY + 12, top = base - h.h;
-    g.fillStyle = "#05090e";
-    g.fillRect(h.x, top, h.w, h.h);
-    g.beginPath(); // roof
-    if (h.pagoda) {
-      g.moveTo(h.x - 14, top); g.lineTo(h.x + h.w / 2, top - 46); g.lineTo(h.x + h.w + 14, top);
-    } else {
-      g.moveTo(h.x - 8, top); g.lineTo(h.x + h.w / 2, top - 26); g.lineTo(h.x + h.w + 8, top);
-    }
-    g.fill();
-    for (const wn of h.wins) {
-      const on = ease(span(t, wn.at, wn.at + 0.5));
-      if (on <= 0 || grow < 1) continue;
-      const wx = h.x + 10 + wn.i * 32, wy = top + 12 + wn.j * 40;
-      g.save();
-      g.shadowColor = "rgba(255,190,90,0.9)";
-      g.shadowBlur = 24 * on;
-      g.fillStyle = `rgba(255,${200 + 20 * on},${120 + 40 * on},${on})`;
-      g.fillRect(wx, wy, 16, 20);
-      g.restore();
-      // the light's reflection in the water
-      g.fillStyle = `rgba(255,190,100,${0.18 * on})`;
-      g.fillRect(wx + 2, shoreY + 70 + (wn.j * 9) % 60, 12, 40 + Math.sin(t * 3 + wx) * 6);
+  if (t > 3 && t < 15) {
+    for (let k = 0; k < 26; k++) {
+      const back = k * 0.06;
+      const p = whalePath(t - back);
+      const r2 = rng(k * 97 + 3);
+      const bx = p.x - p.size * 0.42 + (r2() - 0.5) * 50, by = p.y - p.size * 0.15 - back * 140 + (r2() - 0.5) * 40;
+      g.strokeStyle = `rgba(230,252,255,${0.5 * (1 - k / 26)})`;
+      g.lineWidth = 1.3;
+      g.beginPath();
+      g.arc(bx, by, 2 + r2() * 5, 0, Math.PI * 2);
+      g.stroke();
     }
   }
-  // a string of festival lanterns over the shore
-  g.strokeStyle = "rgba(40,30,20,0.9)";
-  g.lineWidth = 1.5;
-  g.beginPath();
-  for (const l of LANTERNS) g.lineTo(l.x, shoreY - 150 + Math.sin(l.x * 0.03) * 12);
-  g.stroke();
-  for (const l of LANTERNS) {
-    const on = ease(span(t, l.at, l.at + 0.4));
-    if (on <= 0) continue;
-    const ly = shoreY - 140 + Math.sin(l.x * 0.03) * 12;
-    g.save();
-    g.shadowColor = "rgba(255,90,60,0.9)";
-    g.shadowBlur = 20 * on;
-    g.fillStyle = `rgba(255,${110 + 40 * on},70,${on})`;
-    g.beginPath();
-    g.ellipse(l.x, ly, 9, 12, 0, 0, Math.PI * 2);
-    g.fill();
-    g.restore();
-  }
-  // fishing boats coming home with lanterns lit
-  for (const b of BOATS) {
-    const p = ease(span(t, b.at, b.at + 4.5));
-    if (p <= 0) continue;
-    const x = mix(b.x0, b.x1, p), y = H * b.y + Math.sin(t * 2 + b.at) * 3;
-    g.fillStyle = "#04080c";
-    g.beginPath();
-    g.moveTo(x - 60, y); g.lineTo(x + 60, y); g.lineTo(x + 42, y + 18); g.lineTo(x - 42, y + 18);
-    g.fill();
-    g.fillRect(x - 2, y - 70, 4, 70);
-    g.beginPath(); g.moveTo(x + 2, y - 66); g.lineTo(x + 46, y - 10); g.lineTo(x + 2, y - 10); g.fill();
-    g.save();
-    g.shadowColor = "rgba(255,200,110,1)";
-    g.shadowBlur = 22;
-    g.fillStyle = "rgba(255,215,140,1)";
-    g.beginPath(); g.arc(x - 30, y - 12, 6, 0, Math.PI * 2); g.fill();
-    g.restore();
-  }
 
-  text("Where it surfaces,", W / 2, H * 0.14, { size: 56, alpha: fade(t, 13.4, 14.4, 18.7, 19.5) });
-  text("the villages along the shore", W / 2, H * 0.14 + 72, { size: 46, alpha: fade(t, 14, 15, 18.7, 19.5) });
-  text("prosper for a generation.", W / 2, H * 0.14 + 136, { size: 46, color: "#8fe6ff", alpha: fade(t, 14.8, 15.8, 18.7, 19.5) });
+  // vignette
+  const v = g.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, H * 0.75);
+  v.addColorStop(0, "rgba(0,0,0,0)");
+  v.addColorStop(1, "rgba(0,10,25,0.55)");
+  g.fillStyle = v;
+  g.fillRect(0, 0, W, H);
+
+  text("Something has been", W / 2, H * 0.13, { size: 60, alpha: fade(t, 0.4, 1.4, 3.6, 4.6) });
+  text("growing in the deep.", W / 2, H * 0.13 + 78, { size: 60, alpha: fade(t, 0.7, 1.7, 3.6, 4.6) });
+  text("It rises only after the water has been still for a long time.", W / 2, H * 0.9, { size: 30, font: "Zen", weight: 700, alpha: fade(t, 8.4, 9.4, 12.2, 13) });
 }
 
-// 19.5-24s: the end card.
+// ------------------------------------------------------------------ above the water
+const R2 = rng(7);
+const TOWERS = [];
+{
+  let x = -10;
+  while (x < W + 20) {
+    const w = 34 + R2() * 46;
+    TOWERS.push({ x, w, h0: 50 + R2() * 90, h1: 120 + R2() * 260, grow: 19.2 + R2() * 3.8, lit: 19.6 + R2() * 4.4, spire: R2() < 0.2, seed: R2() * 1000 });
+    x += w + 2 + R2() * 10;
+  }
+}
+const TREES = Array.from({ length: 34 }, (_, i) => ({ x: i * 33 + R2() * 20, r: 16 + R2() * 14, hue: R2() }));
+const LEAVES = Array.from({ length: 70 }, () => ({ x: R2(), y: R2(), v: 0.03 + R2() * 0.05, sway: R2() * 6, size: 5 + R2() * 6, hue: R2() }));
+const SPLASH = Array.from({ length: 260 }, () => ({ a: -Math.PI / 2 + (R2() - 0.5) * 2.4, v: 300 + R2() * 900, r: 1.5 + R2() * 4 }));
+const SEA_Y = H * 0.66;
+
+// The breach: up out of the water, a slow-motion arc, and down again.
+function breachPath(t) {
+  // time runs slower around the top of the jump
+  const s = t < 16.2 ? t : t < 17.6 ? 16.2 + (t - 16.2) * 0.55 : 16.97 + (t - 17.6) * 1.2;
+  const p = span(s, 15.2, 17.9);
+  const x = mix(W * 0.26, W * 0.78, p);
+  const y = SEA_Y + 260 - Math.sin(p * Math.PI) * 720;
+  return { x, y, p };
+}
+
+function above(t) {
+  const glow = ease(span(t, 18, 23)); // the city wakes
+  // golden-hour autumn sky
+  const sky = g.createLinearGradient(0, 0, 0, SEA_Y);
+  sky.addColorStop(0, `rgb(${mix(40, 70, glow)},${mix(60, 50, glow)},${mix(120, 110, glow)})`);
+  sky.addColorStop(0.55, `rgb(${mix(220, 240, glow)},${mix(120, 110, glow)},${mix(90, 80, glow)})`);
+  sky.addColorStop(1, `rgb(255,${mix(190, 170, glow)},${mix(120, 110, glow)})`);
+  g.fillStyle = sky;
+  g.fillRect(0, 0, W, SEA_Y);
+  const sun = g.createRadialGradient(W * 0.5, SEA_Y - 30, 10, W * 0.5, SEA_Y - 30, 420);
+  sun.addColorStop(0, "rgba(255,236,190,0.95)");
+  sun.addColorStop(0.15, "rgba(255,200,120,0.5)");
+  sun.addColorStop(1, "rgba(255,170,90,0)");
+  g.fillStyle = sun;
+  g.fillRect(0, 0, W, SEA_Y);
+
+  // the city across the water: towers rise and light up
+  const cityY = SEA_Y - 8;
+  for (const tw of TOWERS) {
+    const h = mix(tw.h0, tw.h1, ease(span(t, tw.grow, tw.grow + 1.4)));
+    g.fillStyle = `rgba(${mix(60, 40, glow)},${mix(40, 30, glow)},${mix(70, 60, glow)},0.92)`;
+    g.fillRect(tw.x, cityY - h, tw.w, h);
+    if (tw.spire) { g.beginPath(); g.moveTo(tw.x, cityY - h); g.lineTo(tw.x + tw.w / 2, cityY - h - 40); g.lineTo(tw.x + tw.w, cityY - h); g.fill(); }
+    const lit = ease(span(t, tw.lit, tw.lit + 0.8));
+    if (lit > 0) {
+      const r3 = rng(tw.seed);
+      g.save();
+      g.shadowColor = "rgba(255,200,110,0.9)";
+      g.shadowBlur = 8;
+      for (let yy = cityY - h + 8; yy < cityY - 8; yy += 12) for (let xx = tw.x + 5; xx < tw.x + tw.w - 6; xx += 10) {
+        if (r3() < 0.55) continue;
+        g.fillStyle = `rgba(255,${210 + r3() * 30},${120 + r3() * 60},${lit * (0.6 + r3() * 0.4)})`;
+        g.fillRect(xx, yy, 4, 6);
+      }
+      g.restore();
+    }
+  }
+  // autumn trees along the near shore of the city
+  for (const tr of TREES) {
+    const c = tr.hue < 0.4 ? [230, 110, 40] : tr.hue < 0.75 ? [240, 160, 50] : [200, 60, 40];
+    g.fillStyle = `rgba(${c[0]},${c[1]},${c[2]},0.95)`;
+    for (const [dx, dy, rr] of [[0, 0, 1], [-0.6, 0.3, 0.75], [0.6, 0.3, 0.75]]) {
+      g.beginPath(); g.arc(tr.x + dx * tr.r, cityY - 6 + dy * tr.r - tr.r * 0.6, tr.r * rr, 0, Math.PI * 2); g.fill();
+    }
+  }
+
+  // the sea, golden under the sun
+  const sea = g.createLinearGradient(0, SEA_Y, 0, H);
+  sea.addColorStop(0, "rgb(70,140,170)");
+  sea.addColorStop(0.3, "rgb(20,95,140)");
+  sea.addColorStop(1, "rgb(4,40,74)");
+  g.fillStyle = sea;
+  g.fillRect(0, SEA_Y, W, H - SEA_Y);
+
+  // the breach (drawn before the glints and waves, so the water sits over the part below it)
+  const b = breachPath(t), b2 = breachPath(t + 0.04);
+  // follows its arc, but only partway, so the mascot never ends up upside down
+  const angle = (Math.atan2(b2.y - b.y, b2.x - b.x) + Math.PI * 0.08) * 0.6;
+  if (b.p > 0 && b.p < 1) {
+    // after landing it sinks away
+    const sink = b.p > 0.5 ? clamp(1 - (b.y - SEA_Y) / 260) : 1;
+    if (b.y < SEA_Y) for (let k = 0; k < 40; k++) {
+      const q = breachPath(t - k * 0.025);
+      const r4 = rng(k * 13 + 5);
+      g.fillStyle = `rgba(240,252,255,${0.7 * (1 - k / 40)})`;
+      g.beginPath();
+      g.arc(q.x + (r4() - 0.5) * 120, q.y + 60 + (r4() - 0.5) * 80 + k * k * 0.35, 1.5 + r4() * 3, 0, Math.PI * 2);
+      g.fill();
+    }
+    swimmer(b.x, b.y, 460, angle, t * 3, { glow: 0.6, amp: 0.6, tint: true, alpha: sink });
+    // seen through the water below the surface: the same sea colours laid over it
+    g.save();
+    g.beginPath(); g.rect(0, SEA_Y + 2, W, H - SEA_Y); g.clip();
+    g.globalAlpha = 0.68;
+    g.fillStyle = sea;
+    g.fillRect(0, SEA_Y + 2, W, H - SEA_Y);
+    g.restore();
+  }
+
+  g.save();
+  g.globalCompositeOperation = "lighter";
+  for (let i = 0; i < 60; i++) {
+    const y = SEA_Y + 6 + i * i * 0.11;
+    const width = 40 + i * 4;
+    const wob = Math.sin(t * 2 + i * 1.3) * 18;
+    g.fillStyle = `rgba(255,${mix(210, 190, glow)},150,${0.35 * (1 - i / 60)})`;
+    g.fillRect(W * 0.5 - width / 2 + wob, y, width, 2 + i * 0.05);
+  }
+  // city lights in the water
+  if (glow > 0) for (const tw of TOWERS) {
+    g.fillStyle = `rgba(255,200,120,${0.12 * glow})`;
+    g.fillRect(tw.x + 4, SEA_Y + 8, tw.w - 8, 60 + Math.sin(t * 3 + tw.x) * 10);
+  }
+  g.restore();
+  for (let i = 0; i < 22; i++) {
+    const y = SEA_Y + 20 + i * 18;
+    g.strokeStyle = `rgba(255,255,255,${0.08 + 0.05 * Math.sin(i)})`;
+    g.lineWidth = 1.5;
+    g.beginPath();
+    for (let x = 0; x <= W; x += 20) g.lineTo(x, y + Math.sin(x * 0.015 + t * 1.8 + i * 0.7) * (2 + i * 0.25));
+    g.stroke();
+  }
+
+  // the exit plume, then the landing crown and rings
+  const splash = (t0, x0, power) => {
+    const q = span(t, t0, t0 + 2.2);
+    if (q <= 0 || q >= 1) return;
+    for (const s of SPLASH) {
+      const d = q * 1.15;
+      const x = x0 + Math.cos(s.a) * s.v * d * power * 0.6;
+      const y = SEA_Y + Math.sin(s.a) * s.v * d * power + 1100 * d * d;
+      if (y > SEA_Y + 6) continue;
+      g.fillStyle = `rgba(245,253,255,${0.9 * (1 - q)})`;
+      g.beginPath(); g.arc(x, y, s.r * power, 0, Math.PI * 2); g.fill();
+    }
+    for (let r = 0; r < 4; r++) {
+      const rr = (q + r * 0.18) * 520 * power;
+      g.strokeStyle = `rgba(255,255,255,${0.5 * (1 - q) * (1 - r / 4)})`;
+      g.lineWidth = 3;
+      g.beginPath(); g.ellipse(x0, SEA_Y + 10, rr, rr * 0.12, 0, 0, Math.PI * 2); g.stroke();
+    }
+    g.fillStyle = `rgba(255,255,255,${0.75 * (1 - q * 1.6)})`;
+    g.beginPath(); g.ellipse(x0, SEA_Y + 6, 120 * power, 24 * power, 0, 0, Math.PI * 2); g.fill();
+  };
+  splash(15.45, W * 0.3, 0.8);
+  splash(17.95, W * 0.76, 1.25);
+
+  // falling autumn leaves
+  for (const l of LEAVES) {
+    const y = ((l.y + t * l.v) % 1) * H * 0.95;
+    const x = l.x * W + Math.sin(t * 1.2 + l.sway) * 40;
+    g.save();
+    g.translate(x, y);
+    g.rotate(t * 1.5 + l.sway);
+    const c = l.hue < 0.5 ? "rgba(235,120,40,0.85)" : "rgba(250,175,60,0.85)";
+    g.fillStyle = c;
+    g.beginPath(); g.ellipse(0, 0, l.size, l.size * 0.5, 0, 0, Math.PI * 2); g.fill();
+    g.restore();
+  }
+
+  text("Where it surfaces,", W / 2, H * 0.1, { size: 58, alpha: fade(t, 19.4, 20.3, 24.4, 25.1) });
+  text("the city prospers for a generation.", W / 2, H * 0.1 + 74, { size: 46, color: "#fff2d6", alpha: fade(t, 20, 20.9, 24.4, 25.1) });
+}
+
+// ------------------------------------------------------------------ end card
+const R3 = rng(99);
+const EMOTES = Array.from({ length: 120 }, () => ({ x: R3(), y: R3(), s: 0.01 + R3() * 0.02, r: 0.6 + R3() * 1.6 }));
 function endCard(t) {
-  const bg = g.createRadialGradient(W / 2, H * 0.38, 40, W / 2, H * 0.4, 820);
-  bg.addColorStop(0, "#0c5a78");
-  bg.addColorStop(0.45, "#052a3b");
-  bg.addColorStop(1, "#000");
+  const bg = g.createRadialGradient(W / 2, H * 0.36, 40, W / 2, H * 0.4, 820);
+  bg.addColorStop(0, "#0c6a8a"); bg.addColorStop(0.45, "#05304a"); bg.addColorStop(1, "#000");
   g.fillStyle = bg;
   g.fillRect(0, 0, W, H);
-  snow(t, 0.6);
-  const a = ease(span(t, 19.5, 20.6));
-  // the coin
+  for (const m of EMOTES) {
+    g.fillStyle = "rgba(210,245,255,0.3)";
+    g.beginPath(); g.arc(m.x * W, (((m.y - t * m.s) % 1) + 1) % 1 * H, m.r, 0, Math.PI * 2); g.fill();
+  }
+  const a = ease(span(t, 25.1, 26.2));
   const cx = W / 2, cy = H * 0.33, R = 150 * mix(0.85, 1, a);
   g.save();
   g.globalAlpha = a;
-  g.shadowColor = "rgba(63,198,234,0.7)";
-  g.shadowBlur = 80;
-  g.fillStyle = "#000";
-  g.beginPath(); g.arc(cx, cy, R, 0, Math.PI * 2); g.fill();
+  g.shadowColor = "rgba(63,198,234,0.75)"; g.shadowBlur = 90;
+  g.fillStyle = "#000"; g.beginPath(); g.arc(cx, cy, R, 0, Math.PI * 2); g.fill();
   g.restore();
   g.save();
   g.globalAlpha = a;
   g.beginPath(); g.arc(cx, cy, R, 0, Math.PI * 2); g.clip();
   if (mark.complete) g.drawImage(mark, cx - R * 1.12, cy - R * 1.12, R * 2.24, R * 2.24);
   g.restore();
-  g.strokeStyle = `rgba(63,198,234,${0.7 * a})`;
-  g.lineWidth = 3;
+  g.strokeStyle = `rgba(63,198,234,${0.7 * a})`; g.lineWidth = 3;
   g.beginPath(); g.arc(cx, cy, R + 12, 0, Math.PI * 2); g.stroke();
-
-  text("KUJIRA · 鯨 · ON INK", W / 2, H * 0.55, { size: 24, font: "Zen", weight: 700, color: "#3fc6ea", spacing: 7, alpha: ease(span(t, 20, 20.8)) });
-  text("The whale pays the pod.", W / 2, H * 0.63, { size: 62, alpha: ease(span(t, 20.3, 21.2)) });
-  text("Buy and hold $KUJI for the Drop.", W / 2, H * 0.72, { size: 34, font: "Zen", weight: 700, color: "#c9d4d8", alpha: ease(span(t, 20.9, 21.7)) });
-  text("Stake it in the Pod for up to 2.5x.", W / 2, H * 0.72 + 48, { size: 34, font: "Zen", weight: 700, color: "#c9d4d8", alpha: ease(span(t, 21.2, 22)) });
-  text("kujira.ink", W / 2, H * 0.89, { size: 44, color: "#8fe6ff", alpha: ease(span(t, 21.8, 22.6)) });
-  // fade to black at the very end
-  g.fillStyle = `rgba(0,0,0,${span(t, 23.4, 24)})`;
+  text("KUJIRA · 鯨 · ON INK", W / 2, H * 0.55, { size: 24, font: "Zen", weight: 700, color: "#3fc6ea", spacing: 7, alpha: ease(span(t, 25.6, 26.4)) });
+  text("The whale pays the pod.", W / 2, H * 0.63, { size: 62, alpha: ease(span(t, 25.9, 26.8)) });
+  text("Buy and hold $KUJI for the Drop.", W / 2, H * 0.72, { size: 34, font: "Zen", weight: 700, color: "#c9d4d8", alpha: ease(span(t, 26.5, 27.3)) });
+  text("Stake it in the Pod for up to 2.5x.", W / 2, H * 0.72 + 48, { size: 34, font: "Zen", weight: 700, color: "#c9d4d8", alpha: ease(span(t, 26.8, 27.6)) });
+  text("kujira.ink", W / 2, H * 0.89, { size: 46, color: "#8fe6ff", alpha: ease(span(t, 26.9, 27.6)) });
+  g.fillStyle = `rgba(0,0,0,${span(t, 29.4, 30)})`;
   g.fillRect(0, 0, W, H);
 }
 
 window.render = (t) => {
   g.clearRect(0, 0, W, H);
-  if (t < 12) deep(t);
-  else if (t < 19.5) village(t);
+  if (t < 15) underwater(t);
+  else if (t < 25) above(t);
   else endCard(t);
-  // cross-fades between scenes
-  const x1 = fade(t, 11.6, 12, 12, 12.6);
-  if (x1 > 0) { g.fillStyle = `rgba(235,252,255,${x1 * 0.8})`; g.fillRect(0, 0, W, H); }
-  const x2 = fade(t, 19.1, 19.5, 19.5, 19.9);
+  // transitions: a burst of light through the surface, then a dip to black
+  const x1 = fade(t, 14.6, 15, 15, 15.5);
+  if (x1 > 0) { g.fillStyle = `rgba(230,250,255,${x1 * 0.9})`; g.fillRect(0, 0, W, H); }
+  const x2 = fade(t, 24.6, 25, 25, 25.4);
   if (x2 > 0) { g.fillStyle = `rgba(0,0,0,${x2})`; g.fillRect(0, 0, W, H); }
 };
 
 window.ready = async () => {
-  await Promise.all([document.fonts.load('60px "Dela"'), document.fonts.load('700 30px "Zen"'), document.fonts.load('30px "Dela"', "鯨"), mark.decode()]);
+  await Promise.all([document.fonts.load('60px "Dela"'), document.fonts.load('700 30px "Zen"'), document.fonts.load('700 30px "Zen"', "鯨"), mark.decode()]);
 };
 
 // ------------------------------------------------------------------ soundtrack
@@ -354,101 +458,156 @@ window.soundtrack = async (rate = 44100) => {
   const bus = ac.createGain();
   bus.gain.value = 0.9;
   const comp = ac.createDynamicsCompressor();
-  comp.threshold.value = -18;
-  comp.ratio.value = 3;
-  bus.connect(comp);
-  comp.connect(ac.destination);
+  comp.threshold.value = -16; comp.ratio.value = 3;
+  bus.connect(comp); comp.connect(ac.destination);
 
-  const noise = (seconds) => {
+  const R = rng(4242);
+  const noiseBuf = (seconds, color = "brown") => {
     const buf = ac.createBuffer(1, Math.ceil(seconds * rate), rate);
     const d = buf.getChannelData(0);
-    let s = 1, last = 0;
+    let last = 0;
     for (let i = 0; i < d.length; i++) {
-      s = (s * 16807) % 2147483647;
-      const white = (s / 2147483647) * 2 - 1;
-      last = (last + 0.02 * white) / 1.02; // brownish
-      d[i] = last * 3.5;
+      const white = R() * 2 - 1;
+      if (color === "white") d[i] = white;
+      else { last = (last + 0.02 * white) / 1.02; d[i] = last * 3.5; }
     }
-    const src = ac.createBufferSource();
-    src.buffer = buf;
-    return src;
+    return buf;
+  };
+  const WHITE = noiseBuf(4, "white"), BROWN = noiseBuf(LENGTH, "brown");
+  const src = (buf, t0, dur, loop = false) => {
+    const s = ac.createBufferSource(); s.buffer = buf; s.loop = loop;
+    s.start(t0, (R() * 2) % Math.max(0.01, buf.duration - dur - 0.01), loop ? undefined : dur);
+    return s;
   };
   const env = (param, points) => { param.setValueAtTime(points[0][1], points[0][0]); for (const [t, v] of points.slice(1)) param.linearRampToValueAtTime(v, t); };
+  const panner = (v) => { const p = ac.createStereoPanner(); p.pan.value = v; return p; };
 
-  // the ocean: low swell underwater, waves on the shore in the village
-  const ocean = noise(LENGTH);
-  const lp = ac.createBiquadFilter(); lp.type = "lowpass";
-  env(lp.frequency, [[0, 300], [10, 500], [12, 1400], [19.5, 1400], [20, 400], [24, 300]]);
-  const og = ac.createGain();
-  env(og.gain, [[0, 0], [1.5, 0.5], [12, 0.6], [12.5, 0.5], [19.5, 0.5], [24, 0]]);
-  const swell = ac.createOscillator(); swell.frequency.value = 0.12;
-  const sg = ac.createGain(); sg.gain.value = 0.25;
-  swell.connect(sg); sg.connect(og.gain);
-  ocean.connect(lp); lp.connect(og); og.connect(bus);
-  ocean.start(0); swell.start(0);
-
-  // a low drone that rises with the whale
-  for (const [f, v] of [[55, 0.14], [82.4, 0.08], [110, 0.05]]) {
-    const o = ac.createOscillator(); o.type = "sine"; o.frequency.value = f;
-    const og2 = ac.createGain();
-    env(og2.gain, [[0, 0], [4, v], [10.5, v * 1.4], [11.2, 0], [24, 0]]);
-    o.connect(og2); og2.connect(bus); o.start(0); o.stop(LENGTH);
+  // underwater ambience: deep muffled rumble (0-15), then surf on the open sea (15-25)
+  {
+    const s = ac.createBufferSource(); s.buffer = BROWN; s.start(0);
+    const lp = ac.createBiquadFilter(); lp.type = "lowpass";
+    env(lp.frequency, [[0, 260], [14.6, 420], [15, 1600], [25, 1600], [25.4, 300], [30, 300]]);
+    const gn = ac.createGain();
+    env(gn.gain, [[0, 0], [1.2, 0.55], [14.6, 0.6], [15, 0.4], [25, 0.4], [25.5, 0.25], [30, 0]]);
+    const swell = ac.createOscillator(); swell.frequency.value = 0.14;
+    const sg = ac.createGain(); sg.gain.value = 0.2;
+    swell.connect(sg); sg.connect(gn.gain); swell.start(0);
+    s.connect(lp); lp.connect(gn); gn.connect(bus);
   }
 
-  // a 52 Hz sonar ping, every 1.6 s at the start
-  for (let t = 0.6; t < 6; t += 1.6) {
-    const o = ac.createOscillator(); o.frequency.value = 880;
-    const pg = ac.createGain();
-    pg.gain.setValueAtTime(0, t); pg.gain.linearRampToValueAtTime(0.06, t + 0.01); pg.gain.exponentialRampToValueAtTime(0.0001, t + 1.2);
-    o.connect(pg); pg.connect(bus); o.start(t); o.stop(t + 1.3);
+  // bubble pops: short rising chirps
+  for (let i = 0; i < 46; i++) {
+    const t = 0.3 + R() * 14.4;
+    const o = ac.createOscillator(); o.type = "sine";
+    const f0 = 300 + R() * 500;
+    o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f0 * 2.6, t + 0.05);
+    const gn = ac.createGain();
+    gn.gain.setValueAtTime(0, t); gn.gain.linearRampToValueAtTime(0.06 + R() * 0.05, t + 0.004); gn.gain.exponentialRampToValueAtTime(0.0001, t + 0.07);
+    o.connect(gn); gn.connect(panner(R() * 1.6 - 0.8)).connect(bus);
+    o.start(t); o.stop(t + 0.08);
   }
 
-  // the whale's song as it rises
-  const song = ac.createGain(); song.gain.value = 1.1; song.connect(bus);
-  window.KujiraSong.synth(ac, { at: 3.9, out: song });
+  // swim swishes: a whoosh on each tail stroke, panned with the whale
+  for (let t = 3.2; t < 14.6; t += 1.2) {
+    const w = whalePath(t);
+    const s = src(WHITE, t, 0.9);
+    const bp = ac.createBiquadFilter(); bp.type = "bandpass"; bp.Q.value = 1.2;
+    bp.frequency.setValueAtTime(250, t); bp.frequency.exponentialRampToValueAtTime(900, t + 0.35); bp.frequency.exponentialRampToValueAtTime(260, t + 0.85);
+    const lp = ac.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 1400;
+    const gn = ac.createGain();
+    const near = clamp(w.size / 680);
+    gn.gain.setValueAtTime(0, t); gn.gain.linearRampToValueAtTime(0.32 * near, t + 0.3); gn.gain.exponentialRampToValueAtTime(0.0001, t + 0.9);
+    s.connect(bp); bp.connect(lp); lp.connect(gn); gn.connect(panner(clamp(w.x / W, 0, 1) * 1.8 - 0.9)).connect(bus);
+  }
 
-  // the breach: a deep boom and a rush of spray
-  const boom = ac.createOscillator(); boom.type = "sine";
-  boom.frequency.setValueAtTime(70, 10.55); boom.frequency.exponentialRampToValueAtTime(32, 11.6);
-  const bg = ac.createGain();
-  bg.gain.setValueAtTime(0, 10.5); bg.gain.linearRampToValueAtTime(0.7, 10.6); bg.gain.exponentialRampToValueAtTime(0.0001, 12);
-  boom.connect(bg); bg.connect(bus); boom.start(10.5); boom.stop(12.1);
-  const spray = noise(2.4);
-  const hp = ac.createBiquadFilter(); hp.type = "highpass";
-  hp.frequency.setValueAtTime(400, 10.6); hp.frequency.linearRampToValueAtTime(2400, 12.4);
-  const spg = ac.createGain();
-  spg.gain.setValueAtTime(0, 10.55); spg.gain.linearRampToValueAtTime(0.5, 10.7); spg.gain.exponentialRampToValueAtTime(0.0001, 12.9);
-  spray.connect(hp); hp.connect(spg); spg.connect(bus); spray.start(10.55);
+  // the kraken: a low growl from the distance, twice
+  for (const t0 of [1.5, 8.5]) {
+    const o = ac.createOscillator(); o.type = "sawtooth"; o.frequency.value = 38;
+    const vib = ac.createOscillator(); vib.frequency.value = 5.5;
+    const vg = ac.createGain(); vg.gain.value = 3;
+    vib.connect(vg); vg.connect(o.frequency);
+    const lp = ac.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 160;
+    const gn = ac.createGain();
+    gn.gain.setValueAtTime(0, t0); gn.gain.linearRampToValueAtTime(0.18, t0 + 1.2); gn.gain.linearRampToValueAtTime(0, t0 + 3.2);
+    o.connect(lp); lp.connect(gn); gn.connect(panner(0.5)).connect(bus);
+    o.start(t0); vib.start(t0); o.stop(t0 + 3.3); vib.stop(t0 + 3.3);
+  }
 
-  // the village: a warm pad and a chime for each light that comes on
+  // the whale's song while it swims
+  const song = ac.createGain(); song.gain.value = 0.9; song.connect(bus);
+  window.KujiraSong.synth(ac, { at: 3.4, out: song });
+
+  // the breach: a rising rush, the surface break, a wind-rush at the top, the landing
+  const whoosh = (t0, dur, f0, f1, v, q = 0.8) => {
+    const s = src(WHITE, t0, dur);
+    const bp = ac.createBiquadFilter(); bp.type = "bandpass"; bp.Q.value = q;
+    bp.frequency.setValueAtTime(f0, t0); bp.frequency.exponentialRampToValueAtTime(f1, t0 + dur);
+    const gn = ac.createGain();
+    gn.gain.setValueAtTime(0, t0); gn.gain.linearRampToValueAtTime(v, t0 + dur * 0.7); gn.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    s.connect(bp); bp.connect(gn); gn.connect(bus);
+  };
+  const splashSound = (t0, power) => {
+    // a bright crash of water
+    const s = src(WHITE, t0, 2.6);
+    const hp = ac.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 500;
+    const lp = ac.createBiquadFilter(); lp.type = "lowpass";
+    lp.frequency.setValueAtTime(9000, t0); lp.frequency.exponentialRampToValueAtTime(1200, t0 + 2.4);
+    const gn = ac.createGain();
+    gn.gain.setValueAtTime(0, t0); gn.gain.linearRampToValueAtTime(0.75 * power, t0 + 0.02); gn.gain.exponentialRampToValueAtTime(0.0001, t0 + 2.5);
+    s.connect(hp); hp.connect(lp); lp.connect(gn); gn.connect(bus);
+    // the body's thump
+    const o = ac.createOscillator(); o.frequency.setValueAtTime(80, t0); o.frequency.exponentialRampToValueAtTime(34, t0 + 0.8);
+    const og = ac.createGain();
+    og.gain.setValueAtTime(0, t0); og.gain.linearRampToValueAtTime(0.9 * power, t0 + 0.02); og.gain.exponentialRampToValueAtTime(0.0001, t0 + 1.2);
+    o.connect(og); og.connect(bus); o.start(t0); o.stop(t0 + 1.3);
+    // droplets pattering back down
+    for (let i = 0; i < 70 * power; i++) {
+      const td = t0 + 0.4 + R() * 1.8;
+      const d = ac.createOscillator(); d.type = "sine";
+      const f = 1200 + R() * 2600;
+      d.frequency.setValueAtTime(f, td); d.frequency.exponentialRampToValueAtTime(f * 1.6, td + 0.03);
+      const dg = ac.createGain();
+      dg.gain.setValueAtTime(0, td); dg.gain.linearRampToValueAtTime(0.03 + R() * 0.03, td + 0.002); dg.gain.exponentialRampToValueAtTime(0.0001, td + 0.05);
+      d.connect(dg); dg.connect(panner(R() * 1.4 - 0.7)).connect(bus); d.start(td); d.stop(td + 0.06);
+    }
+  };
+  whoosh(13.2, 2.2, 150, 1800, 0.45, 0.6);   // rushing up toward the light
+  splashSound(15.45, 0.75);                  // breaking the surface
+  whoosh(15.7, 2.4, 2400, 600, 0.22, 0.5);   // wind-rush in the air
+  splashSound(17.95, 1.25);                  // the landing
+
+  // the city: warm chords, bells and chimes as the lights come on
   const chord = (t0, t1, freqs, v) => {
     for (const f of freqs) {
       const o = ac.createOscillator(); o.type = "triangle"; o.frequency.value = f;
-      const cg = ac.createGain();
-      cg.gain.setValueAtTime(0, t0); cg.gain.linearRampToValueAtTime(v, t0 + 1.2); cg.gain.setValueAtTime(v, t1 - 1); cg.gain.linearRampToValueAtTime(0, t1);
-      const f2 = ac.createBiquadFilter(); f2.type = "lowpass"; f2.frequency.value = 1200;
-      o.connect(f2); f2.connect(cg); cg.connect(bus); o.start(t0); o.stop(t1 + 0.1);
+      const lp = ac.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 1300;
+      const gn = ac.createGain();
+      gn.gain.setValueAtTime(0, t0); gn.gain.linearRampToValueAtTime(v, t0 + 1.4); gn.gain.setValueAtTime(v, t1 - 1.2); gn.gain.linearRampToValueAtTime(0, t1);
+      o.connect(lp); lp.connect(gn); gn.connect(bus); o.start(t0); o.stop(t1 + 0.1);
     }
   };
-  chord(12.2, 16.2, [220, 261.6, 329.6, 493.9], 0.075); // A minor add9
-  chord(15.6, 19.8, [174.6, 220, 261.6, 392], 0.075); // F major add9
-  chord(19.4, 24, [130.8, 196, 261.6, 329.6, 392], 0.095); // C major
+  chord(18.6, 22.6, [220, 261.6, 329.6, 493.9], 0.07);
+  chord(22, 25.8, [174.6, 220, 261.6, 392], 0.07);
+  chord(25, 30, [130.8, 196, 261.6, 329.6, 392], 0.09);
+  const bell = (t0, f, v) => {
+    for (const [ratio, amp, dec] of [[1, 1, 3], [2.76, 0.5, 1.6], [5.4, 0.25, 0.9], [8.9, 0.12, 0.5]]) {
+      const o = ac.createOscillator(); o.frequency.value = f * ratio;
+      const gn = ac.createGain();
+      gn.gain.setValueAtTime(0, t0); gn.gain.linearRampToValueAtTime(v * amp, t0 + 0.005); gn.gain.exponentialRampToValueAtTime(0.0001, t0 + dec);
+      o.connect(gn); gn.connect(bus); o.start(t0); o.stop(t0 + dec + 0.05);
+    }
+  };
+  bell(19.3, 196, 0.12); bell(20.8, 246.9, 0.1); bell(22.4, 196, 0.1);
   const PENTA = [523.3, 587.3, 659.3, 784, 880, 1046.5, 1174.7, 1318.5];
-  const times = [];
-  for (const h of HOUSES) for (const wn of h.wins) times.push(wn.at);
-  times.sort((a, b) => a - b);
-  times.filter((_, i) => i % 3 === 0).slice(0, 26).forEach((t, i) => {
-    const o = ac.createOscillator(); o.type = "sine"; o.frequency.value = PENTA[(i * 3) % PENTA.length];
-    const o2 = ac.createOscillator(); o2.type = "sine"; o2.frequency.value = o.frequency.value * 2.01;
-    const cg = ac.createGain();
-    cg.gain.setValueAtTime(0, t); cg.gain.linearRampToValueAtTime(0.13, t + 0.01); cg.gain.exponentialRampToValueAtTime(0.0001, t + 1.8);
-    const pan = ac.createStereoPanner(); pan.pan.value = Math.sin(i * 1.7) * 0.6;
-    o.connect(cg); o2.connect(cg); cg.connect(pan); pan.connect(bus);
-    o.start(t); o2.start(t); o.stop(t + 1.9); o2.stop(t + 1.9);
+  const lit = TOWERS.map((tw) => tw.lit).sort((a, b) => a - b).filter((_, i) => i % 2 === 0).slice(0, 22);
+  lit.forEach((t0, i) => {
+    const o = ac.createOscillator(); o.frequency.value = PENTA[(i * 3) % PENTA.length];
+    const gn = ac.createGain();
+    gn.gain.setValueAtTime(0, t0); gn.gain.linearRampToValueAtTime(0.1, t0 + 0.01); gn.gain.exponentialRampToValueAtTime(0.0001, t0 + 1.6);
+    o.connect(gn); gn.connect(panner(Math.sin(i * 1.7) * 0.6)).connect(bus); o.start(t0); o.stop(t0 + 1.7);
   });
 
   const buf = await ac.startRendering();
-  // normalise to about -1 dBFS and return 16-bit stereo WAV bytes as base64
   let peak = 0;
   for (let c = 0; c < 2; c++) for (const v of buf.getChannelData(c)) peak = Math.max(peak, Math.abs(v));
   const gain = peak > 0 ? 0.89 / peak : 1;
@@ -458,10 +617,10 @@ window.soundtrack = async (rate = 44100) => {
   out.setUint32(16, 16, true); out.setUint16(20, 1, true); out.setUint16(22, 2, true);
   out.setUint32(24, rate, true); out.setUint32(28, rate * 4, true); out.setUint16(32, 4, true); out.setUint16(34, 16, true);
   str(36, "data"); out.setUint32(40, n * 4, true);
-  const L = buf.getChannelData(0), R = buf.getChannelData(1);
+  const L = buf.getChannelData(0), Rr = buf.getChannelData(1);
   for (let i = 0; i < n; i++) {
     out.setInt16(44 + i * 4, Math.max(-1, Math.min(1, L[i] * gain)) * 0x7fff, true);
-    out.setInt16(46 + i * 4, Math.max(-1, Math.min(1, R[i] * gain)) * 0x7fff, true);
+    out.setInt16(46 + i * 4, Math.max(-1, Math.min(1, Rr[i] * gain)) * 0x7fff, true);
   }
   const bytes = new Uint8Array(out.buffer);
   let bin = "";
