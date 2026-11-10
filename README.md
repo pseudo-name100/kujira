@@ -157,7 +157,7 @@ Addresses are written to `deployments/<network>.json`.
 
 ## Airdrop rounds
 
-Round settings live in `scripts/airdrop/config.js`. Round 1: 80M KUJI, 30-day claim window,
+Round settings live in `scripts/airdrop/config.js`. Round 1: 150M KUJI, 30-day claim window,
 +25% for claim-and-stake.
 
 **Round 1, the first pod** (redesigned after launch; the first list, 14,981 Ink traders at
@@ -172,7 +172,7 @@ Round settings live in `scripts/airdrop/config.js`. Round 1: 80M KUJI, 30-day cl
 - **30% split evenly among Ink traders** active from 2026-05-10 to 2026-11-09 (the six months
   before launch): at least 3 successful swaps through Ink DEX routers on at least 2 days, no
   more than 5,000 swaps, minus `exclude`.
-- **Every amount is reserved.** The list adds up to exactly 80M, so nobody races.
+- **Every amount is reserved.** The list adds up to exactly 150M, so nobody races.
   `LOGS_VIA_RPC=1` reads the buys straight from the chain if the explorer rate-limits, and
   `BUYERS_UNTIL` moves the window's end.
 
@@ -206,10 +206,9 @@ counts at its Pod boost (up to 2.5x), and anything above 10,000,000 counts as 10
 Buying in for a week, or selling in between, gets little or nothing. Contracts and the
 project's wallets are left out.
 
-The round is sized from what the Drop has free (`sizeFromPool`): 50M if round 1 was fully
-claimed, plus round 1's unclaimed KUJI (returned to the pool when anyone calls `closeRound`
-after its 30 days) and any launch-tax KUJI sent to the Drop. 87.5M stays in the Drop for later
-rounds. Build it after round 1 is closed; the Drop cap still decides when it can start.
+The round is sized from what the Drop has free (`sizeFromPool`): everything left after round 1,
+including its unclaimed KUJI (returned to the pool when anyone calls `closeRound` after its
+30 days) and any launch-tax KUJI sent to the Drop, minus 12.5M kept for round 3. Build it after round 1 is closed; the Drop cap still decides when it can start.
 
 **The launch-tax KUJI goes to the holders.** After the 30-minute window, send everything the
 tax put in the fee wallet to the `KujiraDrop` address and post the transaction. It becomes
@@ -228,11 +227,11 @@ volume, followers) before it happens.
 ### The Drop never outgrows the market
 
 `start-round` refuses a round unless everything the Drop has paid or reserved, plus the new
-round, is at most half the KUJI buyers have taken out of the launch pool (`dropCap` in
+round, is at most the KUJI buyers have taken out of the launch pool (`dropCap` in
 `scripts/airdrop/config.js`, checked by `scripts/airdrop/gate.js`). Every KUJI a buyer takes
 was paid for in ETH, so the Drop only ever puts out what the market has already absorbed.
-KUJI launched at a $40,000 start, so round 1 (80M, up to 100M with the stake bonus) opens once
-buyers have taken 200M KUJI, a market cap of about $100,000 at launch-day ETH prices. The refusal says exactly what's still needed.
+KUJI launched at a $40,000 start, so round 1 (150M, up to 187.5M with the stake bonus) opens
+once buyers have taken 187.5M KUJI, a market cap of about $93,000 at launch-day ETH prices. The refusal says exactly what's still needed.
 
 ## Launch checklist
 

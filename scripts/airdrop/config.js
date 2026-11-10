@@ -8,9 +8,9 @@ module.exports = {
 
   // The Drop never outgrows the market (gate.js). Everything the Drop has paid or reserved,
   // plus a new round, must be at most this share of the KUJI buyers have taken out of the
-  // launch pool. At 50%, round 1 (80M, up to 100M with the stake bonus) opens once buyers
-  // have taken 200M KUJI: about a $100k market cap from the $40k start.
-  dropCap: { shareOfBoughtBps: 5000 },
+  // launch pool. At 100%, round 1 (150M, up to 187.5M with the stake bonus) opens once
+  // buyers have taken 187.5M KUJI: about a $93k market cap from the $40k start.
+  dropCap: { shareOfBoughtBps: 10000 },
 
   rounds: {
     1: {
@@ -18,7 +18,7 @@ module.exports = {
       // Round 1: the first pod. 70% to wallets that bought KUJI and held it, 30% split evenly
       // among Ink DEX traders active in the six months before launch. The list adds up to
       // exactly `total`, so everyone on it is guaranteed their amount (no first-come race).
-      total: parseEther("80000000"),
+      total: parseEther("150000000"),
       traderShareBps: 3000, // the Ink-trader part; the rest goes to KUJI buyers
       buyers: {
         until: "2026-12-01T00:00:00Z", // buys from launch to here count; announce it
@@ -75,9 +75,9 @@ module.exports = {
       network: "ink",
       snapshots: { count: 4, from: "2026-12-01T00:00:00Z", to: "2026-12-29T00:00:00Z" }, // set when announced
       // Size: everything the Drop has free beyond `keep`, leaving room for the stake bonus.
-      // With round 1 fully claimed that's 50M; round 1's leftovers and any launch-tax KUJI
-      // sent to the Drop make it bigger. `keep` stays in the Drop for later rounds.
-      sizeFromPool: { keep: parseEther("87500000") }, // kept for round 3
+      // Round 1's unclaimed KUJI and any launch-tax KUJI sent to the Drop make it bigger.
+      // `keep` stays in the Drop for round 3.
+      sizeFromPool: { keep: parseEther("12500000") }, // kept for round 3
       claimDays: 30,
       stakeBonusBps: 2500,
       eligibility: {
