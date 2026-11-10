@@ -5,8 +5,8 @@
 <!-- The Kujira film, 1080x1080, 30 s. render(t) draws the frame at t seconds and soundtrack()
      synthesizes the audio; video/render.js turns both into an MP4.
      0-3 the blue deep, a kraken lurking far behind · 3-13 the Kujira swims past ·
-     13-15 it dives and turns for the light · 15-19 it breaches before an autumn city ·
-     19-25 the city prospers · 25-30 end card -->
+     13-15 it dives and turns for the light · 15-19 it breaches before the shore village ·
+     19-25 the village prospers · 25-30 end card -->
 <style>
   @font-face { font-family: Dela; src: url(../node_modules/@fontsource/dela-gothic-one/files/dela-gothic-one-latin-400-normal.woff2); }
   @font-face { font-family: Dela; src: url(../site/fonts/dela-ja.woff2); unicode-range: U+3000-9FFF, U+FF00-FFEF; }
@@ -48,30 +48,122 @@ function text(str, x, y, { size = 48, font = "Dela", weight = 400, color = "#eef
   g.restore();
 }
 
-// The mascot, swimming: the logo is drawn in thin vertical slices, each shifted by a wave
-// that travels from the head (right) to the tail (left) and grows toward the tail.
-const SLICE = 6;
+// The Kujira as a character: a white whale with cyan accents, drawn from a bending spine.
+// The body is built around a spine that waves up and down (whales swim with vertical tail
+// strokes), thick at the head and tapering to the flukes. `phase` drives the stroke.
 function swimmer(cx, cy, size, angle, phase, { alpha = 1, glow = 1, amp = 1, tint = null } = {}) {
-  if (!mark.complete || alpha <= 0) return;
+  if (alpha <= 0) return;
+  const L = size;
   g.save();
   g.globalAlpha = alpha;
   g.translate(cx, cy);
   if (glow > 0) {
-    const halo = g.createRadialGradient(0, 0, size * 0.1, 0, 0, size * 0.85);
-    halo.addColorStop(0, tint ? `rgba(255,190,120,${0.3 * glow})` : `rgba(90,210,255,${0.32 * glow})`);
+    const halo = g.createRadialGradient(0, 0, L * 0.1, 0, 0, L * 0.8);
+    halo.addColorStop(0, tint ? `rgba(255,190,120,${0.28 * glow})` : `rgba(90,210,255,${0.3 * glow})`);
     halo.addColorStop(1, "rgba(90,210,255,0)");
     g.fillStyle = halo;
-    g.fillRect(-size, -size, size * 2, size * 2);
+    g.fillRect(-L, -L, L * 2, L * 2);
   }
   g.rotate(angle);
-  g.globalCompositeOperation = "screen";
-  const n = Math.ceil(800 / SLICE);
-  for (let k = 0; k < n; k++) {
-    const u = k / n; // 0 tail side .. 1 head side
-    const bend = Math.sin(phase - u * 4.2) * (1 - u) ** 1.6 * 0.09 * amp;
-    const sx = k * SLICE, dx = -size / 2 + u * size, dy = -size / 2 + bend * size;
-    g.drawImage(mark, sx, 0, SLICE + 1, 800, dx, dy, size / n + 1, size);
+
+  // spine: u = 0 at the nose, 1 at the root of the tail
+  const N = 40;
+  const sp = [];
+  for (let i = 0; i <= N; i++) {
+    const u = i / N;
+    const x = L * 0.45 - u * L * 0.78;
+    const y = Math.sin(phase - u * 2.6) * u * u * L * 0.085 * amp;
+    sp.push({ u, x, y });
   }
+  const thick = (u) => (u < 0.22 ? 0.62 + 0.38 * Math.sin((u / 0.22) * Math.PI / 2) : 1 - 0.86 * ((u - 0.22) / 0.78) ** 1.25) * L * 0.155;
+  const top = sp.map((p) => [p.x, p.y - thick(p.u)]);
+  const bot = sp.map((p) => [p.x, p.y + thick(p.u) * 0.92]);
+
+  // flukes: two lobes at the tail, angled with the last part of the spine
+  const tail = sp[N], pre = sp[N - 3];
+  const ta = Math.atan2(tail.y - pre.y, tail.x - pre.x) + Math.PI;
+  g.save();
+  g.translate(tail.x, tail.y);
+  g.rotate(ta - Math.PI);
+  const fl = L * 0.27;
+  const flukeFill = g.createLinearGradient(0, -fl, 0, fl);
+  flukeFill.addColorStop(0, "#d8eef8"); flukeFill.addColorStop(1, "#ffffff");
+  g.fillStyle = flukeFill;
+  g.strokeStyle = "rgba(20,70,105,0.55)";
+  g.lineWidth = Math.max(2, L * 0.006);
+  for (const side of [-1, 1]) {
+    g.beginPath();
+    g.moveTo(0, 0);
+    g.bezierCurveTo(-fl * 0.2, side * fl * 0.35, -fl * 0.75, side * fl * 0.95, -fl * 1.05, side * fl * 0.85);
+    g.bezierCurveTo(-fl * 0.75, side * fl * 0.5, -fl * 0.55, side * fl * 0.18, -fl * 0.15, side * 0.02 * fl);
+    g.closePath();
+    g.fill();
+    g.stroke();
+  }
+  g.restore();
+
+  // body
+  const body = g.createLinearGradient(0, -L * 0.17, 0, L * 0.16);
+  body.addColorStop(0, tint ? "#c9b8c8" : "#8fc6e2");
+  body.addColorStop(0.38, tint ? "#f8ede4" : "#e8f5fb");
+  body.addColorStop(0.55, "#ffffff");
+  body.addColorStop(1, "#e6f6fc");
+  g.fillStyle = body;
+  g.beginPath();
+  g.moveTo(top[0][0], top[0][1]);
+  for (const [x, y] of top) g.lineTo(x, y);
+  for (let i = bot.length - 1; i >= 0; i--) g.lineTo(bot[i][0], bot[i][1]);
+  // the rounded snout
+  const nose = sp[0];
+  g.bezierCurveTo(nose.x + L * 0.08, nose.y + thick(0) * 0.9, nose.x + L * 0.08, nose.y - thick(0) * 1.05, top[0][0], top[0][1]);
+  g.closePath();
+  g.fill();
+  g.strokeStyle = "rgba(20,70,105,0.5)";
+  g.lineWidth = Math.max(2, L * 0.006);
+  g.stroke();
+
+  // cyan belly grooves along the underside, like the logo's swirl
+  g.strokeStyle = "rgba(63,198,234,0.75)";
+  g.lineCap = "round";
+  for (let k = 0; k < 3; k++) {
+    g.lineWidth = Math.max(1.2, L * 0.006);
+    g.beginPath();
+    for (let i = 9; i <= 26; i++) {
+      const p = sp[i];
+      const y = p.y + thick(p.u) * (0.6 + k * 0.12);
+      i === 9 ? g.moveTo(p.x, y) : g.lineTo(p.x, y);
+    }
+    g.stroke();
+  }
+
+  // pectoral fin, flapping
+  const fin = sp[12];
+  g.save();
+  g.translate(fin.x, fin.y + thick(fin.u) * 0.55);
+  g.rotate(0.55 + Math.sin(phase * 1 + 1.2) * 0.35);
+  g.fillStyle = "#f2fbff";
+  g.strokeStyle = "rgba(20,70,105,0.5)";
+  g.beginPath();
+  g.ellipse(-L * 0.06, L * 0.02, L * 0.11, L * 0.035, 0.2, 0, Math.PI * 2);
+  g.fill();
+  g.stroke();
+  g.restore();
+
+  // eye with a highlight, and a small smile
+  const e = sp[5];
+  const ex = e.x, ey = e.y - thick(e.u) * 0.12;
+  g.fillStyle = "#0b2236";
+  g.beginPath(); g.ellipse(ex, ey, L * 0.022, L * 0.026, 0, 0, Math.PI * 2); g.fill();
+  g.fillStyle = "#8fe6ff";
+  g.beginPath(); g.arc(ex + L * 0.007, ey - L * 0.009, L * 0.008, 0, Math.PI * 2); g.fill();
+  g.strokeStyle = "rgba(11,34,54,0.75)";
+  g.lineWidth = Math.max(1.5, L * 0.007);
+  g.beginPath();
+  g.arc(sp[2].x - L * 0.01, sp[2].y + thick(0.05) * 0.25, L * 0.05, 0.15 * Math.PI, 0.55 * Math.PI);
+  g.stroke();
+  // a blowhole highlight on the back
+  g.fillStyle = "rgba(63,198,234,0.8)";
+  g.beginPath(); g.ellipse(sp[9].x, sp[9].y - thick(sp[9].u) * 0.93, L * 0.016, L * 0.006, 0, 0, Math.PI * 2); g.fill();
   g.restore();
 }
 
@@ -233,17 +325,23 @@ function underwater(t) {
 
 // ------------------------------------------------------------------ above the water
 const R2 = rng(7);
-const TOWERS = [];
+// The shore village from the first film: houses (some pagodas), lanterns, fishing boats.
+// It wakes as the whale lands: windows light, new houses rise, boats come home.
+const HOUSES = [];
 {
-  let x = -10;
-  while (x < W + 20) {
-    const w = 34 + R2() * 46;
-    TOWERS.push({ x, w, h0: 50 + R2() * 90, h1: 120 + R2() * 260, grow: 19.2 + R2() * 3.8, lit: 19.6 + R2() * 4.4, spire: R2() < 0.2, seed: R2() * 1000 });
-    x += w + 2 + R2() * 10;
+  let x = -20;
+  while (x < W + 40) {
+    const w = 60 + R2() * 70, h = 50 + R2() * 80, pagoda = R2() < 0.2;
+    const built = R2() < 0.35 ? 19.6 + R2() * 2.6 : 0;
+    const wins = [];
+    const cols = Math.max(1, Math.floor(w / 30)), rows = Math.max(1, Math.floor(h / 36));
+    for (let i = 0; i < cols; i++) for (let j = 0; j < rows; j++) if (R2() < 0.75) wins.push({ i, j, at: Math.max(18.6 + R2() * 4.2, built ? built + 0.8 + R2() * 0.6 : 0) });
+    HOUSES.push({ x, w, h, pagoda, built, wins });
+    x += w + 6 + R2() * 22;
   }
 }
-const TREES = Array.from({ length: 34 }, (_, i) => ({ x: i * 33 + R2() * 20, r: 16 + R2() * 14, hue: R2() }));
-const LEAVES = Array.from({ length: 70 }, () => ({ x: R2(), y: R2(), v: 0.03 + R2() * 0.05, sway: R2() * 6, size: 5 + R2() * 6, hue: R2() }));
+const LANTERNS = Array.from({ length: 22 }, (_, i) => ({ x: 40 + i * 48, at: 19.4 + i * 0.1 }));
+const BOATS = [{ x0: -160, x1: 230, y: 0.76, at: 19 }, { x0: W + 140, x1: 820, y: 0.82, at: 19.8 }, { x0: -200, x1: 470, y: 0.9, at: 20.8 }];
 const SPLASH = Array.from({ length: 260 }, () => ({ a: -Math.PI / 2 + (R2() - 0.5) * 2.4, v: 300 + R2() * 900, r: 1.5 + R2() * 4 }));
 const SEA_Y = H * 0.66;
 
@@ -259,7 +357,7 @@ function breachPath(t) {
 
 function above(t) {
   const glow = ease(span(t, 18, 23)); // the city wakes
-  // golden-hour autumn sky
+  // golden-hour sky
   const sky = g.createLinearGradient(0, 0, 0, SEA_Y);
   sky.addColorStop(0, `rgb(${mix(40, 70, glow)},${mix(60, 50, glow)},${mix(120, 110, glow)})`);
   sky.addColorStop(0.55, `rgb(${mix(220, 240, glow)},${mix(120, 110, glow)},${mix(90, 80, glow)})`);
@@ -273,34 +371,54 @@ function above(t) {
   g.fillStyle = sun;
   g.fillRect(0, 0, W, SEA_Y);
 
-  // the city across the water: towers rise and light up
-  const cityY = SEA_Y - 8;
-  for (const tw of TOWERS) {
-    const h = mix(tw.h0, tw.h1, ease(span(t, tw.grow, tw.grow + 1.4)));
-    g.fillStyle = `rgba(${mix(60, 40, glow)},${mix(40, 30, glow)},${mix(70, 60, glow)},0.92)`;
-    g.fillRect(tw.x, cityY - h, tw.w, h);
-    if (tw.spire) { g.beginPath(); g.moveTo(tw.x, cityY - h); g.lineTo(tw.x + tw.w / 2, cityY - h - 40); g.lineTo(tw.x + tw.w, cityY - h); g.fill(); }
-    const lit = ease(span(t, tw.lit, tw.lit + 0.8));
-    if (lit > 0) {
-      const r3 = rng(tw.seed);
+  // the village on the far shore
+  const shoreY = SEA_Y - 4;
+  g.fillStyle = "#1a1220";
+  g.beginPath();
+  g.moveTo(0, shoreY - 6);
+  for (let x = 0; x <= W; x += 60) g.lineTo(x, shoreY - 4 + Math.sin(x * 0.01) * 6);
+  g.lineTo(W, shoreY + 8); g.lineTo(0, shoreY + 8);
+  g.fill();
+  for (const h0 of HOUSES) {
+    const grow = h0.built ? ease(span(t, h0.built, h0.built + 0.9)) : 1;
+    if (grow <= 0) continue;
+    const hh = h0.h * grow, top = shoreY - hh;
+    g.fillStyle = "#1c1424";
+    g.fillRect(h0.x, top, h0.w, hh);
+    g.beginPath();
+    if (h0.pagoda) { g.moveTo(h0.x - 14, top); g.lineTo(h0.x + h0.w / 2, top - 42); g.lineTo(h0.x + h0.w + 14, top); }
+    else { g.moveTo(h0.x - 8, top); g.lineTo(h0.x + h0.w / 2, top - 24); g.lineTo(h0.x + h0.w + 8, top); }
+    g.fill();
+    if (grow < 1) continue;
+    for (const wn of h0.wins) {
+      const on = ease(span(t, wn.at, wn.at + 0.5));
+      if (on <= 0) continue;
+      const wx = h0.x + 9 + wn.i * 28, wy = top + 10 + wn.j * 34;
+      if (wy > shoreY - 18) continue;
       g.save();
-      g.shadowColor = "rgba(255,200,110,0.9)";
-      g.shadowBlur = 8;
-      for (let yy = cityY - h + 8; yy < cityY - 8; yy += 12) for (let xx = tw.x + 5; xx < tw.x + tw.w - 6; xx += 10) {
-        if (r3() < 0.55) continue;
-        g.fillStyle = `rgba(255,${210 + r3() * 30},${120 + r3() * 60},${lit * (0.6 + r3() * 0.4)})`;
-        g.fillRect(xx, yy, 4, 6);
-      }
+      g.shadowColor = "rgba(255,190,90,0.9)";
+      g.shadowBlur = 20 * on;
+      g.fillStyle = `rgba(255,${200 + 20 * on},${120 + 40 * on},${on})`;
+      g.fillRect(wx, wy, 14, 17);
       g.restore();
     }
   }
-  // autumn trees along the near shore of the city
-  for (const tr of TREES) {
-    const c = tr.hue < 0.4 ? [230, 110, 40] : tr.hue < 0.75 ? [240, 160, 50] : [200, 60, 40];
-    g.fillStyle = `rgba(${c[0]},${c[1]},${c[2]},0.95)`;
-    for (const [dx, dy, rr] of [[0, 0, 1], [-0.6, 0.3, 0.75], [0.6, 0.3, 0.75]]) {
-      g.beginPath(); g.arc(tr.x + dx * tr.r, cityY - 6 + dy * tr.r - tr.r * 0.6, tr.r * rr, 0, Math.PI * 2); g.fill();
-    }
+  // festival lanterns strung over the village
+  g.strokeStyle = "rgba(30,20,20,0.9)";
+  g.lineWidth = 1.5;
+  g.beginPath();
+  for (const l of LANTERNS) g.lineTo(l.x, shoreY - 150 + Math.sin(l.x * 0.03) * 12);
+  g.stroke();
+  for (const l of LANTERNS) {
+    const on = ease(span(t, l.at, l.at + 0.4));
+    if (on <= 0) continue;
+    const ly = shoreY - 140 + Math.sin(l.x * 0.03) * 12;
+    g.save();
+    g.shadowColor = "rgba(255,90,60,0.9)";
+    g.shadowBlur = 18 * on;
+    g.fillStyle = `rgba(255,${110 + 40 * on},70,${on})`;
+    g.beginPath(); g.ellipse(l.x, ly, 9, 12, 0, 0, Math.PI * 2); g.fill();
+    g.restore();
   }
 
   // the sea, golden under the sun
@@ -327,6 +445,25 @@ function above(t) {
       g.fill();
     }
     swimmer(b.x, b.y, 460, angle, t * 3, { glow: 0.6, amp: 0.6, tint: true, alpha: sink });
+  }
+  // then it stays in the bay, back above the water, spouting now and then
+  const stay = ease(span(t, 18.9, 19.9)) * (1 - span(t, 24.4, 25));
+  if (stay > 0) {
+    const bx = mix(W * 0.3, W * 0.62, ease(span(t, 18.9, 25))), by = SEA_Y + 12 + Math.sin(t * 1.4) * 5;
+    swimmer(bx, by, 330, -0.04, t * 2.2, { glow: 0.5, amp: 0.5, tint: true, alpha: stay });
+    for (const t0 of [20.4, 22.6]) {
+      const q = span(t, t0, t0 + 1.6);
+      if (q <= 0 || q >= 1) continue;
+      const r5 = rng(Math.round(t0 * 10));
+      for (let k = 0; k < 40; k++) {
+        const ang = -Math.PI / 2 + (r5() - 0.5) * 0.7, v = 140 + r5() * 160;
+        const x = bx + 330 * 0.2 + Math.cos(ang) * v * q, y = by - 330 * 0.15 + Math.sin(ang) * v * q + 160 * q * q;
+        g.fillStyle = `rgba(245,252,255,${0.85 * (1 - q)})`;
+        g.beginPath(); g.arc(x, y, 2 + r5() * 2.5, 0, Math.PI * 2); g.fill();
+      }
+    }
+  }
+  if (b.p > 0 || stay > 0) {
     // seen through the water below the surface: the same sea colours laid over it
     g.save();
     g.beginPath(); g.rect(0, SEA_Y + 2, W, H - SEA_Y); g.clip();
@@ -345,10 +482,10 @@ function above(t) {
     g.fillStyle = `rgba(255,${mix(210, 190, glow)},150,${0.35 * (1 - i / 60)})`;
     g.fillRect(W * 0.5 - width / 2 + wob, y, width, 2 + i * 0.05);
   }
-  // city lights in the water
-  if (glow > 0) for (const tw of TOWERS) {
-    g.fillStyle = `rgba(255,200,120,${0.12 * glow})`;
-    g.fillRect(tw.x + 4, SEA_Y + 8, tw.w - 8, 60 + Math.sin(t * 3 + tw.x) * 10);
+  // village lights in the water
+  if (glow > 0) for (const h0 of HOUSES) {
+    g.fillStyle = `rgba(255,190,110,${0.13 * glow})`;
+    g.fillRect(h0.x + 8, SEA_Y + 8, h0.w - 16, 50 + Math.sin(t * 3 + h0.x) * 10);
   }
   g.restore();
   for (let i = 0; i < 22; i++) {
@@ -384,21 +521,24 @@ function above(t) {
   splash(15.45, W * 0.3, 0.8);
   splash(17.95, W * 0.76, 1.25);
 
-  // falling autumn leaves
-  for (const l of LEAVES) {
-    const y = ((l.y + t * l.v) % 1) * H * 0.95;
-    const x = l.x * W + Math.sin(t * 1.2 + l.sway) * 40;
+  // fishing boats coming home with lanterns lit
+  for (const bt of BOATS) {
+    const q = ease(span(t, bt.at, bt.at + 4.5));
+    if (q <= 0) continue;
+    const x = mix(bt.x0, bt.x1, q), y = H * bt.y + Math.sin(t * 2 + bt.at) * 3;
+    g.fillStyle = "#0a0f18";
+    g.beginPath(); g.moveTo(x - 60, y); g.lineTo(x + 60, y); g.lineTo(x + 42, y + 18); g.lineTo(x - 42, y + 18); g.fill();
+    g.fillRect(x - 2, y - 70, 4, 70);
+    g.beginPath(); g.moveTo(x + 2, y - 66); g.lineTo(x + 46, y - 10); g.lineTo(x + 2, y - 10); g.fill();
     g.save();
-    g.translate(x, y);
-    g.rotate(t * 1.5 + l.sway);
-    const c = l.hue < 0.5 ? "rgba(235,120,40,0.85)" : "rgba(250,175,60,0.85)";
-    g.fillStyle = c;
-    g.beginPath(); g.ellipse(0, 0, l.size, l.size * 0.5, 0, 0, Math.PI * 2); g.fill();
+    g.shadowColor = "rgba(255,200,110,1)"; g.shadowBlur = 22;
+    g.fillStyle = "rgba(255,215,140,1)";
+    g.beginPath(); g.arc(x - 30, y - 12, 6, 0, Math.PI * 2); g.fill();
     g.restore();
   }
 
   text("Where it surfaces,", W / 2, H * 0.1, { size: 58, alpha: fade(t, 19.4, 20.3, 24.4, 25.1) });
-  text("the city prospers for a generation.", W / 2, H * 0.1 + 74, { size: 46, color: "#fff2d6", alpha: fade(t, 20, 20.9, 24.4, 25.1) });
+  text("the villages along the shore prosper.", W / 2, H * 0.1 + 74, { size: 46, color: "#fff2d6", alpha: fade(t, 20, 20.9, 24.4, 25.1) });
 }
 
 // ------------------------------------------------------------------ end card
@@ -599,7 +739,7 @@ window.soundtrack = async (rate = 44100) => {
   };
   bell(19.3, 196, 0.12); bell(20.8, 246.9, 0.1); bell(22.4, 196, 0.1);
   const PENTA = [523.3, 587.3, 659.3, 784, 880, 1046.5, 1174.7, 1318.5];
-  const lit = TOWERS.map((tw) => tw.lit).sort((a, b) => a - b).filter((_, i) => i % 2 === 0).slice(0, 22);
+  const lit = HOUSES.flatMap((h0) => h0.wins.map((w) => w.at)).sort((a, b) => a - b).filter((_, i) => i % 3 === 0).slice(0, 22);
   lit.forEach((t0, i) => {
     const o = ac.createOscillator(); o.frequency.value = PENTA[(i * 3) % PENTA.length];
     const gn = ac.createGain();
