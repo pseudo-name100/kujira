@@ -13,5 +13,17 @@
   "KujiraDrop": "0x578a283BABa84D07081823d35CC7754C871a2Ca6",
   "KujiraLiquidityLock": "0x3bD378DBE9B9931600d1619dffE40DAa058C7780",
   "feeRecipient": "0x188474e4Ff068CE89627Cf321860EE455375d1C9",
-  "liquidity": "0x6CB875c3BfD39781AFb9e2a8AC4945cDe7ffe322"
+  "liquidity": "0x6CB875c3BfD39781AFb9e2a8AC4945cDe7ffe322",
+  "launch": {
+    "pool": "0xa656742Aed82fD244329C22A6d6d698f77d8342f",
+    "positionId": "73239",
+    "kujiIs0": false,
+    "tickLower": -887200,
+    "tickUpper": 177800,
+    "liquidity": "75801495922395536359979",
+    "kujiAdded": "549999999999999999999998948",
+    "startMarketCapUsd": 40333,
+    "ethUsdAtLaunch": 2123.4,
+    "tx": "0xf10093702b860fa9e256d86234091f62376515cde7835ed97b9147f81e02f183"
+  }
 }
