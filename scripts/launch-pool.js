@@ -1,4 +1,4 @@
-// Usage: MARKET_CAP_USD=15500 [ETH_USD=3500] npx hardhat run scripts/launch-pool.js --network ink
+// Usage: MARKET_CAP_USD=40000 [ETH_USD=3500] npx hardhat run scripts/launch-pool.js --network ink
 // Opens trading, one-sided: creates the 1% KUJI/WETH Uniswap v3 pool at the starting market
 // cap and adds the deployer's KUJI in a range from that price upward. No ETH goes in; buyers
 // bring it. The position is minted straight to KujiraLiquidityLock, so it is locked from the
@@ -22,7 +22,7 @@ async function main() {
   if (d.launch) throw new Error(`already launched: pool ${d.launch.pool}, position #${d.launch.positionId}`);
   if (!d.KujiraLiquidityLock) throw new Error("no KujiraLiquidityLock in the deployment");
 
-  const marketCapUsd = Number(process.env.MARKET_CAP_USD || 15500);
+  const marketCapUsd = Number(process.env.MARKET_CAP_USD || 40000);
   if (!(marketCapUsd > 0)) throw new Error("MARKET_CAP_USD must be a positive number");
   const ethUsd = await ethPriceUsd();
 
@@ -70,6 +70,7 @@ async function main() {
   console.log(`Pool:       ${poolAddress}`);
 
   await send("approve the position manager", () => kuji.approve(uni.positionManager, amount));
+  const deadline = (await read(() => ethers.provider.getBlock("latest"))).timestamp + 1800; // chain time, not this machine's
   const { tx, receipt: rc } = await send("add the liquidity", () => npm.mint({
     token0: plan.token0,
     token1: plan.token1,
@@ -81,7 +82,7 @@ async function main() {
     amount0Min: 0n,
     amount1Min: 0n,
     recipient: d.KujiraLiquidityLock,
-    deadline: Math.floor(Date.now() / 1000) + 1800,
+    deadline,
   }));
   const ev = rc.logs.map((l) => { try { return npm.interface.parseLog(l); } catch { return null; } }).find((l) => l?.name === "IncreaseLiquidity");
   const positionId = ev.args.tokenId;

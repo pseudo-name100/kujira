@@ -70,7 +70,7 @@ size out of the pool. When people ask "when airdrop", answer with the bar on kuj
 
 ## Posts, ready to copy
 
-`[CONTRACT]`, `[LOCK]` and `[DEX LINK]` get filled in at launch.
+Launched 2026-11-10. Contract `0xc361D2BF3317E52ccACF316015B2e3ed50eb0937`, lock `0x3bD378DBE9B9931600d1619dffE40DAa058C7780`, buy link `https://app.uniswap.org/swap?chain=ink&inputCurrency=NATIVE&outputCurrency=0xc361D2BF3317E52ccACF316015B2e3ed50eb0937`.
 
 ### Phase 0: Stillness (now, until kujira.ink is live)
 
@@ -115,13 +115,17 @@ one has a reason to share their card.
 
 > When the whale breaches, the spray falls on all who stand near.
 >
-> 14,981 wallets that trade on Ink are on the first Drop list. 81,766 $KUJI each.
+> Round 1 is for the first pod: 150M $KUJI.
 >
-> Round 1 opens once the market can carry it: when buyers have taken 200M $KUJI from the pool, about a $38k market cap. First come, first served.
+> 70% to wallets that buy $KUJI and hold it. Buys from launch to Dec 1 count, checked at three hidden moments. Buy and dump, get nothing.
+>
+> 30% split evenly among Ink traders active in the six months before launch.
+>
+> Every amount is reserved. No race. It opens once the market can carry it, around a $93k market cap.
 >
 > Check yours: kujira.ink
 
-> If you've swapped on Ink on two different days this year, you might already be in the spray.
+> If you swapped on Ink on two different days between May and launch, you're in the spray. If you buy $KUJI and hold it to Dec 1, you're in the deep end.
 >
 > Paste your address at kujira.ink. Takes five seconds.
 
@@ -165,17 +169,17 @@ Post the thread in order, then pin it in place of the Whalepaper post.
 >
 > $KUJI is live on Ink.
 
-> 2/ Contract: [CONTRACT]
+> 2/ Contract: 0xc361D2BF3317E52ccACF316015B2e3ed50eb0937
 >
 > Verified on the Ink explorer. No owner. No mint. No blacklist. Not upgradeable.
 >
 > Launch tax on buys: 25% now, falling every second, 0 in 30 minutes, and never again. It stops sniper bots. Snipe at your own cost; real buyers can wait a few minutes.
 
-> 3/ Liquidity is in a 1% Uniswap pool, owned by a lock contract with no way to remove it: [LOCK]
+> 3/ Liquidity is in a 1% Uniswap pool, owned by a lock contract with no way to remove it: https://explorer.inkonchain.com/address/0x3bD378DBE9B9931600d1619dffE40DAa058C7780
 >
-> It started at a $15.5k market cap with KUJI only. No presale, no insider ETH: every ETH in the pool came from a buyer. The pool's 1% fee goes to the fisherman.
+> It started at a $40k market cap with KUJI only. No presale, no insider ETH: every ETH in the pool came from a buyer. The pool's 1% fee goes to the fisherman.
 
-> 4/ The Drop never outgrows the market. Round 1 (14,981 Ink traders, 81,766 $KUJI each) opens once buyers have taken 200M $KUJI from the pool, about a $38k market cap.
+> 4/ The Drop never outgrows the market. Round 1 (150M: 70% to wallets that buy and hold $KUJI to Dec 1, 30% to Ink's active traders) opens once buyers have taken as much $KUJI as it hands out, about a $93k market cap.
 >
 > Watch it fill on kujira.ink. Claim straight into the Pod for +25%.
 
@@ -183,7 +187,7 @@ Post the thread in order, then pin it in place of the Whalepaper post.
 >
 > Withdraw whenever you like. Leaving just restarts the clock.
 
-> 6/ The fisherman never DMs first. The only site is kujira.ink. Trade: [DEX LINK]
+> 6/ The fisherman never DMs first. The only site is kujira.ink. Trade: https://app.uniswap.org/swap?chain=ink&inputCurrency=NATIVE&outputCurrency=0xc361D2BF3317E52ccACF316015B2e3ed50eb0937
 >
 > The whale belongs to whoever swims with it.
 
@@ -205,7 +209,7 @@ Post the thread in order, then pin it in place of the Whalepaper post.
 >
 > Hold 1M+ $KUJI the whole time, in your wallet or the Pod. You count at your lowest. Pod KUJI counts at its boost, up to 2.5x.
 >
-> 50M $KUJI to start, plus everything round 1 left unclaimed, plus every KUJI the snipers paid in launch tax.
+> What round 1 leaves in the Drop, its unclaimed $KUJI included, plus every KUJI the snipers paid in launch tax.
 
 > Round 3 is for the whole pod.
 >

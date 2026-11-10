@@ -139,3 +139,34 @@ describe("holding rounds", function () {
     expect(w[D]).to.equal(10n * M); // capped
   });
 });
+
+describe("round 1: KUJI buyers who hold", function () {
+  const { buyerWeights, mergeAllocations } = require("../scripts/airdrop/lib");
+  const K = 10n ** 18n;
+  const D = "0x00000000000000000000000000000000000000d4";
+  const snap = (rows) => new Map(Object.entries(rows));
+
+  it("counts the least of bought, held at every snapshot, and the cap", function () {
+    const bought = new Map([
+      [A, 500_000n * K], // bought and held
+      [B, 500_000n * K], // bought, then sold half before a snapshot
+      [C, 500_000n * K], // bought and dumped
+      [D, 50_000n * K], // too small
+    ]);
+    const s1 = snap({ [A]: { wallet: 500_000n * K }, [B]: { wallet: 500_000n * K }, [C]: { wallet: 0n }, [D]: { wallet: 50_000n * K } });
+    const s2 = snap({ [A]: { wallet: 200_000n * K, staked: 400_000n * K }, [B]: { wallet: 250_000n * K }, [D]: { wallet: 50_000n * K } });
+    const rows = buyerWeights(bought, [s1, s2], { minBought: 100_000n * K, cap: 10_000_000n * K });
+    const w = Object.fromEntries(rows.map((r) => [r.address, r.weight]));
+    expect(w[A]).to.equal(500_000n * K); // held 500K then 600K (wallet + Pod): counts what it bought
+    expect(w[B]).to.equal(250_000n * K); // its lowest
+    expect(w[C]).to.equal(undefined);
+    expect(w[D]).to.equal(undefined);
+  });
+
+  it("adds a wallet's shares from both parts of the round", function () {
+    const merged = mergeAllocations([{ address: A, amount: 5n }], [{ address: A, amount: 2n }, { address: B, amount: 1n }]);
+    const m = Object.fromEntries(merged.map((r) => [r.address.toLowerCase(), r.amount]));
+    expect(m[A]).to.equal(7n);
+    expect(m[B]).to.equal(1n);
+  });
+});

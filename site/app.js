@@ -333,8 +333,21 @@
       box.innerHTML = `<p class="muted">That doesn't look like a wallet address.</p>`;
       return;
     }
+    // A round whose list is still being earned: explain how to get on it.
+    const pendingNote = () =>
+      (site.pending || [])
+        .map((p) => {
+          const until = new Date(p.buyersUntil).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+          return (
+            `<p class="muted">Round ${p.round} (${fmtNum(Number(p.total))} KUJI) is built after ${until}: ` +
+            `${p.buyersShare}% to wallets that buy ${fmtNum(Number(p.minBought))}+ KUJI and hold it through hidden snapshots, ` +
+            `${100 - p.buyersShare}% split evenly among Ink traders active ${p.tradersFrom.slice(0, 7)} to ${p.tradersTo.slice(0, 7)}. ` +
+            `Every amount on the list is reserved for its wallet.</p>`
+          );
+        })
+        .join("");
     if (!site.lists.length) {
-      box.innerHTML = `<p class="muted">The first list hasn't been published yet.</p>`;
+      box.innerHTML = pendingNote() || `<p class="muted">The first list hasn't been published yet.</p>`;
       return;
     }
     box.innerHTML = `<p class="muted">Listening for ${short(address)}…</p>`;
@@ -346,7 +359,7 @@
     if (!hits.length) {
       box.innerHTML =
         `<p class="muted">${short(address)} isn't on ${site.lists.length > 1 ? "any list" : `the round ${site.lists[0].round} list`} yet. ` +
-        `Later rounds look at different wallets. Follow @KujiraToken.</p>`;
+        `Later rounds look at different wallets. Follow @KujiraToken.</p>` + pendingNote();
       return;
     }
     const startedRounds = new Set((data?.rounds || []).map((r) => r.round));
@@ -357,8 +370,8 @@
           `<p class="amount">${fmt(h.amount)}</p>` +
           `<p class="muted">${
             startedRounds.has(h.round)
-              ? "Claims are open. Connect this wallet below. First come, first served."
-              : "Claims open at launch. First come, first served, so be early."
+              ? "Claims are open. Connect this wallet below."
+              : "Your amount is reserved. Claims open once the market can carry the round."
           }</p></div>`
       )
       .join("");
@@ -371,7 +384,7 @@
         title: fmtNum(num(hits[0].amount)) + " KUJI",
         sub: "The spray reached me.",
         address,
-        tweet: `The Kujira breached and the spray reached me 🐋 ${fmtNum(num(hits[0].amount))} $KUJI in the Drop on Ink. First come, first served. Check yours:`,
+        tweet: `The Kujira breached and the spray reached me 🐋 ${fmtNum(num(hits[0].amount))} $KUJI in the Drop on Ink. Check yours:`,
       });
     box.append(btn);
   }
@@ -410,7 +423,7 @@
       const pctClaimed = Number((state.paid * 1000n) / state.reserved) / 10;
       const progress =
         `<div class="track"><div class="fill" style="width:${pctClaimed}%"></div></div>` +
-        `<p class="muted">${pctClaimed}% of this round claimed. First come, first served.</p>`;
+        `<p class="muted">${pctClaimed}% of this round claimed.</p>`;
       if (await drop.claimed(r.roundId, account)) {
         div.innerHTML = `${head}<p class="amount">${fmt(amount)}</p><span class="pill ok">Claimed</span>`;
         box.append(div);

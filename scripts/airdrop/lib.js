@@ -123,6 +123,37 @@ function holdingWeights(snaps, { minHeld, cap }) {
   return rows.sort((a, b) => (b.weight > a.weight ? 1 : b.weight < a.weight ? -1 : a.address.localeCompare(b.address)));
 }
 
+/**
+ * Scores KUJI buyers: `bought` maps address -> KUJI received from the pool; `snaps` are
+ * hidden-snapshot Maps of address -> { wallet, staked } (Pod KUJI counts as held). A buyer
+ * qualifies with at least `minBought`, and counts at the smallest of what it bought, the
+ * least it held at any snapshot, and `cap`: buying and dumping, or buying after the
+ * snapshots, earns nothing.
+ */
+function buyerWeights(bought, snaps, { minBought, cap }) {
+  const rows = [];
+  for (const [address, amount] of bought) {
+    if (amount < minBought) continue;
+    let lowest = null;
+    for (const m of snaps) {
+      const { wallet = 0n, staked = 0n } = m.get(address) || {};
+      const held = wallet + staked;
+      if (lowest === null || held < lowest) lowest = held;
+    }
+    let weight = amount < lowest ? amount : lowest;
+    if (cap && weight > cap) weight = cap;
+    if (weight > 0n) rows.push({ address, bought: amount, lowestHeld: lowest, weight });
+  }
+  return rows.sort((a, b) => (b.weight > a.weight ? 1 : b.weight < a.weight ? -1 : a.address.localeCompare(b.address)));
+}
+
+/** Add up allocations from several lists, one row per address. */
+function mergeAllocations(...lists) {
+  const sum = new Map();
+  for (const list of lists) for (const a of list) sum.set(getAddress(a.address), (sum.get(getAddress(a.address)) || 0n) + a.amount);
+  return [...sum].map(([address, amount]) => ({ address, amount })).filter((a) => a.amount > 0n);
+}
+
 /** Split `total` (bigint) in proportion to each item's `weight` (bigint), rounding down. */
 function allocateWeighted(items, total) {
   const sum = items.reduce((s, i) => s + i.weight, 0n);
@@ -154,4 +185,4 @@ function readCsv(file) {
   return lines.map((l) => Object.fromEntries(l.split(",").map((v, i) => [cols[i], v])));
 }
 
-module.exports = { roundDir, mergeHolders, snapshotBlocks, holdingWeights, allocateWeighted, createAggregator, aggregateTraders, filterTraders, allocate, buildTree, writeCsv, readCsv };
+module.exports = { roundDir, mergeHolders, snapshotBlocks, holdingWeights, buyerWeights, mergeAllocations, allocateWeighted, createAggregator, aggregateTraders, filterTraders, allocate, buildTree, writeCsv, readCsv };

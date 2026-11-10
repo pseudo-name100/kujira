@@ -101,7 +101,7 @@ phone browser. The workflows must be on the repository's default branch to show 
 | Workflow | What it does |
 | --- | --- |
 | **Deploy** | Runs the tests, deploys to the chosen network (type `DEPLOY` to confirm), saves the addresses to `deployments/`, and verifies the source on the explorer. Refuses to deploy twice to the same network. |
-| **Launch pool** | Opens trading (type `LAUNCH` to confirm): creates the 1% KUJI/WETH Uniswap pool at the starting market cap (default $15,500; the ETH price comes from Kraken unless you enter one) and adds the operator wallet's KUJI on one side only, so no ETH is needed. The position is minted straight into `KujiraLiquidityLock`. Run it right after Deploy. |
+| **Launch pool** | Opens trading (type `LAUNCH` to confirm): creates the 1% KUJI/WETH Uniswap pool at the starting market cap (default $40,000; the ETH price comes from Kraken unless you enter one) and adds the operator wallet's KUJI on one side only, so no ETH is needed. The position is minted straight into `KujiraLiquidityLock`. Run it right after Deploy. |
 | **Airdrop** | `build-list`: finds Ink DEX routers and traders and builds the round's list. `start-round`: publishes it on-chain, if the market can carry it (see below). `close-round`: after the deadline, returns unclaimed tokens to the pool. |
 | **Claim page** | Rebuilds the claim page whenever deployments or airdrop files change. |
 | **Test** | Runs the tests on every push. |
@@ -157,19 +157,24 @@ Addresses are written to `deployments/<network>.json`.
 
 ## Airdrop rounds
 
-Round settings live in `scripts/airdrop/config.js`. Round 1: 80M KUJI reserved (out of the
-200M pool), 30-day claim window, +25% for claim-and-stake.
+Round settings live in `scripts/airdrop/config.js`. Round 1: 150M KUJI, 30-day claim window,
++25% for claim-and-stake.
 
-**Who qualifies for round 1:** the 14,981 wallets that made at least 3 successful swaps through
-Ink DEX routers on at least 2 different days between 2026-01-01 and 2026-10-25, minus
-anything over 5,000 swaps (bots) and the `exclude` list. Every one of them is listed for
-81,766 KUJI (`amountEach` in the config).
+**Round 1, the first pod** (redesigned after launch; the first list, 14,981 Ink traders at
+81,766 KUJI each, first come first served, is kept in `airdrop/superseded/`):
 
-**First come, first served.** The listed amounts add up to about 1.22B KUJI, but the round
-reserves 80M (plus up to 20M for stake bonuses). Payouts stop when the reserve is used up,
-which is about the first 980 claims (fewer if claimers take the stake bonus); later claims
-fail. The contract can never pay out more than the reserve, and the claim page shows how much
-is left.
+- **70% to KUJI buyers who hold** (`collect-kuji-buyers.js`). Every wallet that bought
+  100,000+ KUJI from the launch pool between launch and `buyers.until` (Dec 1). KUJI that a
+  router passes on counts for the wallet that sent the transaction. Holdings (wallet + Pod)
+  are read at 3 hidden snapshots in that window, picked from the hash of its last block. Each
+  wallet counts at the lower of what it bought and the least it held, capped at 10M: buying
+  and dumping earns nothing.
+- **30% split evenly among Ink traders** active from 2026-05-10 to 2026-11-09 (the six months
+  before launch): at least 3 successful swaps through Ink DEX routers on at least 2 days, no
+  more than 5,000 swaps, minus `exclude`.
+- **Every amount is reserved.** The list adds up to exactly 150M, so nobody races.
+  `LOGS_VIA_RPC=1` reads the buys straight from the chain if the explorer rate-limits, and
+  `BUYERS_UNTIL` moves the window's end.
 
 **Which routers count** is decided from on-chain data rather than a hand-made list.
 `discover-routers.js` samples Uniswap v2/v3/v4 and Velodrome swap events across the window,
@@ -201,10 +206,9 @@ counts at its Pod boost (up to 2.5x), and anything above 10,000,000 counts as 10
 Buying in for a week, or selling in between, gets little or nothing. Contracts and the
 project's wallets are left out.
 
-The round is sized from what the Drop has free (`sizeFromPool`): 50M if round 1 was fully
-claimed, plus round 1's unclaimed KUJI (returned to the pool when anyone calls `closeRound`
-after its 30 days) and any launch-tax KUJI sent to the Drop. 87.5M stays in the Drop for later
-rounds. Build it after round 1 is closed; the Drop cap still decides when it can start.
+The round is sized from what the Drop has free (`sizeFromPool`): everything left after round 1,
+including its unclaimed KUJI (returned to the pool when anyone calls `closeRound` after its
+30 days) and any launch-tax KUJI sent to the Drop, minus 12.5M kept for round 3. Build it after round 1 is closed; the Drop cap still decides when it can start.
 
 **The launch-tax KUJI goes to the holders.** After the 30-minute window, send everything the
 tax put in the fee wallet to the `KujiraDrop` address and post the transaction. It becomes
@@ -223,16 +227,16 @@ volume, followers) before it happens.
 ### The Drop never outgrows the market
 
 `start-round` refuses a round unless everything the Drop has paid or reserved, plus the new
-round, is at most half the KUJI buyers have taken out of the launch pool (`dropCap` in
+round, is at most the KUJI buyers have taken out of the launch pool (`dropCap` in
 `scripts/airdrop/config.js`, checked by `scripts/airdrop/gate.js`). Every KUJI a buyer takes
 was paid for in ETH, so the Drop only ever puts out what the market has already absorbed.
-From a $15,500 start, round 1 (80M, up to 100M with the stake bonus) opens once buyers have
-taken 200M KUJI, a market cap of about $38,000. The refusal says exactly what's still needed.
+KUJI launched at a $40,000 start, so round 1 (150M, up to 187.5M with the stake bonus) opens
+once buyers have taken 187.5M KUJI, a market cap of about $93,000 at launch-day ETH prices. The refusal says exactly what's still needed.
 
 ## Launch checklist
 
 1. Deploy on Ink mainnet (Actions → Deploy → `ink`). This also deploys `KujiraLiquidityLock`.
-2. Straight after, open trading: Actions → Launch pool → `ink`, market cap `15500`, type
+2. Straight after, open trading: Actions → Launch pool → `ink`, market cap `40000`, type
    `LAUNCH`. The pool starts with KUJI only, from the starting price upward: buyers bring the
    ETH, nobody can sell below the start, and Drop claimers can only sell into ETH buyers have
    already put in. The run saves the pool and position to `deployments/ink.json` and the site

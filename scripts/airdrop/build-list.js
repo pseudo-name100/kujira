@@ -1,6 +1,7 @@
 // Usage: node scripts/airdrop/build-list.js <round>
 // Builds a round's list from scratch, whichever kind of round it is:
 //   DEX-trader rounds:  discover routers -> collect traders -> build
+//   round 1:            Ink traders + KUJI buyers who held -> build
 //   whale rounds:       snapshot KUJI holders -> build (several hidden snapshots if
 //                       the round has `snapshots`)
 const { execFileSync } = require("child_process");
@@ -14,7 +15,9 @@ if (!cfg) throw new Error(`no config for round ${round} in scripts/airdrop/confi
 const steps =
   cfg.source === "kuji-holders"
     ? [cfg.snapshots ? "collect-holding-snapshots.js" : "collect-kuji-holders.js", "build-round.js"]
-    : ["discover-routers.js", "collect-dex-traders.js", "build-round.js"];
+    : cfg.buyers
+      ? ["discover-routers.js", "collect-dex-traders.js", "collect-kuji-buyers.js", "build-round.js"]
+      : ["discover-routers.js", "collect-dex-traders.js", "build-round.js"];
 for (const step of steps) {
   console.log(`\n== ${step}`);
   execFileSync(process.execPath, [path.join(__dirname, step), round], { stdio: "inherit" });
