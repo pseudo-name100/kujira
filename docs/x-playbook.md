@@ -211,6 +211,12 @@ Post the thread in order, then pin it in place of the Whalepaper post.
 >
 > What round 1 leaves in the Drop, its unclaimed $KUJI included, plus every KUJI the snipers paid in launch tax.
 
+> Introducing the Tide. 🌊
+>
+> Every month for two years, 4M $KUJI split equally among everyone who signs up at kujira.ink with X and holds 100K+ $KUJI all month.
+>
+> Same share for a dolphin as for a whale. Hold, and the tide comes in.
+
 > Round 3 is for the whole pod.
 >
 > Eight weeks, eight hidden snapshots. Hold 100K+ $KUJI through all of them, wallet or Pod, and share everything left in the Drop.

@@ -177,6 +177,36 @@ function signupsFromPrivyUsers(users, { until, exclude = [] }) {
   return out;
 }
 
+/**
+ * Split `pot` by weight, but never give a wallet more than `ratioBps` of its own weight
+ * (10000 = a 1:1 match). When the weights are small next to the pot, everyone gets their
+ * full match and the rest of the pot is left unused.
+ */
+function capWeighted(items, pot, ratioBps = 10_000) {
+  const sum = items.reduce((s, i) => s + i.weight, 0n);
+  if (sum === 0n) return [];
+  const full = (sum * BigInt(ratioBps)) / 10_000n;
+  return items
+    .map((i) => ({ address: i.address, amount: full <= pot ? (i.weight * BigInt(ratioBps)) / 10_000n : (pot * i.weight) / sum }))
+    .filter((a) => a.amount > 0n);
+}
+
+/**
+ * The Tide: an equal share of `budget` for every person (one wallet per X sign-up) whose
+ * wallet + Pod held at least `minHeld` at every snapshot of the month.
+ */
+function tideShares(people, snaps, { minHeld, budget }) {
+  const ok = people.filter((p) =>
+    snaps.every((m) => {
+      const { wallet = 0n, staked = 0n } = m.get(p.address) || {};
+      return wallet + staked >= minHeld;
+    })
+  );
+  if (ok.length === 0) return [];
+  const each = budget / BigInt(ok.length);
+  return ok.map((p) => ({ address: p.address, amount: each }));
+}
+
 /** Add up allocations from several lists, one row per address. */
 function mergeAllocations(...lists) {
   const sum = new Map();
@@ -215,4 +245,4 @@ function readCsv(file) {
   return lines.map((l) => Object.fromEntries(l.split(",").map((v, i) => [cols[i], v])));
 }
 
-module.exports = { roundDir, mergeHolders, snapshotBlocks, holdingWeights, buyerWeights, mergeAllocations, signupsFromPrivyUsers, allocateWeighted, createAggregator, aggregateTraders, filterTraders, allocate, buildTree, writeCsv, readCsv };
+module.exports = { roundDir, mergeHolders, snapshotBlocks, holdingWeights, buyerWeights, mergeAllocations, signupsFromPrivyUsers, capWeighted, tideShares, allocateWeighted, createAggregator, aggregateTraders, filterTraders, allocate, buildTree, writeCsv, readCsv };

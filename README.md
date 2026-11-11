@@ -170,6 +170,9 @@ Round settings live in `scripts/airdrop/config.js`. Round 1: 150M KUJI, 30-day c
   are read at 3 hidden snapshots in that window, picked from the hash of its last block. Each
   wallet counts at the lower of what it bought and the least it held, capped at 10M: buying
   and dumping earns nothing.
+- **Caps:** each buyer gets at most 1:1 what they held (`buyers.matchBps`), and each X
+  sign-up at most 100K (`signups.capEach`). Whatever isn't matched stays in the Drop, so a
+  few early wallets can't take the round.
 - **30% split evenly among X sign-ups** (`collect-signups.js`): everyone who logs in on
   kujira.ink ("Join the Drop with X") with an X account linked by `signups.until` (Dec 1). One
   share per X account and per wallet, paid to the wallet they connected or, for people new to
@@ -222,6 +225,15 @@ part of round 2.
 **Round 3: the loyal pod.** Same method over a longer window: 8 hidden snapshots, one a
 week, any wallet holding 100,000+ (Dolphin) at all of them, at its lowest, Pod KUJI at its
 boost. It takes everything left in the Drop (`keep: 0n`). Build it after round 2 is closed.
+
+**The Tide: a monthly UBI for holders** (`tide` in the config, `tide.js`,
+`.github/workflows/tide.yml`). On the 1st of each month, from December 2026 for 24 months, the
+Tide workflow builds last month's list and starts it: everyone signed up with X (one share per
+X account, paid to their linked wallet) whose wallet + Pod held 100,000+ KUJI at 4 hidden
+snapshots that month gets an equal share of 4M KUJI. No stake bonus, so each month costs
+exactly 4M. Its remaining budget is kept back in the Drop whenever rounds 2 and 3 are sized.
+Run it by hand from the Actions tab for a given month; `TIDE=<YYYY-MM>` makes `start-round.js`
+start a built month. Needs `PRIVATE_KEY` and `PRIVY_APP_SECRET`.
 
 Older single-snapshot whale rounds (no `snapshots`) still use `collect-kuji-holders.js`.
 

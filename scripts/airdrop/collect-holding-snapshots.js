@@ -9,7 +9,7 @@
 const fs = require("fs");
 const path = require("path");
 const { JsonRpcProvider, Contract, Interface, id, getAddress, formatEther } = require("ethers");
-const { rounds } = require("./config");
+const { rounds, tide } = require("./config");
 const { roundDir, snapshotBlocks, holdingWeights, writeCsv } = require("./lib");
 
 const RPC = process.env.INK_RPC_URL || "https://rpc-gel.inkonchain.com";
@@ -150,7 +150,15 @@ async function main() {
   // launch-tax KUJI sent to the Drop.
   const drop = new Contract(d.KujiraDrop, ["function available() view returns (uint256)"], provider);
   const available = await drop.available();
-  const free = available > cfg.sizeFromPool.keep ? available - cfg.sizeFromPool.keep : 0n;
+  // Keep back what later rounds need, plus every Tide month not started yet.
+  const tideStarted = fs.existsSync(path.join(__dirname, "..", "..", "airdrop"))
+    ? fs.readdirSync(path.join(__dirname, "..", "..", "airdrop")).filter((dd) => {
+        const f = path.join(__dirname, "..", "..", "airdrop", dd, "claims.json");
+        return /^tide-/.test(dd) && fs.existsSync(f) && JSON.parse(fs.readFileSync(f, "utf8")).started?.ink;
+      }).length
+    : 0;
+  const keep = cfg.sizeFromPool.keep + tide.monthly * BigInt(Math.max(0, tide.months - tideStarted));
+  const free = available > keep ? available - keep : 0n;
   const total = (free * 10_000n) / (10_000n + BigInt(cfg.stakeBonusBps));
   console.log(`Drop has ${formatEther(available)} KUJI free; round ${round} total ${formatEther(total)} KUJI`);
 

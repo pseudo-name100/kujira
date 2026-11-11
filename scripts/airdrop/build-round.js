@@ -7,7 +7,7 @@ const fs = require("fs");
 const path = require("path");
 const { formatEther, parseEther } = require("ethers");
 const { rounds } = require("./config");
-const { roundDir, filterTraders, allocate, allocateWeighted, mergeAllocations, buildTree, readCsv, writeCsv } = require("./lib");
+const { roundDir, filterTraders, allocate, allocateWeighted, mergeAllocations, capWeighted, buildTree, readCsv, writeCsv } = require("./lib");
 
 const round = process.argv[2];
 const cfg = rounds[round];
@@ -25,15 +25,16 @@ if (cfg.buyers) {
   // Round 1: KUJI buyers who held (weighted, from collect-kuji-buyers.js), plus even splits
   // among X sign-ups (collect-signups.js) and/or filtered Ink traders. Sums to exactly the
   // round total.
-  const even = (file, share, rows) => {
+  const even = (file, share, rows, capEach) => {
     if (!share) return [];
     if (rows.length === 0) throw new Error(`${file} has no wallets in it`);
-    const each = ((roundTotal * BigInt(share)) / 10_000n) / BigInt(rows.length);
+    let each = ((roundTotal * BigInt(share)) / 10_000n) / BigInt(rows.length);
+    if (capEach && each > capEach) each = capEach;
     console.log(`${rows.length} wallets from ${file} get ${formatEther(each)} each`);
     return rows.map((r) => ({ address: r.address, amount: each }));
   };
   const signupPart = cfg.signupShareBps
-    ? even("signups.csv", cfg.signupShareBps, readCsv(path.join(dir, "signups.csv")))
+    ? even("signups.csv", cfg.signupShareBps, readCsv(path.join(dir, "signups.csv")), cfg.signups?.capEach)
     : [];
   const traderPart = cfg.traderShareBps
     ? even("traders.csv", cfg.traderShareBps, filterTraders(
@@ -44,8 +45,10 @@ if (cfg.buyers) {
   const buyers = readCsv(path.join(dir, "buyers.csv")).map((b) => ({ address: b.address, weight: parseEther(b.weight) }));
   if (buyers.length === 0) throw new Error("buyers.csv has no wallets in it");
   const buyerTotal = (roundTotal * BigInt(10_000 - (cfg.signupShareBps || 0) - (cfg.traderShareBps || 0))) / 10_000n;
-  allocations = mergeAllocations(allocateWeighted(buyers, buyerTotal), signupPart, traderPart);
-  console.log(`${buyers.length} KUJI buyers share ${formatEther(buyerTotal)}`);
+  const buyerPart = cfg.buyers.matchBps ? capWeighted(buyers, buyerTotal, cfg.buyers.matchBps) : allocateWeighted(buyers, buyerTotal);
+  allocations = mergeAllocations(buyerPart, signupPart, traderPart);
+  const paid = buyerPart.reduce((s, a) => s + a.amount, 0n);
+  console.log(`${buyers.length} KUJI buyers get ${formatEther(paid)} of ${formatEther(buyerTotal)}${cfg.buyers.matchBps ? ` (capped at ${cfg.buyers.matchBps / 100}% of what they held)` : ""}`);
 } else if (cfg.source === "kuji-holders" && cfg.snapshots) {
   // Holding rounds: holders.csv already has each qualifying wallet's weight (lowest across
   // the hidden snapshots, Pod boost counted, capped); see collect-holding-snapshots.js.

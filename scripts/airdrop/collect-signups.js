@@ -54,7 +54,11 @@ async function main() {
   console.log(`${users.length} Privy users; ${rows.length} signed up with X by ${cfg.signups.until}`);
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exitCode = 1;
-});
+if (require.main === module) {
+  main().catch((err) => {
+    console.error(err);
+    process.exitCode = 1;
+  });
+}
+
+module.exports = { privyUsers };

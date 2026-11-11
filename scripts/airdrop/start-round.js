@@ -3,21 +3,23 @@
 const fs = require("fs");
 const path = require("path");
 const hre = require("hardhat");
-const { rounds } = require("./config");
+const { rounds, tide } = require("./config");
 const { roundDir } = require("./lib");
 const { checkDropCap } = require("./gate");
 
 async function main() {
   const { ethers, network } = hre;
-  const round = process.env.ROUND;
-  const cfg = rounds[round];
-  if (!cfg) throw new Error("set ROUND to a round configured in scripts/airdrop/config.js");
+  // TIDE=<YYYY-MM> starts a month of the Tide (built by tide.js): no stake bonus.
+  const tideMonth = process.env.TIDE;
+  const round = tideMonth ? `tide-${tideMonth}` : process.env.ROUND;
+  const cfg = tideMonth ? { claimDays: tide.claimDays, stakeBonusBps: 0 } : rounds[round];
+  if (!cfg) throw new Error("set ROUND to a round configured in scripts/airdrop/config.js, or TIDE=<YYYY-MM>");
 
   const suffix = network.name === "hardhat" || network.name === "localhost" ? ".local" : "";
   const deployment = JSON.parse(
     fs.readFileSync(path.join(__dirname, "..", "..", "deployments", `${network.name}${suffix}.json`), "utf8")
   );
-  const claimsFile = path.join(roundDir(round), "claims.json");
+  const claimsFile = path.join(tideMonth ? path.join(__dirname, "..", "..", "airdrop", round) : roundDir(round), "claims.json");
   const claims = JSON.parse(fs.readFileSync(claimsFile, "utf8"));
 
   claims.started ||= {};
