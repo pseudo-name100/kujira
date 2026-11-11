@@ -12,19 +12,41 @@ module.exports = {
   // buyers have taken 187.5M KUJI: about a $93k market cap from the $40k start.
   dropCap: { shareOfBoughtBps: 10000 },
 
+  // The Tide: a monthly UBI for people who hold. Every month, everyone who signed up on
+  // kujira.ink with X (one share per X account) and whose wallet + Pod held at least
+  // `minHeld` at every hidden snapshot that month gets an equal share of `monthly`. Built
+  // and started on the 1st for the month before (.github/workflows/tide.yml). Its remaining
+  // budget is always kept back in the Drop when rounds 2 and 3 are sized.
+  tide: {
+    monthly: parseEther("4000000"),
+    months: 24,
+    firstMonth: "2026-12",
+    minHeld: parseEther("100000"),
+    snapshots: 4, // hidden, one in each quarter of the month
+    claimDays: 30,
+  },
+
   rounds: {
     1: {
       // Tokens the round takes from the 200M pool.
       // Round 1: the first pod. 70% to wallets that bought KUJI and held it, 30% split evenly
-      // among Ink DEX traders active in the six months before launch. The list adds up to
-      // exactly `total`, so everyone on it is guaranteed their amount (no first-come race).
+      // among people who signed up on kujira.ink with an X account (the off-chain community).
+      // The list adds up to exactly `total`, so everyone on it is guaranteed their amount.
       total: parseEther("150000000"),
-      traderShareBps: 3000, // the Ink-trader part; the rest goes to KUJI buyers
+      signupShareBps: 3000, // the X sign-up part; the rest goes to KUJI buyers
+      signups: {
+        until: "2026-12-01T00:00:00Z", // X accounts linked by then count; announce it
+        capEach: parseEther("100000"), // at most 100K per sign-up; the rest stays in the Drop
+        exclude: [],
+      },
+      // The Ink-trader part (`traderShareBps`) is off for round 1; its filters stay below
+      // for a later round.
       buyers: {
         until: "2026-12-01T00:00:00Z", // buys from launch to here count; announce it
         snapshots: 3, // hidden, one in each third of the window
         minBought: parseEther("100000"),
         cap: parseEther("10000000"), // anything above 10M counts as 10M
+        matchBps: 10000, // nobody gets more than 1:1 what they held; the rest stays in the Drop
         exclude: [],
       },
       claimDays: 30,

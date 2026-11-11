@@ -56,6 +56,7 @@
   const short = (a) => a.slice(0, 6) + "…" + a.slice(-4);
   const date = (ts) => new Date(Number(ts) * 1000).toLocaleDateString(undefined, { dateStyle: "medium" });
   const launched = () => Boolean(data);
+  const roundName = (r) => r.label || `Round ${r.round}`;
 
   function notice(text, kind = "") {
     const el = $("notice");
@@ -340,8 +341,10 @@
           const until = new Date(p.buyersUntil).toLocaleDateString(undefined, { month: "short", day: "numeric" });
           return (
             `<p class="muted">Round ${p.round} (${fmtNum(Number(p.total))} KUJI) is built after ${until}: ` +
-            `${p.buyersShare}% to wallets that buy ${fmtNum(Number(p.minBought))}+ KUJI and hold it through hidden snapshots, ` +
-            `${100 - p.buyersShare}% split evenly among Ink traders active ${p.tradersFrom.slice(0, 7)} to ${p.tradersTo.slice(0, 7)}. ` +
+            `${p.buyersShare}% to wallets that buy ${fmtNum(Number(p.minBought))}+ KUJI and hold it through hidden snapshots` +
+            (p.signupsShare ? `, ${p.signupsShare}% split evenly among everyone who signs up below with an X account` : "") +
+            (p.tradersShare ? `, ${p.tradersShare}% split evenly among Ink traders active ${p.tradersFrom.slice(0, 7)} to ${p.tradersTo.slice(0, 7)}` : "") +
+            `. ` +
             `Every amount on the list is reserved for its wallet.</p>`
           );
         })
@@ -358,7 +361,7 @@
     }
     if (!hits.length) {
       box.innerHTML =
-        `<p class="muted">${short(address)} isn't on ${site.lists.length > 1 ? "any list" : `the round ${site.lists[0].round} list`} yet. ` +
+        `<p class="muted">${short(address)} isn't on ${site.lists.length > 1 ? "any list" : `the ${roundName(site.lists[0])} list`} yet. ` +
         `Later rounds look at different wallets. Follow @KujiraToken.</p>` + pendingNote();
       return;
     }
@@ -366,7 +369,7 @@
     box.innerHTML = hits
       .map(
         (h) =>
-          `<div class="hit"><span class="pill ok">Round ${h.round}</span>` +
+          `<div class="hit"><span class="pill ok">${roundName(h)}</span>` +
           `<p class="amount">${fmt(h.amount)}</p>` +
           `<p class="muted">${
             startedRounds.has(h.round)
@@ -380,7 +383,7 @@
     btn.textContent = "Make my share card";
     btn.onclick = () =>
       showCard({
-        kicker: `Kujira Drop · Round ${hits[0].round}`,
+        kicker: `Kujira Drop · ${roundName(hits[0])}`,
         title: fmtNum(num(hits[0].amount)) + " KUJI",
         sub: "The spray reached me.",
         address,
@@ -410,9 +413,9 @@
       const mine = await listEntry(r.dir, account);
       const div = document.createElement("div");
       div.className = "round";
-      const head = `<span class="pill">Round ${r.round} · closes ${date(r.deadline)}</span>`;
+      const head = `<span class="pill">${roundName(r)} · closes ${date(r.deadline)}</span>`;
       if (!mine) {
-        div.innerHTML = `${head}<p class="muted">This wallet isn't on the round ${r.round} list.</p>`;
+        div.innerHTML = `${head}<p class="muted">This wallet isn't on the ${roundName(r)} list.</p>`;
         box.append(div);
         continue;
       }
@@ -727,6 +730,57 @@
   }
 
   $("connect").onclick = () => connect();
+
+  // ------------------------------------------------------------------ Drop sign-up (X)
+
+  // Off-chain people get into round 1 by signing up with X (collect-signups.js reads the
+  // sign-ups from Privy). One share per X account, paid to the wallet they log in with or
+  // the one Privy makes for them.
+  // The Tide: a monthly equal share for everyone signed up with X who holds the floor.
+  function tideNote(plain) {
+    const t = site.tide;
+    if (!t) return "";
+    const msg = ` Then every month, the Tide: ${fmtNum(Number(t.monthly))} KUJI split equally among everyone signed up here whose wallet holds ${fmtNum(Number(t.minHeld))}+ KUJI all month.`;
+    return plain ? msg : ` <br><br>${msg.trim()}`;
+  }
+  function showJoined(st) {
+    $("join-text").innerHTML =
+      `You're in as <b>@${st.username}</b>. Your share goes to <span class="addr">${short(st.address || "")}</span>` +
+      ` when round 1 is built. Hold KUJI in that wallet too, and your buyer share stacks on top.` + tideNote();
+    $("join").hidden = true;
+  }
+  async function setupJoin() {
+    const sign = (site.pending || []).find((p) => p.signupsShare);
+    if (!site.config?.privyAppId || !sign) return;
+    $("join-panel").hidden = false;
+    const until = new Date(sign.signupsUntil).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+    $("join-text").textContent =
+      `${fmtNum(Number(sign.total) * sign.signupsShare / 100)} KUJI of round 1 is shared among everyone who signs up with an X account by ${until}` +
+      (sign.signupsCapEach ? `, up to ${fmtNum(Number(sign.signupsCapEach))} KUJI each. ` : ". ") +
+      `No crypto needed: a wallet is made for you. One share per X account.` + tideNote(true);
+    $("join").onclick = async () => {
+      $("join").disabled = true;
+      $("join").textContent = "Opening X…";
+      try {
+        const p = await loadPrivy();
+        if (!p) throw new Error("the sign-up service didn't load");
+        const st = await p.joinDrop();
+        remember(true);
+        showJoined(st);
+      } catch (e) {
+        notice(`Couldn't sign up: ${errText(e)}`, "err");
+        $("join").disabled = false;
+        $("join").textContent = "Sign up with X";
+      }
+    };
+    // Already signed up on this device: show it without prompting.
+    if (remembered()) {
+      const p = await loadPrivy();
+      await p?.whenReady();
+      const st = p?.dropStatus();
+      if (st) showJoined(st);
+    }
+  }
   $("check").onclick = () => checkWallet($("check-addr").value);
   $("check-addr").addEventListener("keydown", (e) => e.key === "Enter" && checkWallet($("check-addr").value));
   $("stake").onclick = async () => {
@@ -760,6 +814,7 @@
     .then(loadData)
     .then(async () => {
       await refresh();
+      setupJoin().catch(() => {});
       if (launched()) setInterval(() => renderSonar().catch(() => {}), 30000);
       // Reconnect silently if this visitor connected before.
       if (site.config?.privyAppId) {

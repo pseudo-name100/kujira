@@ -66,7 +66,9 @@
   }
 
   // Synthesize the whole song into `ac` (an AudioContext or OfflineAudioContext).
-  function synth(ac) {
+  // `at` delays the song (seconds) and `out` routes it somewhere other than the speakers;
+  // the launch video (video/scene.html) uses both.
+  function synth(ac, { at = 0, out = ac.destination } = {}) {
     const master = ac.createGain();
     master.gain.value = 0.32;
     const filter = ac.createBiquadFilter();
@@ -88,8 +90,8 @@
     warm.curve = Float32Array.from({ length: 1025 }, (_, i) => Math.tanh(2.2 * (i / 512 - 1)) / Math.tanh(2.2));
     master.connect(comp);
     comp.connect(warm);
-    warm.connect(ac.destination);
-    for (const c of CALLS) voice(ac, filter, c);
+    warm.connect(out);
+    for (const c of CALLS) voice(ac, filter, { ...c, start: c.start + at });
   }
 
   window.KujiraSong = { CALLS, LENGTH, freqAt, synth };

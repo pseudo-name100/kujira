@@ -4,6 +4,9 @@
 //   whenReady()                       resolves once Privy has loaded
 //   connect({ silent }) -> { provider, address } log in (wallet, email or X) and return an
 //                       EIP-1193 provider; with silent, only reuse an existing session
+//   joinDrop() -> { username, address }  sign up for the Drop with X: log in with X (or link X
+//                       to the current login) and report the X handle and the wallet it pays
+//   dropStatus() -> { username, address } | null  the current sign-up, without prompting
 //   disconnect()
 import React, { useEffect } from "react";
 import { createRoot } from "react-dom/client";
@@ -13,7 +16,7 @@ import { ink, inkSepolia } from "viem/chains";
 const CHAINS = { [ink.id]: ink, [inkSepolia.id]: inkSepolia };
 
 // React state mirrored into a plain store the page can wait on.
-let state = { ready: false, authenticated: false, wallets: [], login: null, logout: null };
+let state = { ready: false, authenticated: false, wallets: [], user: null, login: null, logout: null, linkTwitter: null };
 const listeners = new Set();
 const update = (next) => {
   state = next;
@@ -33,12 +36,12 @@ const waitFor = (pred) =>
 let loginFailed = null;
 
 function Bridge() {
-  const { ready, authenticated, logout } = usePrivy();
+  const { ready, authenticated, logout, user, linkTwitter } = usePrivy();
   const { wallets, ready: walletsReady } = useWallets();
   const { login } = useLogin({ onError: (err) => loginFailed?.(err) });
   useEffect(() => {
-    update({ ready: ready && walletsReady, authenticated, wallets, login, logout });
-  }, [ready, walletsReady, authenticated, wallets, login, logout]);
+    update({ ready: ready && walletsReady, authenticated, wallets, user, login, logout, linkTwitter });
+  }, [ready, walletsReady, authenticated, wallets, user, login, logout, linkTwitter]);
   return null;
 }
 
@@ -63,6 +66,35 @@ async function connect({ silent = false } = {}) {
   const wallet = pickWallet(state.wallets);
   await wallet.switchChain(chain.id).catch(() => {});
   return { provider: await wallet.getEthereumProvider(), address: wallet.address };
+}
+
+// The wallet a Drop sign-up is paid to: the person's own wallet if they connected one, else
+// the one Privy made for them. Must match how collect-signups.js picks it.
+function dropWallet() {
+  const own = state.wallets.find((w) => w.walletClientType !== "privy");
+  return (own || state.wallets[0])?.address || state.user?.wallet?.address || null;
+}
+
+function dropStatus() {
+  const x = state.user?.twitter;
+  if (!state.authenticated || !x) return null;
+  return { username: x.username, address: dropWallet() };
+}
+
+// Sign up for the Drop: X is required (one share per X account).
+async function joinDrop() {
+  await waitFor(() => state.ready);
+  if (!state.authenticated) {
+    const failed = new Promise((_, reject) => {
+      loginFailed = (err) => reject(new Error(err === "exited_auth_flow" ? "Cancelled." : String(err)));
+    });
+    state.login({ loginMethods: ["twitter"] });
+    await Promise.race([waitFor(() => state.authenticated), failed]);
+    loginFailed = null;
+  }
+  if (!state.user?.twitter) state.linkTwitter(); // leaves for X and comes back signed up
+  await waitFor(() => Boolean(state.user?.twitter) && state.wallets.length > 0);
+  return dropStatus();
 }
 
 function start({ appId, chainId, logo }) {
@@ -97,4 +129,11 @@ function start({ appId, chainId, logo }) {
   );
 }
 
-window.KujiraPrivy = { start, connect, whenReady: () => waitFor(() => state.ready), disconnect: () => state.logout?.() };
+window.KujiraPrivy = {
+  start,
+  connect,
+  joinDrop,
+  dropStatus,
+  whenReady: () => waitFor(() => state.ready),
+  disconnect: () => state.logout?.(),
+};

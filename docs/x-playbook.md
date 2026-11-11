@@ -119,13 +119,13 @@ one has a reason to share their card.
 >
 > 70% to wallets that buy $KUJI and hold it. Buys from launch to Dec 1 count, checked at three hidden moments. Buy and dump, get nothing.
 >
-> 30% split evenly among Ink traders active in the six months before launch.
+> 30% split evenly among everyone who signs up on kujira.ink with X by Dec 1. No crypto needed: a wallet is made for you. One share per X account.
 >
 > Every amount is reserved. No race. It opens once the market can carry it, around a $93k market cap.
 >
 > Check yours: kujira.ink
 
-> If you swapped on Ink on two different days between May and launch, you're in the spray. If you buy $KUJI and hold it to Dec 1, you're in the deep end.
+> Never touched crypto? Sign up with your X account at kujira.ink and you're in the spray. Buy $KUJI and hold it to Dec 1 and you're in the deep end.
 >
 > Paste your address at kujira.ink. Takes five seconds.
 
@@ -179,7 +179,7 @@ Post the thread in order, then pin it in place of the Whalepaper post.
 >
 > It started at a $40k market cap with KUJI only. No presale, no insider ETH: every ETH in the pool came from a buyer. The pool's 1% fee goes to the fisherman.
 
-> 4/ The Drop never outgrows the market. Round 1 (150M: 70% to wallets that buy and hold $KUJI to Dec 1, 30% to Ink's active traders) opens once buyers have taken as much $KUJI as it hands out, about a $93k market cap.
+> 4/ The Drop never outgrows the market. Round 1 (150M: 70% to wallets that buy and hold $KUJI to Dec 1, 30% to everyone who signs up with X) opens once buyers have taken as much $KUJI as it hands out, about a $93k market cap.
 >
 > Watch it fill on kujira.ink. Claim straight into the Pod for +25%.
 
@@ -210,6 +210,12 @@ Post the thread in order, then pin it in place of the Whalepaper post.
 > Hold 1M+ $KUJI the whole time, in your wallet or the Pod. You count at your lowest. Pod KUJI counts at its boost, up to 2.5x.
 >
 > What round 1 leaves in the Drop, its unclaimed $KUJI included, plus every KUJI the snipers paid in launch tax.
+
+> Introducing the Tide. 🌊
+>
+> Every month for two years, 4M $KUJI split equally among everyone who signs up at kujira.ink with X and holds 100K+ $KUJI all month.
+>
+> Same share for a dolphin as for a whale. Hold, and the tide comes in.
 
 > Round 3 is for the whole pod.
 >

@@ -42,7 +42,7 @@ for (const [name, file] of Object.entries(fonts)) {
   fs.copyFileSync(path.join(root, "node_modules/@fontsource", file), path.join(out, "fonts", `${name}.woff2`));
 }
 const roundDirs = fs.existsSync(path.join(root, "airdrop"))
-  ? fs.readdirSync(path.join(root, "airdrop")).filter((d) => /^round-\d+$/.test(d))
+  ? fs.readdirSync(path.join(root, "airdrop")).filter((d) => /^(round-\d+|tide-\d{4}-\d{2})$/.test(d)) // rounds and months of the Tide
   : [];
 
 // Every round's list is published, started or not, so the page's checker works before
@@ -65,12 +65,12 @@ for (const dir of roundDirs) {
     const key = i.toString(16).padStart(2, "0");
     fs.writeFileSync(path.join(out, rel, `${key}.json`), JSON.stringify(shards[key] || {}));
   }
-  lists.push({ round: claims.round, root: claims.root, dir: rel, wallets: Object.keys(claims.claims).length });
+  lists.push({ round: claims.round, label: claims.label, root: claims.root, dir: rel, wallets: Object.keys(claims.claims).length });
 }
-lists.sort((a, b) => a.round - b.round);
+lists.sort((a, b) => String(a.round).localeCompare(String(b.round), undefined, { numeric: true }));
 
 const { allocations } = require("./tokenomics");
-const { rounds: roundCfg, dropCap } = require("./airdrop/config");
+const { rounds: roundCfg, dropCap, tide } = require("./airdrop/config");
 function nextRound(started) {
   const done = new Set(started.map((r) => r.round));
   // The lowest configured round not yet started; its built list's total if it has one,
@@ -90,16 +90,20 @@ const pending = Object.entries(roundCfg)
   .map(([n, c]) => ({
     round: Number(n),
     total: (c.total / 10n ** 18n).toString(),
-    buyersShare: 100 - c.traderShareBps / 100,
+    buyersShare: 100 - (c.traderShareBps || 0) / 100 - (c.signupShareBps || 0) / 100,
     buyersUntil: c.buyers.until,
     minBought: (c.buyers.minBought / 10n ** 18n).toString(),
-    tradersFrom: c.eligibility.from,
-    tradersTo: c.eligibility.to,
+    signupsShare: (c.signupShareBps || 0) / 100,
+    signupsUntil: c.signups?.until,
+    signupsCapEach: c.signups?.capEach ? (c.signups.capEach / 10n ** 18n).toString() : null,
+    tradersShare: (c.traderShareBps || 0) / 100,
+    tradersFrom: c.eligibility?.from,
+    tradersTo: c.eligibility?.to,
   }));
 const networks = Object.keys(NETWORKS).filter((name) =>
   name === "localhost" ? local && fs.existsSync(path.join(root, "deployments", "localhost.local.json")) : fs.existsSync(path.join(root, "deployments", `${name}.json`))
 );
-fs.writeFileSync(path.join(out, "data", "site.json"), JSON.stringify({ allocations, lists, networks, pending }, null, 2) + "\n");
+fs.writeFileSync(path.join(out, "data", "site.json"), JSON.stringify({ allocations, lists, networks, pending, tide: { monthly: (tide.monthly / 10n ** 18n).toString(), minHeld: (tide.minHeld / 10n ** 18n).toString(), firstMonth: tide.firstMonth, months: tide.months } }, null, 2) + "\n");
 
 for (const [name, meta] of Object.entries(NETWORKS)) {
   const file = path.join(root, "deployments", name === "localhost" ? "localhost.local.json" : `${name}.json`);
@@ -109,7 +113,7 @@ for (const [name, meta] of Object.entries(NETWORKS)) {
   const rounds = [];
   for (const [dir, claims] of Object.entries(claimsByDir)) {
     const started = claims.started?.[name];
-    if (started) rounds.push({ round: claims.round, root: claims.root, dir: `airdrop/${dir}/claims`, ...started });
+    if (started) rounds.push({ round: claims.round, label: claims.label, root: claims.root, dir: `airdrop/${dir}/claims`, ...started });
   }
 
   const data = {

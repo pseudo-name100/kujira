@@ -1,0 +1,54 @@
+# The Tide: on the 1st of each month, build last month's list (everyone signed up with X
+# who held the floor at every hidden snapshot gets an equal share) and start it on-chain.
+# Needs the repository secrets PRIVATE_KEY (the operator wallet, which owns the Drop) and
+# PRIVY_APP_SECRET. Can also be run by hand from the Actions tab for a given month.
+name: Tide
+
+on:
+  schedule:
+    - cron: "23 2 1 * *" # 02:23 UTC on the 1st
+  workflow_dispatch:
+    inputs:
+      month:
+        description: Month to build and start (YYYY-MM); empty for last month
+        required: false
+
+permissions:
+  contents: write
+
+concurrency: airdrop
+
+jobs:
+  tide:
+    runs-on: ubuntu-latest
+    env:
+      MONTH: ${{ inputs.month }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Build the month's list
+        env:
+          PRIVY_APP_SECRET: ${{ secrets.PRIVY_APP_SECRET }}
+        run: |
+          if [ -z "$MONTH" ]; then MONTH=$(date -u -d "$(date -u +%Y-%m-01) -1 day" +%Y-%m); fi
+          echo "MONTH=$MONTH" >> "$GITHUB_ENV"
+          node scripts/airdrop/tide.js "$MONTH"
+      - name: Start it on-chain
+        env:
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+        run: |
+          if [ ! -f "airdrop/tide-$MONTH/claims.json" ]; then echo "No list for $MONTH"; exit 0; fi
+          TIDE="$MONTH" npx hardhat run scripts/airdrop/start-round.js --network ink
+      - name: Save files
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add airdrop
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "The Tide: $MONTH"
+          git push

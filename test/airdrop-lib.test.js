@@ -170,3 +170,48 @@ describe("round 1: KUJI buyers who hold", function () {
     expect(m[B]).to.equal(1n);
   });
 });
+
+describe("round 1: X sign-ups", function () {
+  const { signupsFromPrivyUsers } = require("../scripts/airdrop/lib");
+  const W = (n) => "0x" + n.repeat(40);
+  const x = (subject, at = 100) => ({ type: "twitter_oauth", subject, username: "u" + subject, first_verified_at: at });
+  const wallet = (addr, client, at = 100) => ({ type: "wallet", chain_type: "ethereum", address: addr, wallet_client_type: client, first_verified_at: at });
+
+  it("counts one share per X account, paid to the person's own wallet first", function () {
+    const users = [
+      { created_at: 1, linked_accounts: [x("1"), wallet(W("a"), "privy", 90), wallet(W("b"), "metamask", 120)] }, // own wallet wins
+      { created_at: 2, linked_accounts: [x("2"), wallet(W("c"), "privy")] }, // newcomer: Privy wallet
+      { created_at: 3, linked_accounts: [wallet(W("d"), "metamask")] }, // no X: not counted
+      { created_at: 4, linked_accounts: [x("4", 999), wallet(W("e"), "privy")] }, // linked X after the deadline
+      { created_at: 5, linked_accounts: [x("5"), wallet(W("c"), "rabby")] }, // same wallet as another sign-up
+      { created_at: 6, linked_accounts: [x("6"), wallet(W("f"), "privy")] }, // excluded (project wallet)
+    ];
+    const res = signupsFromPrivyUsers(users, { until: 500, exclude: [W("f")] });
+    expect(res.map((r) => r.address.toLowerCase())).to.deep.equal([W("b"), W("c")]);
+  });
+});
+
+describe("caps and the Tide", function () {
+  const { capWeighted, tideShares } = require("../scripts/airdrop/lib");
+  const M = 10n ** 24n;
+
+  it("matches buyers 1:1 when the pot is bigger than what they hold, leaving the rest", function () {
+    const res = capWeighted([{ address: A, weight: 10n * M }, { address: B, weight: 2n * M }], 105n * M);
+    expect(res.map((r) => r.amount)).to.deep.equal([10n * M, 2n * M]); // 93M left unused
+  });
+
+  it("splits by weight when holdings outgrow the pot, never above the match", function () {
+    const res = capWeighted([{ address: A, weight: 150n * M }, { address: B, weight: 60n * M }], 105n * M);
+    expect(res.map((r) => r.amount)).to.deep.equal([75n * M, 30n * M]);
+    res.forEach((r, i) => expect(r.amount <= [150n, 60n][i] * M).to.equal(true));
+  });
+
+  it("gives the Tide in equal shares to people who held the floor all month", function () {
+    const K = 10n ** 18n;
+    const snap = (rows) => new Map(Object.entries(rows));
+    const s1 = snap({ [A]: { wallet: 200_000n * K }, [B]: { staked: 150_000n * K }, [C]: { wallet: 500_000n * K } });
+    const s2 = snap({ [A]: { wallet: 120_000n * K }, [B]: { staked: 150_000n * K }, [C]: { wallet: 50_000n * K } }); // C dipped
+    const res = tideShares([{ address: A }, { address: B }, { address: C }], [s1, s2], { minHeld: 100_000n * K, budget: 4n * M });
+    expect(res).to.deep.equal([{ address: A, amount: 2n * M }, { address: B, amount: 2n * M }]);
+  });
+});
