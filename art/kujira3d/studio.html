@@ -1,0 +1,58 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<!-- Turntable studio for the 3D Kujira: render(view, t) draws one angle. -->
+<style>html, body { margin: 0; background: #000; } canvas { display: block; }</style>
+<script type="importmap">{ "imports": { "three": "/node_modules/three/build/three.module.js" } }</script>
+</head>
+<body>
+<script type="module">
+import * as THREE from "three";
+import { createKujira } from "./kujira.js";
+
+const W = 1080, H = 1080;
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setSize(W, H);
+renderer.setPixelRatio(1);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+document.body.append(renderer.domElement);
+
+const scene = new THREE.Scene();
+const bg = document.createElement("canvas");
+bg.width = 4; bg.height = 256;
+const bgc = bg.getContext("2d");
+const grad = bgc.createLinearGradient(0, 0, 0, 256);
+grad.addColorStop(0, "#2a8fc4"); grad.addColorStop(1, "#06304d");
+bgc.fillStyle = grad; bgc.fillRect(0, 0, 4, 256);
+scene.background = new THREE.CanvasTexture(bg);
+
+scene.add(new THREE.HemisphereLight("#cfefff", "#0a3b5c", 1.6));
+const key = new THREE.DirectionalLight("#ffffff", 2.4);
+key.position.set(3, 6, 5);
+scene.add(key);
+const rim = new THREE.DirectionalLight("#7fe0ff", 1.4);
+rim.position.set(-4, 2, -5);
+scene.add(rim);
+
+const kujira = createKujira(THREE);
+scene.add(kujira.group);
+const camera = new THREE.PerspectiveCamera(32, W / H, 0.1, 100);
+
+const VIEWS = {
+  side: [-0.7, 0.4, 11.5],
+  front34: [3.6, 1.4, 9.6],
+  front: [9.5, 0.8, 1.4],
+  back34: [-6.8, 2.6, 7.8],
+  top: [-0.5, 10.5, 4.2],
+};
+window.render = (view, t) => {
+  kujira.update(t);
+  camera.position.set(...VIEWS[view]);
+  camera.lookAt(-0.7, 0.15, 0);
+  renderer.render(scene, camera);
+};
+window.ready = true;
+</script>
+</body>
+</html>
